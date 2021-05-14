@@ -8,7 +8,8 @@ output: html_notebook
 The first half of this notebook is an overview of basic inferential statistics, most of which should be review. The second half will introduce ANOVA and Chi-Square estimation.  Depending on who taught your intro class (if it was me, depending on if we missed classes due to a hurricane or something), this may be new material.  The ANOVA and Chi-Square methods are not common in econometrics, which typically focus on regression analysis and there are variants of regression analysis that do the same thing ANOVA and Chi-Square do. However, they are worth spending a little time on because a) they are commonly used outside of econometrics, and b) learning them will deepen your understanding of statistical inference.
 
 # Inference and Hypothesis Testing
-
+ 
+ 
 ```{r}
 plot(cars)
 ```
