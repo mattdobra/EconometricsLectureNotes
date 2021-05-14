@@ -1,0 +1,47 @@
+---
+title: "Test Realm and Keeper of the YAML"
+author: "Matt Dobra"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output: 
+    ioslides_presentation:
+        widescreen: TRUE
+        incremental: false
+        transition: faster
+        css: dobraslidestyle.css
+      
+---
+```{r setup, include=FALSE}
+library(knitr)
+library(tidyverse) # Keep things tidy
+library(kableExtra) # Table Formattting
+library(ggthemes)
+library(ggpubr)
+library(DiagrammeR) # Makes Flowcharts
+library(WDI) # World Development Indicators
+library(quantmod) # Gets FRED data
+library(scales)
+theme_set(theme_classic())
+# knitr::opts_chunk$set(echo = FALSE, dev.args=list(bg="transparent")) 
+
+
+
+###Color Themes
+color1 <- "#FFFFFF" # white
+color2 <- "#00205B" # med blue
+color3 <- "#0A863D" # green
+color4 <- "#99999A" # gray
+color5 <- "#041C2C" # Navy
+
+
+
+```
+
+# Intro to R
+
+## Intro to R
+
+R is an open source programming language for statistical, data visualization, and analytics. 
+
+```{r}
+paste("Hello","World")
+```
