@@ -7,15 +7,324 @@ output: html_notebook
 
 The first half of this notebook is an overview of basic inferential statistics, most of which should be review. The second half will introduce ANOVA and Chi-Square estimation.  Depending on who taught your intro class (if it was me, depending on if we missed classes due to a hurricane or something), this may be new material.  The ANOVA and Chi-Square methods are not common in econometrics, which typically focus on regression analysis and there are variants of regression analysis that do the same thing ANOVA and Chi-Square do. However, they are worth spending a little time on because a) they are commonly used outside of econometrics, and b) learning them will deepen your understanding of statistical inference.
 
-# Inference and Hypothesis Testing
- 
- 
-```{r}
-plot(cars)
+As always, let's start by loading the relevant libraries and datasets into memory.
+
+```{r, warning=FALSE}
+library(tidyverse)
+library(AER)
+data(CPS1985)
+attach(CPS1985)
+library(wooldridge)
+data(vote1)
+attach(vote1)
+data(k401k)
+attach(k401k)
+data(sleep)
+data(affairs)
 ```
 
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+# Statistical Inference and Hypothesis Testing
 
-When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+## One-Sample t-test
+ 
+Let's start simple, with the 1-sample t-test.  A 1-sample t-test is used to test a hypothesis about the mean of a specific data set.  
 
-The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+Let's look at the k401k data set.  As always, `?k401k` is a good way to get information about a data set.
+
+```{r}
+?k401k
+```
+This data includes data on 1534 401k plans in the US.  Let's take a look at the distribution of the contribution match rate:
+
+```{r}
+k401k %>% ggplot() +
+    geom_histogram(aes(x = mrate), binwidth = .2)
+```
+Just eyeballing it, it looks like the median and modal match rate is probably 50%, but there are some very generous match rates out there as this data is pretty heavily right-skewed.
+
+Let's say that an expert comes to you and tells you that the average match rate among 401k plans is 75%.  
+
+We can summarize the data and see that the mean is actually 73.15%.  But is that far enough below 75% to dismiss the 75% claim?  This is where a one-sample t-test comes in.  
+
+```{r}
+summary(mrate)
+```
+We should start by stating our Null and Alternative Hypotheses.  In this case, our hypothesis is about our population mean (mu), so we have:
+
+* H~0~: mu = .75
+* H~1~: mu != .75
+
+The t-test is executed with the `t.test()` function:
+
+```{r}
+t.test(mrate, alternative = "two.sided", mu = .75, conf.level = 0.95)
+```
+Here, we se see the results of the t-test. We  **do not** reject the null hypothesis. Why not?
+
+* the p-value (p=0.3531) is not less than 0.05
+* the confidence interval (.69 to 0.77) includes our hypothesized value of 0.75
+* the t value (-0.929) is not in the rejection region (it would have to be less than -1.96--you can use the *qt()* function to look up t-values)
+
+Let's say that this same expert tells you that the average participation rate in 401k programs is over 90%  This indicates a 1 sided test, where:
+
+* H~0~: mu >= .90
+* H~1~: mu < .90
+
+We can calculate a one-sided t-test for prate as follows:
+
+```{r}
+t.test(prate, alternative = "less", mu = 90, conf.level = .95)
+```
+This suggests that we reject the null hypothesis, that the mean in the data set of 87.3 is far enough below 90 to say that the true mean is probably below 90.  We see this in the results because:
+
+* the p-value (p=4.135e-10) is definitely less than 0.05
+* the confidence interval (-infinity to 88.1) does not include our hypothesized value of 90
+* the t value (-6.18) is in the rejection region (it starts around -1.65)
+
+It is often useful to store the resutls of a test in an object, for example:
+```{r}
+test1 <- t.test(prate, alternative = "less", mu = 90, conf.level = .95)
+
+```
+
+An object called test1 should be in your environment window.  
+
+To see what is in this object, see what its *attributes* are:
+```{r}
+attributes(test1)
+```
+Now, you can refer to these elements using the $.
+```{r}
+test1$statistic
+test1$estimate
+```
+
+## Two-Sample t-test
+
+The two-sample t-test is used to compare the means of two populations.  Typically, you are looking at a situation where you have a numeric dependent variable that you think varies based on the value of some categorical indepenent variable that has two possible levels.   
+
+Let's consider the CPS1985 data.  Perhaps you think that union members have higher incomes than non-union members.  Here, wage is your numeric dependent variable, union membership is your categorical independent variale with 2 levels (union member and non-union member), so a two-sample t-test is appropriate. First, let's start by looking at the data with a boxplot:
+
+```{r}
+CPS1985 %>% ggplot(aes(y = wage, x = union)) +
+    geom_boxplot()
+```
+Again, we should start by stating our Null and Alternative Hypotheses.  In this case, our hypothesis is about our population mean (mu), so we have:
+
+* H~0~: mean wage of union members = mean wage of non-union members
+* H~1~: the means are different
+
+Looks like there may be a difference.  Let's do the statistical test using the same *t.test()* command as before.  Here, we use the code `wage ~ union`; in R, the tilde *~* is the formula operator; when I see I tilde, in my head I say "is a function of" so I read `wage ~ union` to say that wage is a function of union membership.  The dependent variable goes on the left, the independent variable on the right.  Get used to this, you will be seeing it a lot this semester.
+
+
+
+```{r}
+t.test(wage ~ union, mu = 0, alt = "two.sided", conf.level = .95)
+```
+The format of this code might be confusing.  Why test mu=0?  Technically, the test is that the difference of the means is equal to 0.  But that being said, most of the arguments in this code are the default paramaters of the *t.test*.  When you look at the help for *t.test* using `?t.test`, it tells you what the default values are. The options `mu = 0, alt = "two.sided", conf.level = .95` are all defaults, so this code can be simplified as:
+
+```{r}
+t.test(wage ~ union)
+```
+Note that I get the same results.  So why bother typing all the options?  When you are learning R, typing all the options is a good way to learn the syntax. 
+
+Anyhow, what does this result tell us?  We reject the null hypothesis!
+
+* the p-value (p=6.608e-5) is  less than 0.05
+* the confidence interval (-3.2 to -1.1) does not include the value 0.
+* the t value (-4.103) is  in the rejection region (it would have to be less than -1.96)
+
+Let's push a little farther with our two-sample t-tests.  what if our research question is whether union membership affects wages, but only for males and only for those whose occupation is worker.  How do we do this?  
+
+There are lots of ways--we could try to do it all using brackets to subset our data, or we could use dplyr to filter our data into a smaller dataset and  do a simple *t.test*
+
+Option 1: bracketpalooza
+```{r}
+t.test(wage[gender == "male" & occupation == "worker"] ~ union[gender == "male" & occupation == "worker"])
+```
+Option 2: Enter the Tidyverse
+```{r}
+CPS1985 %>% 
+    filter(gender == "male") %>% 
+    filter(occupation == "worker") %>% 
+    t.test(wage ~ union, data = .)
+```
+Both get to the same place.  In my opinion, the tidyverse option is more elegant and easier to follow.  The only tricky bit in there is the `data = .` part, but that's just being fancy.  I could have done:
+
+```{r}
+tempdat <- CPS1985 %>%
+    filter(gender == "male") %>% 
+    filter(occupation == "worker") 
+t.test(wage ~ union, data = tempdat)
+```
+Which gets us to the same spot.
+
+## Wilcoxon / Mann-Whitney test
+
+The Mann-Whitney U Test and the Wilcoxon Rank-Sum Test are similar tests.  They can be used in place of the two-sample t-test in cases where the dataset is small or the data is non-normal.  Let's see if our wage data from the CPS1985 data is normal using a Quantile-Quantile plot (usually called a QQplot)
+
+```{r}
+qqnorm(wage)
+qqline(wage)
+```
+If the data were normal, they would lie (more or less) on the straight line.  Because this Q-Q plot looks curved, it's a decent indicator that our data is skewed.
+
+To see what a normal Q-Q plot looks like, here is the Q-Q plot of the height variable in the trees dataset...it's pretty darn close to normal!  
+
+```{r}
+qqnorm(trees$Height)
+qqline(trees$Height)
+
+```
+
+Anyhow, since it appears that our wage data may not be normal, perhaps a Wilcoxon test is in order.  Rather than comparing the means, were are comparing the ranks of the data. 
+
+```{r}
+wilcox.test(wage ~ union)
+```
+Here, the p-value is 1.2e-07, which is way less than .05, so again we reject the null hypothesis of these two groups being the same.  
+
+## Paired t-Test
+
+A paired t-test is used to compare 2 populations that are paired with each other.  Often these are before-after type tests.  The sleep data we loaded earlier shows the effect of 2 sleeping drugs given to 10 patients
+
+```{r}
+sleep
+```
+Because the same group of people recieved both drugs, we can conduct a paired t-test here.  This looks a lot like the 2 sample t-test we did earlier, witn one extra argument:
+
+```{r}
+t.test(extra ~ group, data = sleep, paired =TRUE)
+```
+## ANOVA
+
+ANOVA statds for Analysis of Variance and is a very common statistical technique in experimental sciences where one can run an experiment with a control group and multiple treatment groups.  Though there are some noteable exceptions, economics is not usually viewed as an experimental science. However, ANOVA is a special case of Regression analysis, which is at the core of econometrics. 
+
+In many ways, ANOVA is just an amped-up 2-sample t-test; amped up because you can have your dependent variable explained my more than 1 independent variable, and those independent variables can have more than two levels. 
+
+In the example we did above, we looked at the relationship between union membership and wages.  Wages were the numeric dependent variable, and union membership was the 2-level categorical variable.  
+
+Let's calculate an ANOVA looking at the relationship between wages and occupation.  We can start by looking at the data visually in a boxplot:
+
+```{r}
+CPS1985 %>% ggplot(aes(x = occupation, y = wage)) +
+    geom_boxplot() +
+    stat_boxplot(geom = "errorbar", width = 0.5)
+```
+The Null hypothesis in ANOVA is that ALL of the means are the same.  The alternative is that at least one is different from at least one other.  It certainly looks like these means are different, but we can use ANOVA to test this.
+
+```{r}
+aov(wage ~ occupation)
+```
+This test result doesn't actually tell us much.  We need to save this test result as an object and use the *summary()* command on that object.
+```{r}
+anova1 <- aov(wage ~ occupation)
+summary(anova1)
+```
+This table tells us whether or not we reject the null hypothesis...the Pr(>F) is our p-value, and that is way less than 0.05. so we reject the null hypothesis that all the group means are the same and accept the alternative hypothesis that at least one is different from the rest.
+
+If we want to know **which** means are different, we can run the Tukey-Kremer test. To do this, we simply put our anova object into the *TukeyHSD()* function.
+
+```{r}
+TukeyHSD(anova1)
+```
+This shows the confidence intervals and p-values for all of the pairwise comparisons--since there are 6 levels of the occupation variable, there are 6*5/2=15 different combinations to examine!  We can display this visually by plotting the Tukey results:  
+
+```{r}
+plot(TukeyHSD(anova1))
+```
+Ugh this is unreadable.  Let's try that again, some minor edits for readability:
+
+```{r}
+par(mar = c(3,10,3,3))
+plot(TukeyHSD(anova1), las=1)
+```
+Any combination where 0 is not included in the confidence interval is considered to be a significant difference!  Looks like there are quite a few of them.
+
+The 2-way ANOVA is more complex.  This allows us to have multiple independent categorical variables.  Here, let's look at wages as our dependent variable but have 2 categorical independent variables: gender and marital status.  
+
+This type of anova has 3 null hypotheses:
+
+* There is no difference in wages between men and women
+* There is no difference in wages between married and unmarried individuals
+* There is no interaction between gender and marital status.
+
+**Interaction** is an complex idea.  It is related to the idea in probability regarding independence.  Here, an interaction effect would imply that either:
+
+* The effect of gender on wages varies depends on whether or not hte person is married or unmarried, or equivalently
+* The effect of marital status on wages depends on whether or not the person is a man or a woman.
+
+Let's take a look at this data graphically (I'm going to plagiarize this from my previous notebook!):
+
+```{r}
+CPS1985 %>% ggplot(aes(x = married, y = wage, fill = gender)) +
+    geom_boxplot() +
+    theme_classic() +
+    labs(title = "Does Marriage Influnce the Gender Wage Gap?", 
+         subtitle = "1985 CPS data",
+         x = "Marital Status", 
+         y = "Wages",
+         fill = "",
+         caption = "@mattdobra") +
+    scale_fill_manual(values= c("deepskyblue4", "darksalmon")) +
+    theme(legend.position = "bottom",
+          legend.direction = "horizontal",
+          axis.ticks.x = element_blank()) +
+    scale_x_discrete(labels = c("no" = "Unmarried", "yes" = "Married"))
+```
+
+Let's run this ANOVA and see what the results are:
+
+```{r}
+anova2<-aov(wage ~ gender*married)
+summary(anova2)
+```
+We can reject all 3 null hypotheses at the 5% level.  Get used to looking at stars!  We can dig deeper into the results by looking at the Tukey-Kremer test:
+
+```{r}
+TukeyHSD(anova2)
+```
+The bottom panel examines the interaction effects, and is pretty interesting.  
+
+* The difference in wages between unmarried men and unmarried women is insignificant.
+* The difference in wages between married females and unmarried females is insignificant.
+
+But:
+
+* The difference between married women and married men is significant
+* The difference between married men and unmarried men is significant
+
+Interpreting results like this add nuance to the issue of the gender wage gap.  
+
+This is enough ANOVA for here.  Econometrics typically focuses on regression analysis, not ANOVA.  And, for what its worth, ANOVA is just a very special case of regression analysis anyhow.  
+
+## Chi-Square
+
+The Chi-Square test looks at relationships between 2 (or more) categorical variables.  Let's look at the **affairs** dataset from the *AER* package. This data is from a 1978 paper that looks into the prevalence of extramarital affairs.  We might ask the question whether or not there is a relationship between extramarital affairs and whether or not a married couple has kids.  
+
+Let's start by making a cross tabulation of couples with kids and couples where an affair is occurring.  It is easiest to use dplyr to create a new data frame that only has the 2 variables of interest.
+
+```{r}
+affair2 <- affairs %>% select(c(affair, kids))
+table(affair2)
+```
+On a percentage basis, it looks like affairs are more prevalent among couples with kids.  Maybe this is more clear with a barplot:
+```{r}
+affair2 %>% ggplot(aes(x = as.factor(kids), fill = as.factor(affair))) +
+    geom_bar(position = "fill") +
+    scale_fill_viridis_d() +
+    labs(y = "")
+```
+
+
+
+Is this difference big enough to be statistically significant?  This is where we call in the Chi Square test:
+
+```{r}
+chisq.test(affairs$kids, affairs$affair)
+```
+The p-value is less than .05, so it appears that there is a significant difference in the rate of affairs between couples with kids from those without kids.
+
+# Wrapping Up
+
+This concludes the first section of the course that combined an introduction to R with a review of basic statistics.  Next, we will turn our attention to the basic building block of econometrics, regression analysis.
