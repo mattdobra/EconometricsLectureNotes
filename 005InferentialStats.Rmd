@@ -9,7 +9,7 @@ The first half of this notebook is an overview of basic inferential statistics, 
 
 As always, let's start by loading the relevant libraries and datasets into memory.
 
-```{r, warning=FALSE}
+```{r, warning=FALSE, message = FALSE}
 library(tidyverse)
 library(AER)
 data(CPS1985)

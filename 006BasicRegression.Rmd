@@ -1,0 +1,374 @@
+---
+title: "Basic Regression"
+output: html_notebook
+---
+
+# Overview
+
+Regression modeling is at the center of econometric methods.  For most of the rest of the semester, we will be estimating various types of regression.  We begin with the simplest of regressions; this set of notes will look at bivariate ordinary least squares (OLS) modeling.  
+
+As usual, let's start by loading the libraries and data we will be using in this notebook:
+
+```{r, warning=FALSE, message = FALSE}
+library(tidyverse)
+library(stargazer)
+library(AER)
+data(CPS1985)
+attach(CPS1985)
+```
+
+# Prelude to Regression: The Correlation Test:
+
+We saw how to calculate a correlation (Pearson's r) in a previous notebook; let's see the correlation between wage and years of education from the use the CPS1985 dataset using *cor()* function
+
+```{r}
+cor(wage, education)
+```
+
+Pearson's r looks at the strength of the linear relationship between two variables; graphically, it looks something like this:
+
+```{r, message = FALSE}
+CPS1985 %>% ggplot(aes(x = education, y = wage)) +
+    geom_point() +
+    geom_smooth(method = lm)
+```
+The correlation is a measure of the strength on the linear relationship between the x variable (education) and the y variable (wage).  If the correlation coefficient were 1, we could say that these variables had a perfect positive linear relationship,  If it were 0, we would say that these variables are unrelated.  So is .38 statistically significant? 
+
+* H~0~: The true correlation coefficient is 0
+* H~1~: The true correlation coefficient is not 0
+
+We can test this hypothesis with the function *cor.test*:
+
+```{r}
+cor.test(education, wage)
+```
+This indicates that the correlation coefficient is in fact significantly different from 0.  
+
+Let's look at the correlation between years of experience and wage.  It is useful to start by looking at a graph of the data:
+
+```{r, message = FALSE}
+CPS1985 %>% ggplot(aes(x = experience, y = wage)) +
+    geom_point() +
+    geom_smooth(method = lm)
+```
+This looks a lot like a horizontal line, indicating there is probably no relationship between experience and wage.  Let's run the test, just to be sure:
+
+```{r}
+cor.test(wage, experience)
+```
+The p-value is 0.044, which is barely less than 0.05.  So again we reject the null hypothesis.  A good reason to run the test rather than to just look at the graph!
+
+One reason to run the Spearman test rather than the Pearson test is if you have skewed data or outliers; looking at the graph, it's probably the case that income data is skewed right:
+
+```{r}
+CPS1985 %>% ggplot(aes(x = wage)) +
+    geom_histogram(binwidth = 2)
+```
+So let's take a look at the Spearman test results:
+
+```{r}
+cor.test(wage, experience, method = "spearman", exact = FALSE)
+```
+The Spearman statistic (rho = 0.17) is signficantly different from 0.
+
+# Ordinary Least Squares
+
+The most basic regression model is referred to as Ordinary Least Squares, or OLS.  As this model forms the basis of all that is to follow in this class, it is worth spending some time to develop a good intuition of what is going on here.
+
+## OLS Intuition
+
+In a simple, bivariate OLS, we are looking at the *linear* relationship between our *dependent variable* and **one** *independent variable.*  Let's imagine that we are looking at the relationship between years of education and wages, where education is our independent variable, X, and wages are our dependent variable, Y.  To say this model is linear implies that the relationship between X and Y looks like:
+
+\begin{equation}
+Y_{i} = \alpha + \beta X_{i} 
+\end{equation}
+
+That is, for any value of $X_i$, years of education, you can determine that person's wage by multiplying their years of education by $\beta$ and then adding $\alpha$.  Graphically, this relationship looks like:
+
+```{r, echo=FALSE, warning=FALSE}
+library(broom)
+set.seed(5)
+y <-rnorm(5)
+x <-1:5
+mod <- lm(y ~ x)
+df <- augment(mod)
+ggplot(df) + 
+  geom_line(aes(x = x, y = .fitted), size = 1) +
+  geom_segment(aes(x = 1, y = -1, xend = 5, yend = -1), color = "black") +
+  geom_segment(aes(x = 1, y = -1, xend = 1, yend = 1), color = "black") +
+  geom_point(aes(x = 1, y = -0.54), size = 5, color = "orange") +
+  geom_point(aes(x = 1.95, y = -0.2), size = 5, color = "purple") +
+  geom_point(aes(x = 4, y = 0.58), size = 5, color = "purple") +
+  geom_segment(aes(x = 4, y = 0.58, xend = 4, yend = -0.2), color = "purple", size = 0.5) +
+  geom_segment(aes(x = 1.95, y = -0.2, xend = 4, yend = -0.2), color = "purple", size = 0.5) +
+  annotate("text", x = 1.15, y = -0.56, label = expression(alpha), color = "orange", size = 6) +
+  annotate("text", x = 4.2, y = 0.2, label = expression(Delta*"Y"), color = "purple", size = 6) +
+  annotate("text", x = 3, y = -0.3, label = expression(Delta*"X"), color = "purple", size = 6) +
+  annotate("text", x = 4, y = -0.3, label = expression(beta*" = "*Delta*"Y/"*Delta*"X"), size = 6, color = "darkgreen" ) +
+  annotate("text", x = 2.2, y = 0.5, label = expression("Y = "*alpha + beta*"X"[1]), color = "black", size = 7) +
+  lims(y = c(-1, 1), x = c(1, 5)) + 
+  labs(x = expression("X"), y = expression("Y")) +
+  theme(axis.text = element_blank(),
+        axis.ticks = element_blank())
+```
+This is an example of a model that is *fully determined* -- there is no scope for individuals to not be on the line.  If, for example, $\beta = 1$ and $\alpha = 0.5$, then we would say that someone with 7 years of education should have an hourly wage of \$7.50, someone with 13 years an hourly wage of \$13.50, and so forth.  The real world is rarely so neat and tidy, and a regression is an example of a *stochastic* model.  
+
+In a stochastic model, we use statistical tools to approximate the line that best fits the data.  That is, we are still trying to figure out what $\alpha$ and $\beta$ are, but we are aware that not everybody will be on the line that is implied by $\alpha$ and $\beta$.  This means that the model looks more like:
+
+\begin{equation}
+Y_{i} = \alpha + \beta X_{i} + \epsilon_i
+\end{equation}
+
+The new term, $\epsilon_i$, is called the *error term*.  Where does the error term come from?  We take our values of \alpha and \beta and combine them with $X_i$ to calculate a predicted value of Y.  Typically we refer to the predicted value of Y as $\hat{Y}$ (Y-hat).  The difference between the actual value of $Y_i$ and $\hat{Y}$ is $\epsilon_i$:
+
+\begin{equation}
+\epsilon_{i} = \hat{Y} - Y_i
+\end{equation}
+
+The theory (and math) behind a regression model focuses on trying to estimate values for $\alpha$ and $\beta$ that best fits the observed data. Because we don't know $\alpha$ and $\beta$, we estimate $\hat{\alpha}$ and $\hat{\beta}$ by using $\epsilon$.  
+
+In a regression model, we estimate a model that looks like: 
+
+\begin{equation}
+Y_{i} = \hat{\alpha} + \hat{\beta} X_{i}+ \epsilon_{i} 
+\end{equation}
+
+In this model, $\epsilon_i$ is referred to as our *residual*, which is just the vertical distance each individual data point is from the line implied by $\hat{\alpha}$ and $\hat{\beta}$.
+
+Perhaps this is easier to understand if looked at graphically:
+
+```{r, echo=FALSE}
+library(tidyverse)
+library(broom)
+set.seed(5)
+y <-rnorm(5)
+x <-1:5
+mod <- lm(y ~ x)
+yl <- c("y[1]", "y[2]", "y[3]", "y[4]", "y[5]")
+yhl <- c("hat(y)[1]", "hat(y)[2]", "hat(y)[3]", "hat(y)[4]", "hat(y)[5]")
+sl <- c("hat(epsilon)[1]", "hat(epsilon)[2]", "hat(epsilon)[3]", "hat(epsilon)[4]", "hat(epsilon)[5]")
+df <- augment(mod)
+ggplot(df) + 
+  geom_segment(aes(x = x, y = y, xend = x, yend = .fitted), linetype = "dashed", color = "purple") +
+  geom_point(aes(x = x, y = y), size = 5, color = "purple") +
+  geom_line(aes(x = x, y = .fitted)) +
+  geom_point(aes(x = x, y = .fitted), size = 5) +
+  geom_text(aes(x = x, y = y), label = yl, color = "purple", size = 2, parse = TRUE) +
+  geom_text(aes(x = x, y = .fitted), label = yhl, color = "purple", size = 2, parse = TRUE) +
+  geom_text(aes(x = x + 0.2, y = (y + .fitted) / 2), label = sl, color = "black", size = 2, parse = TRUE) +
+  ylim(-1.5, 2) + 
+  theme(axis.text = element_blank())
+```
+Assume that the black line is the one implied by our estimates of $\hat{\alpha}$ and $\hat{\beta}$, and each purple point represents one of our data poins.  The vertical distance each point is from the line is its residual $\epsilon_i$.
+
+So where do $\hat{\alpha}$ and $\hat{\beta}$ come from?  What line is the line of best fit?  The best fitting line is the one where the values of $\hat{\alpha}$ and $\hat{\beta}$ minimize the sum of squared errors, $\Sigma{\epsilon^2}$.  This is why the method is called Ordinary Least **Squares**! In principle, we could take a data set, run it through every single possible combination of $\hat{\alpha}$ and $\hat{\beta}$, calculate, square, and sum all the values of $\epsilon_i$ that result from those values of $\hat{\alpha}$ and $\hat{\beta}$, and choose the $\hat{\alpha}$ and $\hat{\beta}$ that minimize $\Sigma{\epsilon_i^2}$.  There is a much cleaner way of doing this, but it involves calculus so it will be left as an exercise for the interested student to research on his/her own.  
+
+## Estimating and Interpreting a Bivariate Regression.
+
+### Estimating the Model
+
+Let's look again at the CPS1985 dataset and the relationship between education and wage.  Again, the scatter plot looks like:
+
+```{r, message = FALSE}
+CPS1985 %>% ggplot(aes(x = education, y = wage)) +
+    geom_point() 
+```
+
+We can estimate a regression model between wage and education with the *lm()* command, If it helps you remember the command, *lm* stands for **linear model**. 
+
+```{r}
+lm(wage ~ education)
+```
+### Obtaining Useful Results
+
+The immediate output from a regression model is not very helpful.  You pretty much always want to to store your model as an object and inspect the object separately. 
+
+```{r, warning = FALSE}
+reg1 <- lm(wage ~ education)
+```
+
+We can use the *attributes()* command to see what is contained within this object; we will make use of some of these shortly.  
+```{r}
+attributes(reg1)
+```
+To interpret the model, we need to take a deeper look at this regression object.  The Base R method is to use the *summary()* command, though I prefer *stargazer* because it's cleaner and the format looks like the way regressions get published in academic journals. 
+
+```{r}
+summary(reg1)
+```
+
+```{r, warning = FALSE}
+stargazer(reg1, type = "text")
+```
+
+Now this is a lot more useful.  There's lots of stuff in here.  The values of $\hat{\alpha}$ and $\hat{\beta}$ are found in the coefficients panel--the estimate of the (Intercept) is $\hat{\alpha}$ and the estimated coefficient on education is $\hat{\beta}$.  This means that our regression model is in fact:
+
+\begin{equation}
+\hat{Wage_{i}} = -0.74598 + 0.75046 Education_{i} 
+\end{equation}
+
+### Predicted Values and Residuals
+
+We can use this equation to make predictions: the predicted wages of somebody with 12 years of education is:
+
+\begin{equation}
+\hat{Wage_{i}} = -0.74598 + 0.75046 * 12
+\end{equation}
+
+\begin{equation}
+\hat{Wage_{i}} = \$8.26
+\end{equation}
+
+Let's take a look at some of the data - here are the first 10 observations in the data set, along with their predicted values and residuals:
+
+
+```{r}
+resids <- reg1$residuals
+preds <- reg1$fitted.values
+tempdata <- cbind(CPS1985, preds, resids)
+tempdata %>% 
+    select(c(wage,education, preds, resids)) %>% 
+    slice(1:10)
+```
+
+### Look at the stars, look how they shine for you
+
+As an aside, Coldplay sucks. Rather than think about their excrementary music, let's look back at the *stargazer()* output so we can think happy thoughts again:
+
+```{r, warning = FALSE}
+stargazer(reg1, type = "text")
+```
+
+You should have noticed all the stars next to the education coefficient.  The the stars are very useful for interpreting the *statistical significance* of your regression model.  In a regression, the null hypothesis is that the true coefficients ($\beta$ and $\alpha$) are equal to zero, the alternative hypothesis is that they are not equal to zero.  For the most part, the significance of $\alpha$ doesn't matter; we focus on $\beta$ and whether or not our estimate of $\hat{\beta}$ is significantly different from zero.
+
+Why zero?  If $\beta > 0$, higher values of $X_i$ are associated with higher values of $Y_i$.  If $\beta < 0$, higher values of $X_i$ are associated with lower values of $Y_i$.  If $\beta = 0$, then there is no relationship between our dependent variable and our independent variable.  In other words, our null hypothesis is that X and Y are unrelated, and by rejecting the null hypothesis we are saying that we believe that X and Y are in fact related.   
+
+The bottom panel shows useful information about the regression.  Observations is your sample size, and R2 is actually $R^2$ (R-squared) and is a measure of goodness of fit.  The possible range for$R^2$ is $0 \geq R^2 \geq 1$.  In a bivariate model, $R^2$ is actually the correlation coefficient squared!
+
+```{r}
+cor(wage, education)
+cor(wage, education)^2
+```
+The F-test is a measure of the significance of the entire model--the null hypothesis is that every $\hat{\beta}$ that you estimated is equal to zero.  In a bivariate model, there is only $\hat{\beta}$ so the F-test of the model is basically the same thing as the t-test of $\hat{\beta}$.  
+
+### Visualizing the Regression Line
+
+Using *ggplot*, it is easy to add the regression line to a scatterplot by adding the `geom_smooth(method = lm)` argument. 
+
+```{r, message = FALSE}
+CPS1985 %>% ggplot(aes(x = education, y = wage)) +
+    geom_point() +
+    geom_smooth(method = lm)
+```
+
+# More Examples
+
+Now that we have the basics of regression down, let's grab a few more datasets from the wooldridge library and practice running and interpreting regressions.  
+
+```{r}
+library(wooldridge)
+data(airfare)
+data(gpa2)
+data(vote1)
+data(meap01)
+```
+
+Let's start with the airfare data and examine the relationship between the average one-way fare and the distance in miles of the routes.  Which variable should be dependent and which should be independent?
+
+We can start by looking at a scatterplot:
+
+```{r, message = FALSE}
+airfare %>% ggplot(aes(x = dist, y = fare)) +
+    geom_point() + 
+    geom_smooth(method=lm)
+```
+Next, we can estimate the regression model using the *lm()* command.  Because I didn't attach the dataset, I need to tell the lm function where the variables are.  One option would be to use the \$ notation, as in `lm(airfare$fare ~ airfare$dist)`, though I prefer this syntax:
+
+```{r}
+reg2 <- lm(fare ~ dist, data = airfare)
+```
+
+The regression output is stored in the object *reg2*, so let's use *stargazer()* to check it out. The *stargazer()* function defaults to output in $\LaTeX$, so you may want to stick with the `type = "text"` option. 
+
+```{r, warning = FALSE}
+stargazer(reg2, type = "text")
+```
+The coefficient on the distance variable is significant at the 99% level and $R^2 = .39$, both of which indicate strong statistical significance.  Let's think about what this means in terms of our regression equation: 
+
+\begin{equation}
+fare_{i} = 103.261 + 0.076 distance_{i} 
+\end{equation}
+
+The $\beta$ implies that, if distance increases by 1, then fare increases by 0.076.  What are the units of measure here?  Distance is measured in miles, and fare is measured in \$Us. So this equation suggests that, on average, a one mile increase in the distance of a flight is associated with a \$0.076 increase in price.  Or, perhaps more intuitively, a 100 mile increase in distance is associated with a \$7.60 increase in price. 
+
+Let's take this logic a little further. 
+
+```{r}
+airfaretemp <- airfare %>% 
+    select(fare, dist) %>% 
+    mutate(dist100 = dist/100)
+airfaretemp[c(1,5,9,13),]
+```
+This bit of code creates a new dataset called airfaretemp and adds a new variable called dist100.  The variable dist100 is created by dividing the dist variable by 100, so really it's just measuring distance in hundreds of miles.  Now, let's estimate the regression between fare and dist100 and put it side by side with our original regression:
+
+```{r, warning = FALSE}
+reg2a <- lm(fare ~ dist100, data = airfaretemp)
+stargazer(reg2, reg2a, type = "text")
+```
+This is pretty cool--the results are more or less identical, except for the decimal place in the distance variable.  And we get the same intuitive result we saw above.
+
+Next, let's take a look at the gpa2 data. This data includes student data from a midsize research university.  Let's look at the relationship between a student's SAT score and his/her GPA after the fall semester:
+
+```{r, message = FALSE}
+gpa2 %>%  ggplot(aes(x = sat, y = colgpa)) +
+    geom_point() +
+    geom_smooth(method = lm)
+```
+Next, store the regression in an object and look at it using *stargazer()*
+```{r, warning = FALSE}
+reg3 <- lm(colgpa ~ sat, data = gpa2)
+stargazer(reg3, type = "text")
+```
+Here, $R^2 = .17$ and our estimate of $\hat{\beta}$ is significant at the 99% level.  We can interpret the coefficient of .002 as stating that we expect GPA go go up by .002 on average for every 1 point of SAT.  This is a bit of an awkward interpretation, notably because SAT scores don't go up by 1, they go up by 10!  We can use the same trick as above to scale these numbers in a way that is more meaningful; a 100 point increase in overall SAT score is associated with a 0.2 increase in GPA seems a lot more meangingful.  
+
+Let's look at the estimated value of $\hat{\alpha}$ of 0.663.  What does that mean, and what does it mean that it is significant?  Let's start with the question of what it means and look at the regression equation:
+
+\begin{equation}
+gpa_{i} = 0.663 + 0.002 sat_{i} 
+\end{equation}
+
+What would our expected gpa, $\hat{gpa}$, be for a student who earned a 0 on the SAT?  Anything multiplied by 0 is 0, so 0.663 is our estimated GPA for somebody who earned a 0 on the SAT.  But is it even possible to earn a 0 on the SAT? They give you 400 points just for showing up.  So looking at a 0 on the SAT is somewhat meaningless in this model, because it is impossible to even get.  The $\alpha$ in the equation is valuable for calculating predicted values, but in most cases, $\hat{\alpha}$ is not really what we are looking at in a regression model.  This brings us to the question of the significance of the $\hat{\alpha}$ term - the fact that we are pretty darn sure that the true value of $\alpha$ is not really 0 doesn't mean a whole lot here.
+
+Let's look at the meap01 data; this data has school level funding and test score data in the state of Michigan.  Does spending per student lead to better performing students?  We can look at the relationship between the variable math4, the percent of students receiving a satisfactory 4th grade math score, and exppp, expenditures per pupil. We start by looking at a plot of the data:
+
+```{r, message = FALSE}
+meap01 %>% ggplot(aes(x = exppp, y = math4)) +
+    geom_point() +
+    geom_smooth(method = lm)
+```
+That line is probably not sloping in the direction you might expect it to.  Let's estimate a regression:
+
+```{r, warning = FALSE}
+reg4 <- lm(math4 ~ exppp, data = meap01)
+stargazer(reg4, type  = "text")
+```
+The sign on the $\hat{\beta}$ is negative, which corresponds to the downward sloping line in the plot.  However, there are no stars next to the coefficient, implying that the result is not significantly different from 0; thus, even though $\hat{\beta} < 0$, we do not reject the null hypothesis that $\beta = 0$.
+
+Finally, let's take a look at the voting data in the vote1 dataset.  Specifically, let's examine the relationship between the share of campaign expenditures (shareA) a candidate made and the vote share received (voteA). We can start with a graph:
+
+```{r, message = FALSE}
+vote1 %>% ggplot(aes(x = shareA, y = voteA)) +
+    geom_point() +
+    geom_smooth(method = lm)
+```
+Next, we estimate the regression and put the results into *stargazer()* 
+
+```{r, warning = FALSE}
+reg5 <- lm(voteA ~ shareA, data = vote1)
+stargazer(reg5, type = "text")
+```
+The $R^2$ is pretty huge $R^2 = 0.86$ and the $\hat{\beta}$ is positive and significant at the 99% level.  This is a tricky $\beta$ to interpret, because the variable shareA is defined as $\frac{Expenditures\:by\: Candiate\:A}{Expenditures\:by\:Candidate\:A + Expenditures\:by\:Candidate\:B}$. It can be done, but it is tricky.  In some cases, you are best off just interpreting the **signs** and **significance** of the coefficients, and not focusing so much on the actual **magnitude** of the coefficients.  
+
+# Wrapping Up
+
+At this point, you should be able to use R to estimate a bivariate OLS regression and to interpret the regression output.  We will next turn to some of the key assumptions of regression analysis.

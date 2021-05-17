@@ -12,7 +12,7 @@ This notebook will provide an overview of basic statistics.  This is not meant t
 Before we get started, a brief note on graphing.  We will be using both Base R graphics and *ggplot2* graphics. In my opinion, *ggplot2* makes better looking graphics and is more intuitive when you want to customize your graphs than Base R.  But sometimes, you just want a quick and dirty graph, and Base R is just fine for that.  So I will use both from time to time. Also, I won't be wasting a lot of time making the graphs "good" here.  A good looking graph needs to have a title, axis titles, legends, and so forth.   Sometimes I will put in the effort to make the graph look proper when it is a *ggplot* graph, sometimes I won't.  Data visualization is well beyond the scope of this course.   
 
 Finally, before we get going, let's load in the packages we will be needing and load and attach some data:
-```{r, warning=FALSE}
+```{r, warning=FALSE, message = FALSE}
 library(tidyverse)
 library(AER)
 data(CPS1985)
