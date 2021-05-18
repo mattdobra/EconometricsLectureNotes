@@ -369,6 +369,12 @@ Don't forget, the *summary* command can be useful here too:
 ```{r}
 summary(wage)
 ```
+The  *stargazer* package/function makes nicely formatted tables of summary statistics, but you have to put in a whole dataframe:
+
+```{r}
+stargazer(CPS1985, type = "text")
+```
+
 
 # Wrapping Up
 

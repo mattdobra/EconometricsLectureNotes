@@ -5,7 +5,7 @@ output: html_notebook
 
 # Overview
 
-Regression modeling is at the center of econometric methods.  For most of the rest of the semester, we will be estimating various types of regression.  We begin with the simplest of regressions; this set of notes will look at bivariate ordinary least squares (OLS) modeling.  
+Regression modeling is at the center of econometric methods.  For most of the rest of the semester, we will be estimating various types of regression.  We begin with the simplest of regressions; this set of notes will look at ordinary least squares (OLS) modeling.  
 
 As usual, let's start by loading the libraries and data we will be using in this notebook:
 
@@ -73,7 +73,7 @@ The Spearman statistic (rho = 0.17) is signficantly different from 0.
 
 # Ordinary Least Squares
 
-The most basic regression model is referred to as Ordinary Least Squares, or OLS.  As this model forms the basis of all that is to follow in this class, it is worth spending some time to develop a good intuition of what is going on here.
+The most basic regression model is referred to as Ordinary Least Squares, or OLS.  As this model forms the basis of all that is to follow in this class, it is worth spending some time to develop a good intuition of what is going on here. It is easiest to start wit the bivariate model, as we can develop the intuition graphically as well as mathematically.
 
 ## OLS Intuition
 
@@ -369,6 +369,27 @@ stargazer(reg5, type = "text")
 ```
 The $R^2$ is pretty huge $R^2 = 0.86$ and the $\hat{\beta}$ is positive and significant at the 99% level.  This is a tricky $\beta$ to interpret, because the variable shareA is defined as $\frac{Expenditures\:by\: Candiate\:A}{Expenditures\:by\:Candidate\:A + Expenditures\:by\:Candidate\:B}$. It can be done, but it is tricky.  In some cases, you are best off just interpreting the **signs** and **significance** of the coefficients, and not focusing so much on the actual **magnitude** of the coefficients.  
 
+## Multivariate Regression
+
+We can extend this logic into having multiple independent variables.  Multivariate regression is a bit harder to wrap one's mind around, because it is really difficult to graph (adding variables adds dimensions to the graph, so we are no longer dealing with a 2d space), but the basics of interpreting the variables is the same as with bivariate modeling.
+
+Let's do a basic example. Using the CPS1985 data, what happens when we include education AND age in the same regression.  
+
+```{r, warning = FALSE}
+reg6 <- lm(wage ~ age, data = CPS1985)
+reg7 <- lm(wage ~ education + age, data = CPS1985)
+stargazer(reg1, reg6, reg7, type = "text")
+```
+
+The first column has the first regression in this notebook.  The second looks at the relationship between age and wage, and the third column looks at the model with both education and age.  Some important notes:
+
+* The $R^2$ went up from column 1 to column 3.  By definion, adding variables cannot cause R^2 to fall.  
+* The $\hat{\beta}$ estimates in column 3 are not equal to those in column 1 or 2.  We will discuss *why* this happens later, but for now, suffice it to say that this is expected and probably a sign that column 3 is a better model the other 2.
+* We interpret the coefficients in the same way as before - column 3 implies that a 1 year increase in education is associated with a \$0.82 increase in hourly wage, and a 1 year increase in age is associated with a \$0.11 increase in wage.  
+* We can make predictions the same way as well.  If somebody has 16 years of education and is 34 years old, the model predicts that their wage will be $-\$5.53 + \$0.82(16) + \$0.11(34) = \$11.33$.
+
+Later in the class, we will turn to more nuanced discussino about differences between multivariate regression and bivariate regression.
+
 # Wrapping Up
 
-At this point, you should be able to use R to estimate a bivariate OLS regression and to interpret the regression output.  We will next turn to some of the key assumptions of regression analysis.
+At this point, you should be able to use R to estimate a simple bivariate or multivariate OLS regression and to interpret the regression output.  We will next turn to some of the key assumptions of regression analysis.

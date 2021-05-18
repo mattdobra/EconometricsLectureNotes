@@ -177,6 +177,15 @@ qqline(trees$Height)
 
 ```
 
+There's actually a test to see if data is normally distributed called the Shapiro-Wilk test:
+
+```{r}
+shapiro.test(wage)
+shapiro.test(trees$Height)
+```
+
+Which confirms that wage is non-normal and tree height is normal.
+
 Anyhow, since it appears that our wage data may not be normal, perhaps a Wilcoxon test is in order.  Rather than comparing the means, were are comparing the ranks of the data. 
 
 ```{r}
