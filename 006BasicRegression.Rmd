@@ -34,8 +34,8 @@ CPS1985 %>% ggplot(aes(x = education, y = wage)) +
 ```
 The correlation is a measure of the strength on the linear relationship between the x variable (education) and the y variable (wage).  If the correlation coefficient were 1, we could say that these variables had a perfect positive linear relationship,  If it were 0, we would say that these variables are unrelated.  So is .38 statistically significant? 
 
-* H~0~: The true correlation coefficient is 0
-* H~1~: The true correlation coefficient is not 0
+* $H_0$: The true correlation coefficient is 0
+* $H_1$: The true correlation coefficient is not 0
 
 We can test this hypothesis with the function *cor.test*:
 
@@ -56,9 +56,9 @@ This looks a lot like a horizontal line, indicating there is probably no relatio
 ```{r}
 cor.test(wage, experience)
 ```
-The p-value is 0.044, which is barely less than 0.05.  So again we reject the null hypothesis.  A good reason to run the test rather than to just look at the graph!
+The p-value is 0.044, which is barely less than 0.05.  So again we reject the null hypothesis.  Perhaps it is a good thing we ran the test rather than simply look at the graph!
 
-One reason to run the Spearman test rather than the Pearson test is if you have skewed data or outliers; looking at the graph, it's probably the case that income data is skewed right:
+Another type of correlation is the Spearman correlation; typically, you might want to use the Spearman test rather than the Pearson test if you have skewed data or outliers.  Looking at the graph, it's probably the case that income data is skewed right:
 
 ```{r}
 CPS1985 %>% ggplot(aes(x = wage)) +
@@ -69,11 +69,11 @@ So let's take a look at the Spearman test results:
 ```{r}
 cor.test(wage, experience, method = "spearman", exact = FALSE)
 ```
-The Spearman statistic (rho = 0.17) is signficantly different from 0.
+The Spearman statistic (rho = 0.17) is significantly different from 0.  Because this data is skewed, the Spearman statistic is probably more accurate than the Pearson.
 
 # Ordinary Least Squares
 
-The most basic regression model is referred to as Ordinary Least Squares, or OLS.  As this model forms the basis of all that is to follow in this class, it is worth spending some time to develop a good intuition of what is going on here. It is easiest to start wit the bivariate model, as we can develop the intuition graphically as well as mathematically.
+The most basic regression model is referred to as Ordinary Least Squares, or OLS.  As this model forms the basis of all that is to follow in this class, it is worth spending some time to develop a good intuition of what is going on here. It is easiest to start with the bivariate model, as we can develop the intuition graphically as well as mathematically.
 
 ## OLS Intuition
 
@@ -119,7 +119,7 @@ In a stochastic model, we use statistical tools to approximate the line that bes
 Y_{i} = \alpha + \beta X_{i} + \epsilon_i
 \end{equation}
 
-The new term, $\epsilon_i$, is called the *error term*.  Where does the error term come from?  We take our values of \alpha and \beta and combine them with $X_i$ to calculate a predicted value of Y.  Typically we refer to the predicted value of Y as $\hat{Y}$ (Y-hat).  The difference between the actual value of $Y_i$ and $\hat{Y}$ is $\epsilon_i$:
+The new term, $\epsilon_i$, is called the *error term*.  Where does the error term come from?  We take our values of \alpha and \beta and combine them with $X_i$ to calculate a predicted value of Y.  Typically we refer to the predicted value of Y as $\hat{Y}$ (pronounced Y-hat).  The difference between the actual value of $Y_i$ and $\hat{Y}$ is $\epsilon_i$:
 
 \begin{equation}
 \epsilon_{i} = \hat{Y} - Y_i
@@ -161,7 +161,7 @@ ggplot(df) +
 ```
 Assume that the black line is the one implied by our estimates of $\hat{\alpha}$ and $\hat{\beta}$, and each purple point represents one of our data poins.  The vertical distance each point is from the line is its residual $\epsilon_i$.
 
-So where do $\hat{\alpha}$ and $\hat{\beta}$ come from?  What line is the line of best fit?  The best fitting line is the one where the values of $\hat{\alpha}$ and $\hat{\beta}$ minimize the sum of squared errors, $\Sigma{\epsilon^2}$.  This is why the method is called Ordinary Least **Squares**! In principle, we could take a data set, run it through every single possible combination of $\hat{\alpha}$ and $\hat{\beta}$, calculate, square, and sum all the values of $\epsilon_i$ that result from those values of $\hat{\alpha}$ and $\hat{\beta}$, and choose the $\hat{\alpha}$ and $\hat{\beta}$ that minimize $\Sigma{\epsilon_i^2}$.  There is a much cleaner way of doing this, but it involves calculus so it will be left as an exercise for the interested student to research on his/her own.  
+So where do $\hat{\alpha}$ and $\hat{\beta}$ come from?  How do we determine the line of best fit?  The best fitting line is the one where the values of $\hat{\alpha}$ and $\hat{\beta}$ minimize the sum of squared errors, $\Sigma{\epsilon_i^2}$.  This is why the method is called Ordinary Least **Squares**! In principle, we could take a data set, run it through every single possible combination of $\hat{\alpha}$ and $\hat{\beta}$, calculate, square, and sum all the values of $\epsilon_i$ that result from those values of $\hat{\alpha}$ and $\hat{\beta}$, and choose the $\hat{\alpha}$ and $\hat{\beta}$ that minimize $\Sigma{\epsilon_i^2}$.  There is a much cleaner way of doing this, but it involves calculus so it will be left as an exercise for the interested student to research on his/her own.  
 
 ## Estimating and Interpreting a Bivariate Regression.
 
@@ -174,14 +174,14 @@ CPS1985 %>% ggplot(aes(x = education, y = wage)) +
     geom_point() 
 ```
 
-We can estimate a regression model between wage and education with the *lm()* command, If it helps you remember the command, *lm* stands for **linear model**. 
+We can estimate a regression model between wage and education with the *lm()* command, If it helps you remember the command, *lm* stands for **linear model**. Because we attached the CPS1985 dataset, we could simply use the command `lm(wage ~ education)` if we wanted.
 
 ```{r}
-lm(wage ~ education)
+lm(wage ~ education, data = CPS1985)
 ```
 ### Obtaining Useful Results
 
-The immediate output from a regression model is not very helpful.  You pretty much always want to to store your model as an object and inspect the object separately. 
+The immediate output from a regression model is not very helpful; it tells you the values of $\hat{\alpha}$ and $\hat{\beta}$, but that's it.  You pretty much always want to to store your model as an object and inspect the object separately. 
 
 ```{r, warning = FALSE}
 reg1 <- lm(wage ~ education)
@@ -230,6 +230,8 @@ tempdata %>%
     select(c(wage,education, preds, resids)) %>% 
     slice(1:10)
 ```
+
+Recall, wage is our dependent variable ($Y$), and education is our independent variable ($X$).  
 
 ### Look at the stars, look how they shine for you
 
@@ -371,7 +373,48 @@ The $R^2$ is pretty huge $R^2 = 0.86$ and the $\hat{\beta}$ is positive and sign
 
 ## Multivariate Regression
 
-We can extend this logic into having multiple independent variables.  Multivariate regression is a bit harder to wrap one's mind around, because it is really difficult to graph (adding variables adds dimensions to the graph, so we are no longer dealing with a 2d space), but the basics of interpreting the variables is the same as with bivariate modeling.
+### Predictive modeling and hypothesis testing
+
+We can extend this logic into having multiple independent variables.  Multivariate regression is a bit harder to wrap one's mind around, because it is really difficult to graph (adding variables adds dimensions to the graph, so we are no longer dealing with a 2d space), but the basics of interpreting the variables is the same as with bivariate modeling.  Why would we want to estimate a multivariate regression?  It depends on if your goal is ultimately prediction or hypothesis testing, but either way, nearly every application of regression is a multivariate application.
+
+The goal of regression analysis is typically **prediction** or **hypothesis testing**.  Within the context of a typical regression model $Y = \alpha +\beta_1X_1+\beta_2X_2+...+\beta_kX_k$:
+
+* **Predictive** modeling refers to a situation where your primary purpose is to predict outcome $Y$ as accurately as possible.  Statistics and data analytics tend to focus on predictive modeling.
+* **Hypothesis testing** refers to a model where your primary purpose is to predict the impact of a particular independent variable (e.g. $X_1$) or set of independent variables (e.g. $X_1$, $X_2$, and $X_3$) on the outcome $Y$. Such a variable is commonly referred to as a **variable of interest**; that is, the whole purpose of running the regression is that we are interested in the coefficient on that variable. Economics tends to focus on hypothesis testing.
+
+In either case, one should always include as independent variables **all** variables that they think might impact the value of the dependent variable, even if it is not the variable of interest.  
+
+### Predictive modeling
+
+For predictive modeling, the reason why should be clear--If you are trying to predict $Y$, leaving out relevant information will ultimately lead to less precise and accurate predictions.  As an example, imagine trying to predict wages using only a person's age.  Age probably  matters for wages, but without knowing information like years of education, which also probably matters, your predictions are going to be less accurate.  
+
+Let's look at this example using the CPS1985 data.  Column 1 has a regression with age as the only $X$ variable, column 2 includes both age and education.
+
+```{r, warning = FALSE}
+reg6 <- lm(wage ~ age, data = CPS1985)
+reg7 <- lm(wage ~ education + age, data = CPS1985)
+stargazer(reg6, reg7, type = "text")
+```
+
+To see which has more accurate predictions, let's make a boxplot of the residuals of both models.  Recall that the residual is equal to $\epsilon_i=Y_1-\hat{y}$, and as $\hat{y}$ is our predicted value, bigger values of $\epsilon_i$ implies less accurate predictions.
+
+```{r}
+boxplot(resid(reg6), resid(reg7))
+```
+
+Close inspection of the two boxplots shows that the one of the right has less spread, and thus more predictive accuracy.  In fact, the standard deviations of the residuals from the two models are:
+
+```{r}
+sd(resid(reg6))
+sd(resid(reg7))
+```
+
+### Hypothesis Testing
+
+Hypothesis testing typically focuses on attempting to estimate the "true" relationship between one or more independent variables of interest and the dependent variable.  One might naturally wonder, why worry about other variables if you are only interested in one specific $\hat{\beta}$?  The answer lies in developing a bit deeper intuition of how the regression math works.  Ordinary least squares works by attributing the variation in the dependent variable Y to the variation in your independent variables.  Consider the model $Y=\alpha +\beta X + \epsilon$: it turns out that if you go through the calculus behind OLS, you will find that $\beta=\frac{cov(X,Y)}{var(Y)}$!
+
+The big concern here is that maybe your variable of interest ($X_1$) is correlated with (*multicollinear*)  another variable not in your model ($X_2$), so your estimate of $\hat{\beta}$ will include both the direct effect of $X_1$ ***and*** the indirect effect of $X_2$ to the extent $X_2$ is correlated with $X_1$.  THis is referred to as **omitted variable bias**.
+
 
 Let's do a basic example. Using the CPS1985 data, what happens when we include education AND age in the same regression.  
 

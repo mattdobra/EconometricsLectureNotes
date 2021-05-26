@@ -200,7 +200,7 @@ If a model is not *heteroskedastic* and doesn't have *autocorrelation*, it is sa
 
 This one is important and will probably create quite a few headaches for you when we get to dummy variable regression.  Let's introduce the concept quickly here though.  
 
-Ordinary least squares works by attributing the variation in the dependent variable Y to the variation in your independent variables.  If you have more than one independent variable, OLS needs to figure out which independent variable to attribute the variation to.  If you have two identical independent variables, R cannot distinguish one variable from the other when trying to apportion variation.  If you attempt to estimate a model that contains independent variables that are perfectly correlated, R will spit out an error message.  Typically, the way to proceed is to simply remove one of the offending variables.  
+As discussed in a previous notebook, ordinary least squares works by attributing the variation in the dependent variable Y to the variation in your independent variables.  If you have more than one independent variable, OLS needs to figure out which independent variable to attribute the variation to.  If you have two identical independent variables, R cannot distinguish one variable from the other when trying to apportion variation.  If you attempt to estimate a model that contains independent variables that are perfectly correlated, R will spit out an error message.  Typically, the way to proceed is to simply remove one of the offending variables.  
 
 For example:
 
@@ -210,7 +210,7 @@ summary(reg6a)
 ```
 R doesn't even let me run this.  So let's trick it into running a regression:
 
-```{r}
+```{r, error = TRUE}
 tempdata3 <- vote1
 tempdata3$shareAclone <- tempdata3$sharaA
 reg6b <- lm(voteA ~ shareA + shareAclone, data = tempdata3)
@@ -259,4 +259,33 @@ Compare the model with the multicollinearity on the right with the original mode
 
 Solving multicollinearity is pretty easy.  Just drop one of the collinear variables and you are golden.
 
+## Assumption 7: Normality of Error Terms
 
+The last assumption of the regression model is that your error terms are normally distributed.  Violating this assumption is not terrible, but if this assumption is violated it is often a sign that your models might be heavily influenced by outliers.  An easy way to look for this is the Q-Q plot. Let's look at a Q-Q plot of the voting regression:
+
+```{r}
+reg7a <- lm(voteA ~ shareA, data = vote1)
+qqnorm(reg7a$residuals)
+qqline(reg7a$residuals)
+```
+This Q-Q plot is pretty close to the line, indicating the residuals have pretty close to a normal distribution.  
+
+Let's look at the Q-Q plot from the CEO salary regressions from up above:
+
+```{r}
+qqnorm(reg1b$residuals)
+qqline(reg1b$residuals)
+```
+Not quite as close to the line, but still not bad.  
+
+The Q-Q plot (and the residual plot from assumption 5) can be obtained another way; if you plot a regression object, you get 4 diagnostic plots, two of which are the ones we've looked at.
+
+```{r}
+plot(reg7a)
+```
+
+# Wrapping Up
+
+We have examined the major assumptions that underlie the OLS regression model; keep these in the back of your mind as we progress through this semester because many of the advanced techniques we use are a result of one or more of these assumptions being violated.
+
+We will next turn to expanding the power of multiple regression modeling to include categorical independent variables and interaction effects.
