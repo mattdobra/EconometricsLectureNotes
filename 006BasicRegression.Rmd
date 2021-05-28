@@ -17,7 +17,7 @@ data(CPS1985)
 attach(CPS1985)
 ```
 
-# Prelude to Regression: The Correlation Test:
+# Prelude to Regression: The Correlation Test
 
 We saw how to calculate a correlation (Pearson's r) in a previous notebook; let's see the correlation between wage and years of education from the use the CPS1985 dataset using *cor()* function
 
@@ -231,7 +231,7 @@ tempdata %>%
     slice(1:10)
 ```
 
-Recall, wage is our dependent variable ($Y$), and education is our independent variable ($X$).  
+Recall, wage is our dependent variable ($Y$), and education is our independent variable ($X$).  The preds variable records the values of $\hat{Y}$ for each level of education $X_i$ and the resids variable records how far from the predicted wage $\hat{Y}$ each of the actual wagee $Y_i$ is.
 
 ### Look at the stars, look how they shine for you
 
@@ -251,6 +251,9 @@ The bottom panel shows useful information about the regression.  Observations is
 cor(wage, education)
 cor(wage, education)^2
 ```
+
+$R^2$ is often called the **coefficient of determination**, and, while not technically true, is easiest thought of as the percentage of the variation in $Y$ that you can explain with your independent variable $X$.  OUr $R^2=0.146$ then might be interpreted as saying that we can explain roughly 15% of the variation in wages with education, and therefore the other 85% of the variation in wages is left unexplained.  
+
 The F-test is a measure of the significance of the entire model--the null hypothesis is that every $\hat{\beta}$ that you estimated is equal to zero.  In a bivariate model, there is only $\hat{\beta}$ so the F-test of the model is basically the same thing as the t-test of $\hat{\beta}$.  
 
 ### Visualizing the Regression Line
@@ -263,9 +266,9 @@ CPS1985 %>% ggplot(aes(x = education, y = wage)) +
     geom_smooth(method = lm)
 ```
 
-# More Examples
+## More Examples of Bivariate Regression
 
-Now that we have the basics of regression down, let's grab a few more datasets from the wooldridge library and practice running and interpreting regressions.  
+Now that we have the basics of regression down, let's grab a few more datasets from the wooldridge library and practice running and interpreting regressions.  We will add more nuance to our interpretation as we go.
 
 ```{r}
 library(wooldridge)
@@ -275,7 +278,11 @@ data(vote1)
 data(meap01)
 ```
 
-Let's start with the airfare data and examine the relationship between the average one-way fare and the distance in miles of the routes.  Which variable should be dependent and which should be independent?
+Let's start with the airfare data and examine the relationship between the average one-way fare and the distance in miles of the routes.  Which variable should be dependent and which should be independent?  Statistics cannot prove causation, that is the role of (economic) theory. But when constructing our regressions, we should be thinking about economic logic and how it informs our thinking about causality. 
+
+```{r, fig.align = "center", echo=FALSE, fig.cap="XKCD: Correlation vs Causation", out.width = '100%'}
+knitr::include_graphics("images/correlation.png")
+```
 
 We can start by looking at a scatterplot:
 
@@ -301,17 +308,17 @@ The coefficient on the distance variable is significant at the 99% level and $R^
 fare_{i} = 103.261 + 0.076 distance_{i} 
 \end{equation}
 
-The $\beta$ implies that, if distance increases by 1, then fare increases by 0.076.  What are the units of measure here?  Distance is measured in miles, and fare is measured in \$Us. So this equation suggests that, on average, a one mile increase in the distance of a flight is associated with a \$0.076 increase in price.  Or, perhaps more intuitively, a 100 mile increase in distance is associated with a \$7.60 increase in price. 
+The $\beta$ implies that, if distance increases by 1, then fare increases by 0.076.  What are the units of measure here?  Distance is measured in miles, and fare is measured in \$US. So this equation suggests that, on average, a one mile increase in the distance of a flight is associated with a \$0.076 (7.6 cent) increase in price.  This isn't really an intuitive unit of measure--it may be more intuitive to think of a 100 mile increase in distance is associated with a \$7.60 increase in price. 
 
-Let's take this logic a little further. 
+Let's take this logic a little further and start to learn a bit about data transformation. 
 
 ```{r}
 airfaretemp <- airfare %>% 
     select(fare, dist) %>% 
     mutate(dist100 = dist/100)
-airfaretemp[c(1,5,9,13),]
+airfaretemp[c(1,5,9,13,17),]
 ```
-This bit of code creates a new dataset called airfaretemp and adds a new variable called dist100.  The variable dist100 is created by dividing the dist variable by 100, so really it's just measuring distance in hundreds of miles.  Now, let's estimate the regression between fare and dist100 and put it side by side with our original regression:
+This bit of code creates a new dataset called airfaretemp and adds a new variable called dist100.  The variable dist100 is created by dividing the dist variable by 100, so really it's just measuring distance in hundreds of miles.  I also had R spit out 5 lines of data just to confirm that $dist100=\frac{dist}{100}$. Now, let's estimate the regression between fare and dist100 and put it side by side with our original regression:
 
 ```{r, warning = FALSE}
 reg2a <- lm(fare ~ dist100, data = airfaretemp)
@@ -339,16 +346,134 @@ Let's look at the estimated value of $\hat{\alpha}$ of 0.663.  What does that me
 gpa_{i} = 0.663 + 0.002 sat_{i} 
 \end{equation}
 
-What would our expected gpa, $\hat{gpa}$, be for a student who earned a 0 on the SAT?  Anything multiplied by 0 is 0, so 0.663 is our estimated GPA for somebody who earned a 0 on the SAT.  But is it even possible to earn a 0 on the SAT? They give you 400 points just for showing up.  So looking at a 0 on the SAT is somewhat meaningless in this model, because it is impossible to even get.  The $\alpha$ in the equation is valuable for calculating predicted values, but in most cases, $\hat{\alpha}$ is not really what we are looking at in a regression model.  This brings us to the question of the significance of the $\hat{\alpha}$ term - the fact that we are pretty darn sure that the true value of $\alpha$ is not really 0 doesn't mean a whole lot here.
+What would our expected gpa, $\hat{gpa}$, be for a student who earned a 0 on the SAT?  Anything multiplied by 0 is 0, so 0.663 is our estimated GPA for somebody who earned a 0 on the SAT.  But is it even possible to earn a 0 on the SAT? They give you 400 points just for showing up.  So looking at a 0 on the SAT is somewhat meaningless in this model, because it is impossible to even get.  The $\alpha$ in the equation is valuable for calculating predicted values, but in most cases, $\hat{\alpha}$ is not really what we are looking at in a regression model.  This brings us to the question of the significance of the $\hat{\alpha}$ term - the fact that we are pretty darn sure that the true value of $\alpha$ is not really 0 doesn't really mean anything here.  
 
-Let's look at the meap01 data; this data has school level funding and test score data in the state of Michigan.  Does spending per student lead to better performing students?  We can look at the relationship between the variable math4, the percent of students receiving a satisfactory 4th grade math score, and exppp, expenditures per pupil. We start by looking at a plot of the data:
+Most of the time, the value of $\hat{\alpha}$ is not of terrible importance, though here is a counterexample: consider the CAPM model, a standard model in finance that you hopefully are at least aware of.  The CAPM model can be written as:
+
+\begin{equation}
+(R-R_f)=\alpha + \beta(R_m-R_f) 
+\end{equation}
+
+Where:
+
+* $R$ is the rate of return of an asset or portfolio
+* $R_f$ is the risk-free rate of return
+* $R_m$ is the market rate of return
+* $\beta$ is the relative volatility of the asset 
+* $\alpha$ is a risk-adjusted rate of return: the extent to which the asset under- or over-performed the market when taking into consideration the riskiness of the asset
+
+The CAPM model can be estimated using bivariate regression, and when people in finance talk about stock market betas, they are literally talking about $\beta$ from a CAPM regression!  In this model, you may in fact not only be interested to know the value of $\alpha$, but whether or not it is significantly different from zero is of importance as well!
+
+Getting the data for this will be a bit tricky; to follow along you will need to install the `tidyquant` and `quantmod` packages -- `install.packages("tidyquant")` should install both for you.  
+
+Let's get some data:
+
+```{r}
+library(quantmod)
+library(tidyquant)
+
+firstsolar <- tq_get('FSLR', # firstsolar Ticker
+               from = "2017-01-01",
+               to = "2018-01-01",
+               get = "stock.prices")
+
+vanguard500 <- tq_get('VFINX',  # vanguard500 Ticker
+               from = "2017-01-01",
+               to = "2018-01-01",
+               get = "stock.prices")
+
+coke <- tq_get('KO',  # Coke Ticker
+               from = "2017-01-01",
+               to = "2018-01-01",
+               get = "stock.prices")
+
+spx <- tq_get('^GSPC',  # S&P 500 Ticker
+               from = "2017-01-01",
+               to = "2018-01-01",
+               get = "stock.prices")
+
+tbill <- tq_get('^IRX', # 90 day T-bill
+               from = "2017-01-01",
+               to = "2018-01-01",
+               get = "stock.prices")
+
+# Convert stocks prices into daily rates of return
+
+firstsolar <- firstsolar %>% 
+    select(date, adjusted) %>% 
+    mutate(lnadjusted = log(adjusted)) %>% 
+    mutate(firstsolar = lnadjusted - lag(lnadjusted)) %>% 
+    select(date, firstsolar)
+
+vanguard500 <- vanguard500 %>% 
+    select(date, adjusted) %>% 
+    mutate(lnadjusted = log(adjusted)) %>% 
+    mutate(vanguard500 = lnadjusted - lag(lnadjusted)) %>% 
+    select(date, vanguard500)
+
+coke <- coke %>% 
+    select(date, adjusted) %>% 
+    mutate(lnadjusted = log(adjusted)) %>% 
+    mutate(coke = lnadjusted - lag(lnadjusted)) %>% 
+    select(date, coke)
+
+spx <- spx %>% 
+    select(date, adjusted) %>% 
+    mutate(lnadjusted = log(adjusted)) %>% 
+    mutate(spx = lnadjusted - lag(lnadjusted)) %>% 
+    select(date, spx)
+
+# t bill quotes are annualized, convert to daily
+
+tbill <- tbill %>% 
+    select(date, adjusted) %>% 
+    mutate(tbill = adjusted/360) %>% 
+    select(date, tbill)
+
+# Combine all the datasets
+
+returns <- spx 
+returns <- merge(returns, vanguard500, by = "date")
+returns <- merge(returns, firstsolar, by = "date")
+returns <- merge(returns, coke, by = "date")
+returns <- merge(returns, tbill, by = "date")
+returns <- drop_na(returns)
+```
+
+This downloads stock ticker data for First Solar (FSLR), Vanguard 500 (VFINX), Coca-Cola (KO), and S&P 500 (SPX), and the 3 month T-bill rate (which will be used for our risk-free rate).  Next, we estimate 3 CAPM regressions; one for Coke, one for First Solar, and one for the Vanguard 500, and display them in stargazer.
+
+```{r, warning = FALSE}
+capm1 <- lm(coke-tbill~spx-tbill, data = returns)
+capm2 <- lm(firstsolar-tbill~spx-tbill, data = returns)
+capm3 <- lm(vanguard500 - tbill ~ spx - tbill, data = returns)
+
+stargazer(capm1, capm2, capm3, type = "text")
+```
+This is a model that we actually care about the value of $\alpha$, which represents the risk-adjusted rate of return.  This suggests that both coke and the Vanguard 500 had significantly negative alphas.  In actuality, this is probably not true--the asset returns are calculated daily but the risk adjusted return used is a 3 month return--it would be better to have data with matching time horizons, but I digress.  
+
+It might also be of note here that the significance test of our estimated $\hat{\beta}$ values is relative to $\beta = 0$, but in this particular application of financial econometrics, you may not be interested in $\beta = 0$, you may be more interested in a hypothesis of whether or not the asset has equal volatility to the market ($\beta=1$), or is it more ($\beta>1$) or less ($\beta<1$) volatile than the market.
+
+The easiest way to get insight into this question is to use the `confint` command to generate a confidence interval for the regression model:
+
+```{r}
+confint(capm1) # Coke Model
+```
+We see that our confidence interval for our first regression (for Coca-Cola stock) states that we are 95% confident that $-0.005<\beta<.336$, indicating that we are fairly certain that Coca-Cola stock is far less volatile than the market as a whole.  Repeating this process for the First Solar stock and the Vanguard 500 fund:
+
+```{r}
+confint(capm2) # First Solar Model
+confint(capm3) # Vanguard Model
+```
+We see that the 95% confidence interval in the First Solar regression is $1.229<\beta<2.873$, indicating that the finding that this stock is more volatile than the market is statistically significant at the 95% level, and we see that, unsurprisingly, the Vanguard regression shows $0.981<\beta<1.020$ so $\hat{\beta}$ is not significantly different from 0. 
+
+Let's return to some simpler examples, starting with the meap01 data; this data has school level funding and test score data in the state of Michigan.  Does spending per student lead to better performing students?  We can look at the relationship between the variable math4, the percent of students receiving a satisfactory 4th grade math score, and exppp, expenditures per pupil. We start by looking at a plot of the data:
 
 ```{r, message = FALSE}
 meap01 %>% ggplot(aes(x = exppp, y = math4)) +
     geom_point() +
     geom_smooth(method = lm)
 ```
-That line is probably not sloping in the direction you might expect it to.  Let's estimate a regression:
+If you have read a paper or two in the economics of education literature, the slope of that line shouldn't come as a surprise to you.  Let's estimate a regression:
 
 ```{r, warning = FALSE}
 reg4 <- lm(math4 ~ exppp, data = meap01)
@@ -371,9 +496,9 @@ stargazer(reg5, type = "text")
 ```
 The $R^2$ is pretty huge $R^2 = 0.86$ and the $\hat{\beta}$ is positive and significant at the 99% level.  This is a tricky $\beta$ to interpret, because the variable shareA is defined as $\frac{Expenditures\:by\: Candiate\:A}{Expenditures\:by\:Candidate\:A + Expenditures\:by\:Candidate\:B}$. It can be done, but it is tricky.  In some cases, you are best off just interpreting the **signs** and **significance** of the coefficients, and not focusing so much on the actual **magnitude** of the coefficients.  
 
-## Multivariate Regression
+# Multivariate Regression
 
-### Predictive modeling and hypothesis testing
+## Predictive modeling and hypothesis testing
 
 We can extend this logic into having multiple independent variables.  Multivariate regression is a bit harder to wrap one's mind around, because it is really difficult to graph (adding variables adds dimensions to the graph, so we are no longer dealing with a 2d space), but the basics of interpreting the variables is the same as with bivariate modeling.  Why would we want to estimate a multivariate regression?  It depends on if your goal is ultimately prediction or hypothesis testing, but either way, nearly every application of regression is a multivariate application.
 
@@ -409,12 +534,13 @@ sd(resid(reg6))
 sd(resid(reg7))
 ```
 
-### Hypothesis Testing
+### Hypothesis testing
 
 Hypothesis testing typically focuses on attempting to estimate the "true" relationship between one or more independent variables of interest and the dependent variable.  One might naturally wonder, why worry about other variables if you are only interested in one specific $\hat{\beta}$?  The answer lies in developing a bit deeper intuition of how the regression math works.  Ordinary least squares works by attributing the variation in the dependent variable Y to the variation in your independent variables.  Consider the model $Y=\alpha +\beta X + \epsilon$: it turns out that if you go through the calculus behind OLS, you will find that $\beta=\frac{cov(X,Y)}{var(Y)}$!
 
-The big concern here is that maybe your variable of interest ($X_1$) is correlated with (*multicollinear*)  another variable not in your model ($X_2$), so your estimate of $\hat{\beta}$ will include both the direct effect of $X_1$ ***and*** the indirect effect of $X_2$ to the extent $X_2$ is correlated with $X_1$.  THis is referred to as **omitted variable bias**.
+The big concern here is that maybe your variable of interest ($X_1$) is correlated (*multicollinear*) with another variable not in your model ($X_2$), so your estimate of $\hat{\beta}$ will include both the direct effect of $X_1$ ***and*** the indirect effect of $X_2$ to the extent $X_2$ is correlated with $X_1$.  THis is referred to as **omitted variable bias**, which we will discuss more in the next notebook.  For the purposes of hypothesis testing, however, if what we really care about is the *true* effect of $X_1$ on $Y$, then we need to include any other variables ($X_2$, $X_3$, etc) that we also think might have an effect on $Y$ as well.
 
+## Example of multivariate regression
 
 Let's do a basic example. Using the CPS1985 data, what happens when we include education AND age in the same regression.  
 
@@ -424,14 +550,13 @@ reg7 <- lm(wage ~ education + age, data = CPS1985)
 stargazer(reg1, reg6, reg7, type = "text")
 ```
 
-The first column has the first regression in this notebook.  The second looks at the relationship between age and wage, and the third column looks at the model with both education and age.  Some important notes:
+The first column has the first regression in this notebook.  The second looks at the relationship between age and wage, and the third column looks at the model with both education and age. What observations might we make when we consider these regressions side by side by side?
 
-* The $R^2$ went up from column 1 to column 3.  By definion, adding variables cannot cause R^2 to fall.  
-* The $\hat{\beta}$ estimates in column 3 are not equal to those in column 1 or 2.  We will discuss *why* this happens later, but for now, suffice it to say that this is expected and probably a sign that column 3 is a better model the other 2.
-* We interpret the coefficients in the same way as before - column 3 implies that a 1 year increase in education is associated with a \$0.82 increase in hourly wage, and a 1 year increase in age is associated with a \$0.11 increase in wage.  
-* We can make predictions the same way as well.  If somebody has 16 years of education and is 34 years old, the model predicts that their wage will be $-\$5.53 + \$0.82(16) + \$0.11(34) = \$11.33$.
-
-Later in the class, we will turn to more nuanced discussino about differences between multivariate regression and bivariate regression.
+* The $\hat{\beta}$ estimates in column 3 are not equal to those in column 1 or 2.  As noted before, this is expected and is probably a sign that column 3 is a better model the other 2.
+* The $R^2$ in the multivariate model is larger than in either of the bivariate models.  This **by definition** has to be true.  Recall that our coefficient of determination $R^2$ roughly measures the percentage of variation in $Y$ that is explained by our dependent variable(s).  In other words, how much of the variation in $Y$ is explained by the *information* contained with in our $X$ variables. Adding more $X$ variables does not remove information, it only potentially adds information. If I added a variable that had no explanatory power to this model, I would expect $R^2$ to not move at all.
+* So why not just add a bunch of variables?  If $R^2$ can only go up, why not run a *kitchen sink* regression and include every variable I can think of?  This results in a problem called *overfitting*, and to avoid this we look to the adjusted $R^2$.  Adjusted $R^2$ is simply $R^2$ but adds a penalty for the number of independent variables included in the model.  Basically, the idea is to only add anothe variable to your model if that variable adds a significant amount of explanatory power. Say you estimate a multivariate model and are wondering if you should add another variable.  By definition, adding that variable will cause $R^2$ to go up.  But if adding that variable causes adjusted $R^2$ to fall, then you shouldn't do it, because adding the variable does not add enough information to the model to justify its inclusion.
+* We interpret the coefficients in the same way as in a bivariate model - column 3 implies that a 1 year increase in education is associated with a \$0.82 increase in hourly wage, and a 1 year increase in age is associated with a \$0.11 increase in wage.  It is always useful to keep in mind the economic notion of *ceteris parebus* here!
+* We can make predictions the same way as well.  If somebody has 16 years of education and is 34 years old, the model predicts that their wage will be $-\$5.53 + \$0.82(16) + \$0.11(34) = \$11.33$. Even if a variable is not significant, we need to include it in our math to make predictions.
 
 # Wrapping Up
 
