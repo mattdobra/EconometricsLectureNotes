@@ -22,9 +22,9 @@ data(smoke)
 data(vote1)
 ```
 
-# The Key Assumptions:
+# The Key Assumptions
 
-We will work through a series of assumptions upon which the OLS model is built, and what one might do if these assumptions do not hold. We will be encountering these assumptions throughout the semester!
+We will work through a series of assumptions upon which the OLS model is built, and what one might do if these assumptions do not hold. We will be encountering these assumptions throughout the rest of the semester!
 
 ## Assumption 1: The linear regression model is "linear in parameters"  
 
@@ -198,7 +198,7 @@ If a model is not *heteroskedastic* and doesn't have *autocorrelation*, it is sa
 
 ## Assumption 6: No indepentent variable is perfect linear function of other explanatory variables.
 
-This one is important and will probably create quite a few headaches for you when we get to dummy variable regression.  Let's introduce the concept quickly here though.  
+This one is important and will probably create quite a few headaches for you when we get to regression with categorical independent variables.  Let's introduce the concept quickly here though.  
 
 As discussed in a previous notebook, ordinary least squares works by attributing the variation in the dependent variable Y to the variation in your independent variables.  If you have more than one independent variable, OLS needs to figure out which independent variable to attribute the variation to.  If you have two identical independent variables, R cannot distinguish one variable from the other when trying to apportion variation.  If you attempt to estimate a model that contains independent variables that are perfectly correlated, R will spit out an error message.  Typically, the way to proceed is to simply remove one of the offending variables.  
 
@@ -208,15 +208,16 @@ For example:
 reg6a <- lm(voteA ~ shareA + shareA, data = vote1)
 summary(reg6a)
 ```
-R doesn't even let me run this.  So let's trick it into running a regression:
+R doesn't even let me run this--note that shareA is only included in the table once.  So let's trick it into running a regression with two identical variables:
 
 ```{r, error = TRUE}
 tempdata3 <- vote1
-tempdata3$shareAclone <- tempdata3$sharaA
+tempdata3$shareAclone <- tempdata3$shareA
 reg6b <- lm(voteA ~ shareA + shareAclone, data = tempdata3)
+summary(reg6b)
 
 ```
-Now R is mad at me.  
+Now R is quite displeased with us.  R simply dropped the shareAclone variable because it is impossible to run a regression with both shareA and shareAclone.
 
 Let's dig a little deeper into the *linear function* idea.  Let's say you are running a regression with 3 independent variables, $X_1$, $X_2$, and $X_3$.
 
@@ -228,9 +229,11 @@ This assumption basically states that:
 
 * $X_1$, $X_2$, and $X_3$ are all different variables.
 * $X_1$ is not simply a rescaled version of $X_2$ or $X_3$.  For example, If $X_1$ is height in inches, $X_2$ can't be height in centimeters because then $X_2 = 2.5X_1$
-* $X_1$ cannot be reached with a linear combination of  $X_2$ and $X_3$. So, if $X_1$ is income, $X_2$ is consumption, and $X_3$ is savings, so $X_1 = X_2 + X_3$, you can't include all 3 variables in your equation. This is true of more compicated linear combinations as well; if $X_1 = 23.1 + .2X_2 - 12.4X_3$, you couldn't run that either.  
+* $X_1$ cannot be reached with a linear combination of  $X_2$ and $X_3$. So, if $X_1$ is income, $X_2$ is consumption, and $X_3$ is savings, and thus $X_1 = X_2 + X_3$, you can't include all 3 variables in your equation. This is true of more compicated linear combinations as well; if $X_1 = 23.1 + .2X_2 - 12.4X_3$, you couldn't run that either.  
 
 Why this typically causes trouble for people, however, is that they are not usually aware that there is another variable hidden in the regression, $X_0$, which carries a value of 1 for every observation.  This is technically what the $\alpha$ is multiplied by.  This means that $X_1$, $X_2$, and $X_3$ **cannot** be constants, because otherwise you will violate this assumption. 
+
+Let's see what happens when we include another constant in the voting model:
 
 ```{r}
 tempdata3$six <- 6
@@ -255,7 +258,7 @@ You can see that shareA and shareArand are very highly correlated.  What happens
 reg6d <- lm(voteA ~ shareA + shareArand, data = tempdata4)
 stargazer(reg6a, reg6d, type = "text")
 ```
-Compare the model with the multicollinearity on the right with the original model on the left. The coefficients are huge in absolute value compared to column 1.  One of the coefficients has the wrong sign.  And if you add the two $\beta$s in column 2 dogether, you get a number very close to the coefficient on shareA in column 1.  
+Compare the model with the multicollinearity on the right with the original model on the left. The coefficients are huge in absolute value compared to column 1.  One of the coefficients has the wrong sign.  And if you add the two $\beta$s in column 2 dogether, you get a number very close to the coefficient on shareA in column 1.  This is typical of models with multicollinearity.
 
 Solving multicollinearity is pretty easy.  Just drop one of the collinear variables and you are golden.
 
