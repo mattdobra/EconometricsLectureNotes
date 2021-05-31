@@ -1,0 +1,257 @@
+---
+title: "Categorical Independent Variables"
+output: html_notebook
+---
+
+# Overview
+
+Thus far, we have only considered models in which the independent variables are numeric. Now, we expand our understanding of OLS regression to include categorical independent variables as well.  This notebook will discuss the use of dummy (indicator) variables and interaction effects in regression modelling.
+
+Let's begin by loading in some essential packages:
+
+```{r, warning=FALSE, message = FALSE}
+library(tidyverse)
+library(stargazer)
+library(wooldridge)
+library(AER)
+data(CPS1985)
+data(gpa2)
+
+
+data(wage1)
+data(ceosal1)
+data(nyse)
+data(smoke)
+data(vote1)
+```
+
+# Incorporating Categorical Independent Variables
+
+Categorical independent variables are incorporated into a regression model via a "dummy" variable.  A dummy variable is simply a variable that takes on a value of 1 if an observation is of a specific category, and 0 otherwise. For example, let's consider the CPS1985 data:
+
+```{r}
+head(CPS1985)
+```
+One of the variables in this data set, gender, is categorical and has two possible values (levels) in the data: male or female.
+
+```{r}
+summary(CPS1985$gender)
+```
+We can see that R considers this to be a factor variable:
+```{r}
+class(CPS1985$gender)
+```
+Let's transform this into a set of dummy variables.  Because our factor variable has 2 possible levels, we can make 2 different dummy variables out of it: a male dummy and a female dummy.  
+
+```{r}
+tempdata <- CPS1985
+tempdata$female <- ifelse(tempdata$gender == "female", 1, 0)
+tempdata$male <- ifelse(tempdata$gender == "male", 1, 0)
+```
+Let's verify that the dummies look right:
+
+```{r}
+tempdata[168:177, c(7, 12, 13)]
+```
+
+What if we wanted to look at a categorical variable with more than 2 levels, like occupation?
+
+```{r}
+summary(CPS1985$occupation)
+```
+This has 6 levels, so you would create 6 dummies.
+
+Let's conclude this short section with a couple things worth noting.  First, in R you do not need to create dummy variables; if you run a regression with a factor variable it will do all of this in the background.  However, we will use these created dummies a few times in this notebook to see the intuition of what is going on here. Second, if a categorical variable has $L$ levels, you would only need $L-1$ dummy variables.  We will discuss why as we go along, but the reason lies in the multicollinearity assumption we saw in the previous notebook.  
+
+Let's start by looking at some uses of dummy variables that we encountered earlier.
+
+# Anything ANOVA Does, Regression Does Better
+
+In some circles, those are fighting words!
+
+In an earlier notebook, we looked at some methods of inferential statistics with categorical independent variables, particularly the 2-sample t-test and ANOVA.  Recall, the two-sample t-test is when you have a numeric dependent variable that you think varies based on the value of a categorical independent variable that has two possible levels.  An ANOVA is the same thing, but for categorical independent variables with 2 or more levels or multiple categorical variables.
+
+```{r}
+t.test(wage ~ gender, data = CPS1985)
+```
+```{r}
+summary(aov(wage ~ gender, data = CPS1985))
+```
+Fun aside: there is a variant of the ANOVA called the **Welch One-Way Test** that actually gets the same results as a 2-sample t-test:
+
+```{r}
+oneway.test(wage ~ gender, data = CPS1985)
+```
+The same results can be arrived at via the following regression model:
+
+\begin{equation}
+Wage_{i} = \alpha + \beta female_i 
+\end{equation}
+
+```{r, warning = FALSE}
+reg1a <- lm(wage ~ female, data = tempdata)
+stargazer(reg1a, type = "text")
+```
+It may be presented slighly differently, but this result is **identical** to the ANOVA
+
+```{r}
+summary(aov(wage ~ gender, data = tempdata))
+```
+The F-value is identical, and if you examine the ANOVA table from the regression model, you see even more identical results:
+
+```{r}
+anova(reg1a)
+```
+So let's return to the actual regression results:
+
+```{r, warning = FALSE}
+stargazer(reg1a, type = "text")
+```
+What do these estimated coefficients mean?  The constant term is the average of the *omitted* group.  Since female is the included group, then male is the omitted group: the average male wage is \$9.995.  The $\hat{\beta}$ on female is the difference between females and males.  This result tells us that on average, females earn \$2.116 *less* than males in the data, and that this difference in wages is statistically significant.  
+
+We can visualize this result with a boxplot:
+
+```{r}
+tempdata %>% ggplot(aes(x = gender, y = wage)) +
+    geom_boxplot()
+
+```
+The regression results are telling us that the differences between these groups is in fact significant.  
+
+The regression results stored in the object reg1a were obtained using the dummy variables we created above.  We don't actually need to create dummy variables if the data are stored as factors.  Estimating a regression using the factor variable `gender` gives the same results.
+
+```{r, warning = FALSE}
+reg1b <- lm(wage ~ gender, data = tempdata)
+stargazer(reg1a, reg1b, type = "text")
+```
+What would have happened if we estimated a regression with the male dummies instead?
+
+```{r, warning = FALSE}
+reg1c <- lm(wage ~ male, data = tempdata)
+stargazer(reg1a, reg1c, type = "text")
+```
+As before, the constant tells us the mean of the omitted group (female), and the $\hat{\beta}$ on male is the difference between males and females.  It should not be a surprise that it is simply the negative inverse of the female dummy from reg1a!
+
+If you wanted to generate analogous results using female as the omitted group while using the factor variable gender, it's fairly simple using the `relevel()` function:
+
+```{r, warning = FALSE}
+reg1d <- lm(wage ~ relevel(gender, "female"), data = tempdata)
+stargazer(reg1c, reg1d, type = "text")
+
+```
+
+Thus far, we have excluded either the male or the female dummy.  Why not simply estimate a regression with both dummies in it?
+
+```{r, warning = FALSE}
+reg1e <- lm(wage ~ male + female, data = tempdata)
+stargazer(reg1e, type = "text")
+```
+R won't allow it, but why not?  Recall the discussion from the previous notebook regarding *multicollinearity*; we cannot have a variable that is a linear combination of other variables.  What would happen if you added the male dummy to the female dummy?
+
+```{r}
+tempdata$tempvar <- tempdata$male + tempdata$female
+tempdata[168:177, c(7, 12, 13, 14)]
+```
+It seems that you will get a column of 1s, and a column of 1s will be collinear with the variable that is added to the regression to calculate the constant term.  If you *really* wanted, you could run this regression with no constant term:
+
+```{r, warning = FALSE}
+reg1f <- lm(wage ~ female + male - 1, data = tempdata)
+stargazer(reg1f, type = "text")
+```
+But there is really no point in doing so.  You don't get any added information, and if your research question is about the difference between the male and female groups, this regression doesn't tell you that.  You know that $\hat{\beta_1} =7.879$ and $\hat{\beta_2}=9.995$ are significantly different from zero, but you don't know if the difference between $\hat{\beta_1}$ and $\hat{\beta_2}$ is significantly different.
+
+In this data, gender was a factor variable with 2 levels--what if we have a factor with more than 2 levels, say occupation? We can call a regression model in much the same way:
+
+```{r, warning = FALSE}
+reg2a <- lm(wage ~ occupation, data = tempdata)
+stargazer(reg2a, type = "text")
+```
+Here, constant is the average wage for the omitted group (worker), and the $\hat{\beta}$ estimates for the various occupations are interpreted relative to the omitted group; for example, people whose occupation is "management" make on average \$4.28 more than those whose occupation is "worker", and that difference is statistically significant.  While mathematically it does not matter which occupation is the omitted group, when doing hypothesis testing it is often most useful to omit the group with either the highest or lowest average.  
+
+```{r, warning = "FALSE"}
+reg2b <- lm(wage ~ relevel(occupation, "services"), data = tempdata)
+stargazer(reg2b, type = "text")
+```
+
+The releveled variables are a bit ugly in the table, this is because we releveled the factor variable inside the `lm` command.  We could also permanently relevel the variable with the relevel command and get cleaner looking regression tables:
+
+```{r, warning = FALSE}
+tempdata$occupation <- relevel(tempdata$occupation, "services")
+reg2c <- lm(wage ~ occupation, data = tempdata)
+stargazer(reg2c, type = "text")
+```
+
+
+Just like with ANOVA, we can look at interaction effects with categorical variables as well.  The syntax is the same as before:
+
+```{r, warning = FALSE}
+reg3a <- lm(wage ~ gender*married, data = tempdata)
+stargazer(reg3a, type = "text")
+```
+
+This result is a bit trickier to interpret, so let's start with examining the regression model being estimated:
+
+\begin{equation}
+Wage_i = \alpha + \beta_1 female_i +\beta_2 married_i +\beta_3 (female_i \: and \: married_i)
+\end{equation}
+
+Essentially, we have 4 groups
+
+* married female
+* unmarried female
+* married male
+* unmarried male
+
+For each group, the values of the dummies would look like:
+
+```{r, echo = FALSE}
+temptable <- matrix(c("category", "unmarried male", "married male", "unmarried female", "married female", "female", 0, 0, 1, 1, "married", 0, 1, 0, 1, "married and female", 0 ,0, 0, 1), nrow =5, ncol = 4)
+knitr::kable(temptable)
+```
+
+In this model, the omitted group would be the group of individuals who have a 0 for each of the values of $X$, so unmarried males are the omitted group, and the constant is their mean. To make predictions, you simply add in the value of $\beta$ for any of the categories a particular individual belongs to.  So how do we interpret the estimated coefficients?
+
+```{r, warning = FALSE}
+
+stargazer(reg3a, type = "text")
+```
+
+The ones on gender and marital status are fairly straigtforward; they state that women make on average 9 cents less than men (this result is not statistically significant), and that married people make on average \$2.52 more than unmarried people (this result is statistically significant). Interpreting the interaction term is a bit trickier, and how you do it depends on your hypothesis.  To illustrate this idea, the following two statements are both supported by the regression (and are actually saying the same thing!):
+
+* The effect of gender on wages is \$3.10 bigger for married women than it is for single women.
+* THe effect of being married on wages is \$3.10 bigger for men than it is for women.
+
+All of the results so far are identical to those we could have obtained using ANOVA; so why is regression superior to ANOVA?  Because ANOVA can only handle categorical independent variables, but regression can easily incorporate both into the same model!
+
+# Combining Numeric and Categorical Independent Variables
+
+Let's continue with the CPS1985 data and consider the following model:
+
+\begin{equation}
+Wage_i = \alpha + \beta_1 education_i +\beta_2 female_i
+\end{equation}
+
+Education is a numeric variable while female is categorical.  The resulting regression looks like:
+
+```{r, warning = FALSE}
+reg4a <- lm(wage ~ education + gender, data = CPS1985)
+stargazer(reg4a, type = "text")
+```
+
+In this model, $\hat{\beta_1}=0.751$ tells us that an additional year of education is correlated with an increase in wages of \$0.75 per hour.  This point estimate does not vary between genders.  The estimated $\hat{\beta_2} = -2.124$ suggests that, for a given amount of education, females are predicted to earn \$2.12 less than a male.  Essentially, this model is estimating 2 regression lines, one for males and another for females, but both lines have the same slope.  Graphically, this model looks something like:
+
+```{r}
+CPS1985 %>% ggplot(aes(x = education, y = wage, color = gender)) +
+    geom_point() +
+    scale_color_manual(values = c("darkgreen","orange")) +
+    geom_abline(slope = .751, intercept = .218, color = "darkgreen") +
+    geom_abline(slope = .751, intercept = .218-2.124, color = "orange") +
+    theme_classic()
+```
+This is an important tool, so let's work through a few more examples, starting with the gpa2 data in the wooldridge package.  Let's model GPA as a function of SAT score, an athlete dummy, and a gender dummy.  
+
+```{r, warning = FALSE}
+reg4b <- lm(colgpa ~ sat + athlete + female, data = gpa2)
+stargazer(reg4b, type = "text")
+```
+

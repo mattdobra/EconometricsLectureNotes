@@ -101,7 +101,7 @@ test1$estimate
 
 ## Two-Sample t-test
 
-The two-sample t-test is used to compare the means of two populations.  Typically, you are looking at a situation where you have a numeric dependent variable that you think varies based on the value of some categorical indepenent variable that has two possible levels.   
+The two-sample t-test is used to compare the means of two populations.  Typically, you are looking at a situation where you have a numeric dependent variable that you think varies based on the value of some categorical independent variable that has two possible levels.   
 
 Let's consider the CPS1985 data.  Perhaps you think that union members have higher incomes than non-union members.  Here, wage is your numeric dependent variable, union membership is your categorical independent variale with 2 levels (union member and non-union member), so a two-sample t-test is appropriate. First, let's start by looking at the data with a boxplot:
 
