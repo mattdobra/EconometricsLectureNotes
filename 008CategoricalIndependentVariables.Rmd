@@ -392,4 +392,6 @@ stargazer(reg4f, reg4g, type = "text")
 
 Let's look specifically at the interacted variables.  The function of an interaction effect is really to give an "it depends" sort of answer.  So if I were to ask the question, do minority faculty receive lower teaching evaluations, the answer to that question is that it depends on if whether or not that faculty is male or female.  A minority male would have a 1 for the minority dummy, but a 0 for the interaction dummy, so in aggregate he would be expected to receive a teaching evaluation, all else equal, that is .003 lower than the omitted group (here, that is non-minority males). However, a minority female would receive a 1 for the minority dummy, the female dummy, AND the interaction dummy, so she would be expected to receive a teaching evaluation (again all else equal) .414 lower than a non-minority male.  
 
-# Interacting Numeric and Categorical Independent Variables
+# Interactions with Numeric Variables
+
+In the final section of the notebook on dummy variables, we will look at interactions with numeric variables.  Interpreting these can be tricky.  

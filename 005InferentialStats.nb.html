@@ -253,10 +253,16 @@ data(affairs)</code></pre>
 <p>This data includes data on 1534 401k plans in the US. Let’s take a look at the distribution of the contribution match rate:</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-plot-begin -->
+<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAcgAAAEZCAMAAAAkHUVSAAAAA1BMVEX///+nxBvIAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAAk0lEQVR4nO3BAQ0AAADCoPdPbQ43oAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC4NvWwAAFkSMD2AAAAAElFTkSuQmCC" /></p>
+<!-- rnb-plot-end -->
 <!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuazQwMWsgJT4lIGdncGxvdCgpICtcbiAgICBnZW9tX2hpc3RvZ3JhbShhZXMoeCA9IG1yYXRlKSwgYmlud2lkdGggPSAuMilcbmBgYCJ9 -->
 <pre class="r"><code>k401k %&gt;% ggplot() +
     geom_histogram(aes(x = mrate), binwidth = .2)</code></pre>
 <!-- rnb-source-end -->
+<!-- rnb-plot-begin eyJoZWlnaHQiOjI4MS44Mjk0LCJ3aWR0aCI6NDU2LCJzaXplX2JlaGF2aW9yIjowLCJjb25kaXRpb25zIjpbXX0= -->
+<p><img src="data:image/png;base64,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" /></p>
+<!-- rnb-plot-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>Just eyeballing it, it looks like the median and modal match rate is probably 50%, but there are some very generous match rates out there as this data is pretty heavily right-skewed.</p>
@@ -267,6 +273,10 @@ data(affairs)</code></pre>
 <!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc3VtbWFyeShtcmF0ZSlcbmBgYCJ9 -->
 <pre class="r"><code>summary(mrate)</code></pre>
 <!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiICAgTWluLiAxc3QgUXUuICBNZWRpYW4gICAgTWVhbiAzcmQgUXUuICAgIE1heC4gXG4gMC4wMTAwICAwLjMwMDAgIDAuNDYwMCAgMC43MzE1ICAwLjgzMDAgIDQuOTEwMCBcbiJ9 -->
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+ 0.0100  0.3000  0.4600  0.7315  0.8300  4.9100 </code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>We should start by stating our Null and Alternative Hypotheses. In this case, our hypothesis is about our population mean (mu), so we have:</p>
@@ -280,6 +290,19 @@ data(affairs)</code></pre>
 <!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudC50ZXN0KG1yYXRlLCBhbHRlcm5hdGl2ZSA9IFwidHdvLnNpZGVkXCIsIG11ID0gLjc1LCBjb25mLmxldmVsID0gMC45NSlcbmBgYCJ9 -->
 <pre class="r"><code>t.test(mrate, alternative = &quot;two.sided&quot;, mu = .75, conf.level = 0.95)</code></pre>
 <!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG5cdE9uZSBTYW1wbGUgdC10ZXN0XG5cbmRhdGE6ICBtcmF0ZVxudCA9IC0wLjkyODg3LCBkZiA9IDE1MzMsIHAtdmFsdWUgPSAwLjM1MzFcbmFsdGVybmF0aXZlIGh5cG90aGVzaXM6IHRydWUgbWVhbiBpcyBub3QgZXF1YWwgdG8gMC43NVxuOTUgcGVyY2VudCBjb25maWRlbmNlIGludGVydmFsOlxuIDAuNjkyNDcxOCAwLjc3MDU1MzBcbnNhbXBsZSBlc3RpbWF0ZXM6XG5tZWFuIG9mIHggXG4wLjczMTUxMjQgXG4ifQ== -->
+<pre><code>
+    One Sample t-test
+
+data:  mrate
+t = -0.92887, df = 1533, p-value = 0.3531
+alternative hypothesis: true mean is not equal to 0.75
+95 percent confidence interval:
+ 0.6924718 0.7705530
+sample estimates:
+mean of x 
+0.7315124 </code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>Here, we se see the results of the t-test. We <strong>do not</strong> reject the null hypothesis. Why not?</p>
@@ -299,6 +322,19 @@ data(affairs)</code></pre>
 <!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudC50ZXN0KHByYXRlLCBhbHRlcm5hdGl2ZSA9IFwibGVzc1wiLCBtdSA9IDkwLCBjb25mLmxldmVsID0gLjk1KVxuYGBgIn0= -->
 <pre class="r"><code>t.test(prate, alternative = &quot;less&quot;, mu = 90, conf.level = .95)</code></pre>
 <!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG5cdE9uZSBTYW1wbGUgdC10ZXN0XG5cbmRhdGE6ICBwcmF0ZVxudCA9IC02LjE3ODYsIGRmID0gMTUzMywgcC12YWx1ZSA9IDQuMTM1ZS0xMFxuYWx0ZXJuYXRpdmUgaHlwb3RoZXNpczogdHJ1ZSBtZWFuIGlzIGxlc3MgdGhhbiA5MFxuOTUgcGVyY2VudCBjb25maWRlbmNlIGludGVydmFsOlxuICAgICAtSW5mIDg4LjA2NTM3XG5zYW1wbGUgZXN0aW1hdGVzOlxubWVhbiBvZiB4IFxuIDg3LjM2MjkxIFxuIn0= -->
+<pre><code>
+    One Sample t-test
+
+data:  prate
+t = -6.1786, df = 1533, p-value = 4.135e-10
+alternative hypothesis: true mean is less than 90
+95 percent confidence interval:
+     -Inf 88.06537
+sample estimates:
+mean of x 
+ 87.36291 </code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>This suggests that we reject the null hypothesis, that the mean in the data set of 87.3 is far enough below 90 to say that the true mean is probably below 90. We see this in the results because:</p>
@@ -323,15 +359,34 @@ data(affairs)</code></pre>
 <!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYXR0cmlidXRlcyh0ZXN0MSlcbmBgYCJ9 -->
 <pre class="r"><code>attributes(test1)</code></pre>
 <!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiJG5hbWVzXG4gWzFdIFwic3RhdGlzdGljXCIgICBcInBhcmFtZXRlclwiICAgXCJwLnZhbHVlXCIgICAgIFwiY29uZi5pbnRcIiAgIFxuIFs1XSBcImVzdGltYXRlXCIgICAgXCJudWxsLnZhbHVlXCIgIFwic3RkZXJyXCIgICAgICBcImFsdGVybmF0aXZlXCJcbiBbOV0gXCJtZXRob2RcIiAgICAgIFwiZGF0YS5uYW1lXCIgIFxuXG4kY2xhc3NcblsxXSBcImh0ZXN0XCJcbiJ9 -->
+<pre><code>$names
+ [1] &quot;statistic&quot;   &quot;parameter&quot;   &quot;p.value&quot;     &quot;conf.int&quot;   
+ [5] &quot;estimate&quot;    &quot;null.value&quot;  &quot;stderr&quot;      &quot;alternative&quot;
+ [9] &quot;method&quot;      &quot;data.name&quot;  
+
+$class
+[1] &quot;htest&quot;</code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>Now, you can refer to these elements using the $.</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudGVzdDEkc3RhdGlzdGljXG50ZXN0MSRlc3RpbWF0ZVxuYGBgIn0= -->
-<pre class="r"><code>test1$statistic
-test1$estimate</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudGVzdDEkc3RhdGlzdGljXG5gYGAifQ== -->
+<pre class="r"><code>test1$statistic</code></pre>
 <!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiICAgICAgICB0IFxuLTYuMTc4NjIzIFxuIn0= -->
+<pre><code>        t 
+-6.178623 </code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudGVzdDEkZXN0aW1hdGVcbmBgYCJ9 -->
+<pre class="r"><code>test1$estimate</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoibWVhbiBvZiB4IFxuIDg3LjM2MjkxIFxuIn0= -->
+<pre><code>mean of x 
+ 87.36291 </code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 </div>
@@ -341,10 +396,16 @@ test1$estimate</code></pre>
 <p>Let’s consider the CPS1985 data. Perhaps you think that union members have higher incomes than non-union members. Here, wage is your numeric dependent variable, union membership is your categorical independent variale with 2 levels (union member and non-union member), so a two-sample t-test is appropriate. First, let’s start by looking at the data with a boxplot:</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-plot-begin -->
+<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAcgAAAEZCAMAAAAkHUVSAAAAA1BMVEX///+nxBvIAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAAk0lEQVR4nO3BAQ0AAADCoPdPbQ43oAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC4NvWwAAFkSMD2AAAAAElFTkSuQmCC" /></p>
+<!-- rnb-plot-end -->
 <!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuQ1BTMTk4NSAlPiUgZ2dwbG90KGFlcyh5ID0gd2FnZSwgeCA9IHVuaW9uKSkgK1xuICAgIGdlb21fYm94cGxvdCgpXG5gYGAifQ== -->
 <pre class="r"><code>CPS1985 %&gt;% ggplot(aes(y = wage, x = union)) +
     geom_boxplot()</code></pre>
 <!-- rnb-source-end -->
+<!-- rnb-plot-begin eyJoZWlnaHQiOjI4MS44Mjk0LCJ3aWR0aCI6NDU2LCJzaXplX2JlaGF2aW9yIjowLCJjb25kaXRpb25zIjpbXX0= -->
+<p><img src="data:image/png;base64,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" /></p>
+<!-- rnb-plot-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>Again, we should start by stating our Null and Alternative Hypotheses. In this case, our hypothesis is about our population mean (mu), so we have:</p>
@@ -358,6 +419,19 @@ test1$estimate</code></pre>
 <!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudC50ZXN0KHdhZ2UgfiB1bmlvbiwgbXUgPSAwLCBhbHQgPSBcInR3by5zaWRlZFwiLCBjb25mLmxldmVsID0gLjk1KVxuYGBgIn0= -->
 <pre class="r"><code>t.test(wage ~ union, mu = 0, alt = &quot;two.sided&quot;, conf.level = .95)</code></pre>
 <!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG5cdFdlbGNoIFR3byBTYW1wbGUgdC10ZXN0XG5cbmRhdGE6ICB3YWdlIGJ5IHVuaW9uXG50ID0gLTQuMTAyNSwgZGYgPSAxNTMuNjksIHAtdmFsdWUgPSA2LjYwOGUtMDVcbmFsdGVybmF0aXZlIGh5cG90aGVzaXM6IHRydWUgZGlmZmVyZW5jZSBpbiBtZWFucyBpcyBub3QgZXF1YWwgdG8gMFxuOTUgcGVyY2VudCBjb25maWRlbmNlIGludGVydmFsOlxuIC0zLjIwNDQwNyAtMS4xMjEzODZcbnNhbXBsZSBlc3RpbWF0ZXM6XG4gbWVhbiBpbiBncm91cCBubyBtZWFuIGluIGdyb3VwIHllcyBcbiAgICAgICAgIDguNjM1MjI4ICAgICAgICAgMTAuNzk4MTI1IFxuIn0= -->
+<pre><code>
+    Welch Two Sample t-test
+
+data:  wage by union
+t = -4.1025, df = 153.69, p-value = 6.608e-05
+alternative hypothesis: true difference in means is not equal to 0
+95 percent confidence interval:
+ -3.204407 -1.121386
+sample estimates:
+ mean in group no mean in group yes 
+         8.635228         10.798125 </code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>The format of this code might be confusing. Why test mu=0? Technically, the test is that the difference of the means is equal to 0. But that being said, most of the arguments in this code are the default paramaters of the <em>t.test</em>. When you look at the help for <em>t.test</em> using <code>?t.test</code>, it tells you what the default values are. The options <code>mu = 0, alt = &quot;two.sided&quot;, conf.level = .95</code> are all defaults, so this code can be simplified as:</p>
@@ -366,6 +440,19 @@ test1$estimate</code></pre>
 <!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudC50ZXN0KHdhZ2UgfiB1bmlvbilcbmBgYCJ9 -->
 <pre class="r"><code>t.test(wage ~ union)</code></pre>
 <!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG5cdFdlbGNoIFR3byBTYW1wbGUgdC10ZXN0XG5cbmRhdGE6ICB3YWdlIGJ5IHVuaW9uXG50ID0gLTQuMTAyNSwgZGYgPSAxNTMuNjksIHAtdmFsdWUgPSA2LjYwOGUtMDVcbmFsdGVybmF0aXZlIGh5cG90aGVzaXM6IHRydWUgZGlmZmVyZW5jZSBpbiBtZWFucyBpcyBub3QgZXF1YWwgdG8gMFxuOTUgcGVyY2VudCBjb25maWRlbmNlIGludGVydmFsOlxuIC0zLjIwNDQwNyAtMS4xMjEzODZcbnNhbXBsZSBlc3RpbWF0ZXM6XG4gbWVhbiBpbiBncm91cCBubyBtZWFuIGluIGdyb3VwIHllcyBcbiAgICAgICAgIDguNjM1MjI4ICAgICAgICAgMTAuNzk4MTI1IFxuIn0= -->
+<pre><code>
+    Welch Two Sample t-test
+
+data:  wage by union
+t = -4.1025, df = 153.69, p-value = 6.608e-05
+alternative hypothesis: true difference in means is not equal to 0
+95 percent confidence interval:
+ -3.204407 -1.121386
+sample estimates:
+ mean in group no mean in group yes 
+         8.635228         10.798125 </code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>Note that I get the same results. So why bother typing all the options? When you are learning R, typing all the options is a good way to learn the syntax.</p>
@@ -383,6 +470,19 @@ test1$estimate</code></pre>
 <!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudC50ZXN0KHdhZ2VbZ2VuZGVyID09IFwibWFsZVwiICYgb2NjdXBhdGlvbiA9PSBcIndvcmtlclwiXSB+IHVuaW9uW2dlbmRlciA9PSBcIm1hbGVcIiAmIG9jY3VwYXRpb24gPT0gXCJ3b3JrZXJcIl0pXG5gYGAifQ== -->
 <pre class="r"><code>t.test(wage[gender == &quot;male&quot; &amp; occupation == &quot;worker&quot;] ~ union[gender == &quot;male&quot; &amp; occupation == &quot;worker&quot;])</code></pre>
 <!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG5cdFdlbGNoIFR3byBTYW1wbGUgdC10ZXN0XG5cbmRhdGE6ICB3YWdlW2dlbmRlciA9PSBcIm1hbGVcIiAmIG9jY3VwYXRpb24gPT0gXCJ3b3JrZXJcIl0gYnkgdW5pb25bZ2VuZGVyID09IFwibWFsZVwiICYgb2NjdXBhdGlvbiA9PSBcIndvcmtlclwiXVxudCA9IC00LjA3NSwgZGYgPSA3MC4xNjgsIHAtdmFsdWUgPSAwLjAwMDExOTVcbmFsdGVybmF0aXZlIGh5cG90aGVzaXM6IHRydWUgZGlmZmVyZW5jZSBpbiBtZWFucyBpcyBub3QgZXF1YWwgdG8gMFxuOTUgcGVyY2VudCBjb25maWRlbmNlIGludGVydmFsOlxuIC00LjgyODIwMiAtMS42NTUxNTlcbnNhbXBsZSBlc3RpbWF0ZXM6XG4gbWVhbiBpbiBncm91cCBubyBtZWFuIGluIGdyb3VwIHllcyBcbiAgICAgICAgICA4LjAzOTA3ICAgICAgICAgIDExLjI4MDc1IFxuIn0= -->
+<pre><code>
+    Welch Two Sample t-test
+
+data:  wage[gender == &quot;male&quot; &amp; occupation == &quot;worker&quot;] by union[gender == &quot;male&quot; &amp; occupation == &quot;worker&quot;]
+t = -4.075, df = 70.168, p-value = 0.0001195
+alternative hypothesis: true difference in means is not equal to 0
+95 percent confidence interval:
+ -4.828202 -1.655159
+sample estimates:
+ mean in group no mean in group yes 
+          8.03907          11.28075 </code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>Option 2: Enter the Tidyverse</p>
@@ -394,6 +494,19 @@ test1$estimate</code></pre>
     filter(occupation == &quot;worker&quot;) %&gt;% 
     t.test(wage ~ union, data = .)</code></pre>
 <!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG5cdFdlbGNoIFR3byBTYW1wbGUgdC10ZXN0XG5cbmRhdGE6ICB3YWdlIGJ5IHVuaW9uXG50ID0gLTQuMDc1LCBkZiA9IDcwLjE2OCwgcC12YWx1ZSA9IDAuMDAwMTE5NVxuYWx0ZXJuYXRpdmUgaHlwb3RoZXNpczogdHJ1ZSBkaWZmZXJlbmNlIGluIG1lYW5zIGlzIG5vdCBlcXVhbCB0byAwXG45NSBwZXJjZW50IGNvbmZpZGVuY2UgaW50ZXJ2YWw6XG4gLTQuODI4MjAyIC0xLjY1NTE1OVxuc2FtcGxlIGVzdGltYXRlczpcbiBtZWFuIGluIGdyb3VwIG5vIG1lYW4gaW4gZ3JvdXAgeWVzIFxuICAgICAgICAgIDguMDM5MDcgICAgICAgICAgMTEuMjgwNzUgXG4ifQ== -->
+<pre><code>
+    Welch Two Sample t-test
+
+data:  wage by union
+t = -4.075, df = 70.168, p-value = 0.0001195
+alternative hypothesis: true difference in means is not equal to 0
+95 percent confidence interval:
+ -4.828202 -1.655159
+sample estimates:
+ mean in group no mean in group yes 
+          8.03907          11.28075 </code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>Both get to the same place. In my opinion, the tidyverse option is more elegant and easier to follow. The only tricky bit in there is the <code>data = .</code> part, but that’s just being fancy. I could have done:</p>
@@ -405,6 +518,19 @@ test1$estimate</code></pre>
     filter(occupation == &quot;worker&quot;) 
 t.test(wage ~ union, data = tempdat)</code></pre>
 <!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG5cdFdlbGNoIFR3byBTYW1wbGUgdC10ZXN0XG5cbmRhdGE6ICB3YWdlIGJ5IHVuaW9uXG50ID0gLTQuMDc1LCBkZiA9IDcwLjE2OCwgcC12YWx1ZSA9IDAuMDAwMTE5NVxuYWx0ZXJuYXRpdmUgaHlwb3RoZXNpczogdHJ1ZSBkaWZmZXJlbmNlIGluIG1lYW5zIGlzIG5vdCBlcXVhbCB0byAwXG45NSBwZXJjZW50IGNvbmZpZGVuY2UgaW50ZXJ2YWw6XG4gLTQuODI4MjAyIC0xLjY1NTE1OVxuc2FtcGxlIGVzdGltYXRlczpcbiBtZWFuIGluIGdyb3VwIG5vIG1lYW4gaW4gZ3JvdXAgeWVzIFxuICAgICAgICAgIDguMDM5MDcgICAgICAgICAgMTEuMjgwNzUgXG4ifQ== -->
+<pre><code>
+    Welch Two Sample t-test
+
+data:  wage by union
+t = -4.075, df = 70.168, p-value = 0.0001195
+alternative hypothesis: true difference in means is not equal to 0
+95 percent confidence interval:
+ -4.828202 -1.655159
+sample estimates:
+ mean in group no mean in group yes 
+          8.03907          11.28075 </code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>Which gets us to the same spot.</p>
@@ -418,6 +544,9 @@ t.test(wage ~ union, data = tempdat)</code></pre>
 <pre class="r"><code>qqnorm(wage)
 qqline(wage)</code></pre>
 <!-- rnb-source-end -->
+<!-- rnb-plot-begin eyJoZWlnaHQiOjI4MS44Mjk0LCJ3aWR0aCI6NDU2LCJzaXplX2JlaGF2aW9yIjowLCJjb25kaXRpb25zIjpbXX0= -->
+<p><img src="data:image/png;base64,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" /></p>
+<!-- rnb-plot-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>If the data were normal, they would lie (more or less) on the straight line. Because this Q-Q plot looks curved, it’s a decent indicator that our data is skewed.</p>
@@ -429,15 +558,34 @@ qqline(wage)</code></pre>
 qqline(trees$Height)
 </code></pre>
 <!-- rnb-source-end -->
+<!-- rnb-plot-begin eyJoZWlnaHQiOjI4MS44Mjk0LCJ3aWR0aCI6NDU2LCJzaXplX2JlaGF2aW9yIjowLCJjb25kaXRpb25zIjpbXX0= -->
+<p><img src="data:image/png;base64,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" /></p>
+<!-- rnb-plot-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>There’s actually a test to see if data is normally distributed called the Shapiro-Wilk test:</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc2hhcGlyby50ZXN0KHdhZ2UpXG5zaGFwaXJvLnRlc3QodHJlZXMkSGVpZ2h0KVxuYGBgIn0= -->
-<pre class="r"><code>shapiro.test(wage)
-shapiro.test(trees$Height)</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc2hhcGlyby50ZXN0KHdhZ2UpXG5gYGAifQ== -->
+<pre class="r"><code>shapiro.test(wage)</code></pre>
 <!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG5cdFNoYXBpcm8tV2lsayBub3JtYWxpdHkgdGVzdFxuXG5kYXRhOiAgd2FnZVxuVyA9IDAuODY3MywgcC12YWx1ZSA8IDIuMmUtMTZcbiJ9 -->
+<pre><code>
+    Shapiro-Wilk normality test
+
+data:  wage
+W = 0.8673, p-value &lt; 2.2e-16</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc2hhcGlyby50ZXN0KHRyZWVzJEhlaWdodClcbmBgYCJ9 -->
+<pre class="r"><code>shapiro.test(trees$Height)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG5cdFNoYXBpcm8tV2lsayBub3JtYWxpdHkgdGVzdFxuXG5kYXRhOiAgdHJlZXMkSGVpZ2h0XG5XID0gMC45NjU0NSwgcC12YWx1ZSA9IDAuNDAzNFxuIn0= -->
+<pre><code>
+    Shapiro-Wilk normality test
+
+data:  trees$Height
+W = 0.96545, p-value = 0.4034</code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>Which confirms that wage is non-normal and tree height is normal.</p>
@@ -447,6 +595,14 @@ shapiro.test(trees$Height)</code></pre>
 <!-- rnb-source-begin eyJkYXRhIjoiYGBgclxud2lsY294LnRlc3Qod2FnZSB+IHVuaW9uKVxuYGBgIn0= -->
 <pre class="r"><code>wilcox.test(wage ~ union)</code></pre>
 <!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG5cdFdpbGNveG9uIHJhbmsgc3VtIHRlc3Qgd2l0aCBjb250aW51aXR5IGNvcnJlY3Rpb25cblxuZGF0YTogIHdhZ2UgYnkgdW5pb25cblcgPSAxMzc4MCwgcC12YWx1ZSA9IDEuMjE0ZS0wN1xuYWx0ZXJuYXRpdmUgaHlwb3RoZXNpczogdHJ1ZSBsb2NhdGlvbiBzaGlmdCBpcyBub3QgZXF1YWwgdG8gMFxuIn0= -->
+<pre><code>
+    Wilcoxon rank sum test with continuity correction
+
+data:  wage by union
+W = 13780, p-value = 1.214e-07
+alternative hypothesis: true location shift is not equal to 0</code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>Here, the p-value is 1.2e-07, which is way less than .05, so again we reject the null hypothesis of these two groups being the same.</p>
@@ -459,6 +615,13 @@ shapiro.test(trees$Height)</code></pre>
 <!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc2xlZXBcbmBgYCJ9 -->
 <pre class="r"><code>sleep</code></pre>
 <!-- rnb-source-end -->
+<!-- rnb-frame-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbImRhdGEuZnJhbWUiXSwibnJvdyI6MjAsIm5jb2wiOjMsInN1bW1hcnkiOnsiRGVzY3JpcHRpb24iOlsiZGZbLDNdIFsyMCB4IDNdIl19fSwicmRmIjoiSDRzSUFBQUFBQUFBQm8xU1MwL0NRQkJlMmdKYUF6NGcvZ3VKdkh5Y0lKR0xOK09KbTFuYkJZbTF4ZTJpSFAwYitrODhjZmFQbUhneEdrOWUwTm51REtHTkptd3ltVy9lajUzelhyL3A5bDNHbU0wY2xtZDJIaUFybkp6VkcrMEdZNDRGVWc0czY1cFB3YXVTdURKV0JxcDJYZ2ZKbTMwLzZ2YzBlMEgrMVV6ZTdObkkzUTBqZDB0Rzdyd1p6dkIxa1hmbUpoL1pPNS9JTWM4aTN6YnlYWXpEK3QwZEUwLzFvTldTN2pNWllqV3lWcVBVWWdxQnVCTkJET2dkUGNpeTZZdUJrRkw0RjdHU28zQ1lNVHVYUEJhb0syRURXMEJ6MUdYVGxiM29ac3c5ZFRFS1ZTeHVzWldmVElZU1p0QmZaQzlXKzVIbTZFTXhLS2ZHeW5zQmoyTnNhVEhyQU9wSDByaW50bXZoWlRnNlZIc0NGWUhXZ0hTa3U3cWZic1A2d2NvdW5WK2RRSU5BazBDTFFKdkFBWUZEQWtjRWpoRlk5WDFUcWtDbC9od3l2Wk9RM3dqYWlVMUtNVldTa3pDVTBXUk1KVTU3bVFUck1ycXZVUks5UHV2QmJMLzZUeSt1enhXdkRTU0UvTkZQTVJxclVSUkNNcXVDKzF3T3pzbU1ZbXNTNnVMK25uYzFDYS8zMnEybGoyRkw5MUJkd3JhcFdhVE84clFsRVE1SG9hQzVBMzRwQWpwVW1ESVpzamFHczFjMENtamptb29VSnovWGl3TFNtSU9jL3dMK05ZRURrZ1FBQUE9PSJ9 -->
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":["extra"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["group"],"name":[2],"type":["fctr"],"align":["left"]},{"label":["ID"],"name":[3],"type":["fctr"],"align":["left"]}],"data":[{"1":"0.7","2":"1","3":"1"},{"1":"-1.6","2":"1","3":"2"},{"1":"-0.2","2":"1","3":"3"},{"1":"-1.2","2":"1","3":"4"},{"1":"-0.1","2":"1","3":"5"},{"1":"3.4","2":"1","3":"6"},{"1":"3.7","2":"1","3":"7"},{"1":"0.8","2":"1","3":"8"},{"1":"0.0","2":"1","3":"9"},{"1":"2.0","2":"1","3":"10"},{"1":"1.9","2":"2","3":"1"},{"1":"0.8","2":"2","3":"2"},{"1":"1.1","2":"2","3":"3"},{"1":"0.1","2":"2","3":"4"},{"1":"-0.1","2":"2","3":"5"},{"1":"4.4","2":"2","3":"6"},{"1":"5.5","2":"2","3":"7"},{"1":"1.6","2":"2","3":"8"},{"1":"4.6","2":"2","3":"9"},{"1":"3.4","2":"2","3":"10"}],"options":{"columns":{"min":{},"max":[10],"total":[3]},"rows":{"min":[10],"max":[10],"total":[20]},"pages":{}}}
+  </script>
+</div>
+<!-- rnb-frame-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>Because the same group of people recieved both drugs, we can conduct a paired t-test here. This looks a lot like the 2 sample t-test we did earlier, witn one extra argument:</p>
@@ -467,6 +630,19 @@ shapiro.test(trees$Height)</code></pre>
 <!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudC50ZXN0KGV4dHJhIH4gZ3JvdXAsIGRhdGEgPSBzbGVlcCwgcGFpcmVkID1UUlVFKVxuYGBgIn0= -->
 <pre class="r"><code>t.test(extra ~ group, data = sleep, paired =TRUE)</code></pre>
 <!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG5cdFBhaXJlZCB0LXRlc3RcblxuZGF0YTogIGV4dHJhIGJ5IGdyb3VwXG50ID0gLTQuMDYyMSwgZGYgPSA5LCBwLXZhbHVlID0gMC4wMDI4MzNcbmFsdGVybmF0aXZlIGh5cG90aGVzaXM6IHRydWUgZGlmZmVyZW5jZSBpbiBtZWFucyBpcyBub3QgZXF1YWwgdG8gMFxuOTUgcGVyY2VudCBjb25maWRlbmNlIGludGVydmFsOlxuIC0yLjQ1OTg4NTggLTAuNzAwMTE0Mlxuc2FtcGxlIGVzdGltYXRlczpcbm1lYW4gb2YgdGhlIGRpZmZlcmVuY2VzIFxuICAgICAgICAgICAgICAgICAgLTEuNTggXG4ifQ== -->
+<pre><code>
+    Paired t-test
+
+data:  extra by group
+t = -4.0621, df = 9, p-value = 0.002833
+alternative hypothesis: true difference in means is not equal to 0
+95 percent confidence interval:
+ -2.4598858 -0.7001142
+sample estimates:
+mean of the differences 
+                  -1.58 </code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 </div>
@@ -483,6 +659,9 @@ shapiro.test(trees$Height)</code></pre>
     geom_boxplot() +
     stat_boxplot(geom = &quot;errorbar&quot;, width = 0.5)</code></pre>
 <!-- rnb-source-end -->
+<!-- rnb-plot-begin eyJoZWlnaHQiOjI4MS44Mjk0LCJ3aWR0aCI6NDU2LCJzaXplX2JlaGF2aW9yIjowLCJjb25kaXRpb25zIjpbXX0= -->
+<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAcgAAAEZCAMAAAAkHUVSAAAA9lBMVEUAAAAAADoAAGYAOpAAZrYzMzM6AAA6ADo6AGY6kNtNTU1NTW5NTY5Nbo5NbqtNjqtNjshmAABmADpmtrZmtv9uTU1uTW5uTY5ubk1ubo5ubqtujo5ujshuq6tuq8huq+SOTU2OTW6OTY6Obk2Obm6ObquOjk2Oq6uOyP+QOgCQkGaQtpCQ27aQ2/+rbk2rbm6rjk2rq46ryKur5OSr5P+2ZgC22/+2///Ijk3Ijm7I5KvI/8jI/+TI///bkDrb/7bb///kq27k5Kvk/8jk/+Tk///r6+v/tmb/yI7/25D/27b/29v/5Kv//7b//8j//9v//+T////0sFfZAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAL00lEQVR4nO2dC3vbthmF5cRyZzrN7M2OV/WiNOk2eVvstZUb9WI36qbIXmVb+P9/ZgDBmywCBAiQBD+f88RWJAEHH/gSF4owNGAQCQ26DgDyI4AkIoAkIoAkIoAkIoAkIkuQH81kmo6wQVsBAGTDBgBJxAAgiRgAJBEDgCRiAJBEDACSiEHgIKG2NBwOrdKjRTZk4Jh/KGRUDkA2awCQRAwAkoiBa35DjgDZtEHgs1a/QVA2AEgiBgBJxAAgiRgAJBEDgCRiAJBEDACSiAFAEjEASCIGAEnEACCJGAAkEQOAJGIAkEQMggK5Pp8wdv86erkAyFADMAI5jyYxzPkhQIYagAnI1WdvJ+z+zRVbnV4BZKABGIBcX3zPW+NqtGD3X09ZvNLSbqkl1KI0IOdj0a3evExBCvk9mygbhNMieVNcb7RIgAwxgGqQ80hojDEy7AAMulZ5+bE+H2PWGnAAxiBxHRl2AEYgt+U3CMoGAEnEACCJGAAkEQOAJGIAkEQMAJKIAUASMQBIIgYAScQAIIkYACQRA4AkYgCQRAwAkogBQBIxAEgiBgBJxCBwkFCoQotsyCDwFuk3CMoGAEnEACCJGAAkEQOAJGIAkEQMAJKIAUASMQBIIgYAScQAIIkYACQRA4AkYgCQRAwAkogBQBIxAEgiBgBJxAAgiRgEBPImil5cYZ+dwAOoBin2LZsfYr/WwAMw61o5TOxFF3YAZiB5U8R+rf2Qdgflk4Mp9msNPAATkEwQxH6tYQdgBpLNJhgjww6gGmTSp2K/1rADMGiR8yjiYySuI8MOwLBrfSy/QVA2AEgiBgBJxAAgiRgAJBEDgCRiAJBEDACSiAFAEjEASCIGAEnEgATI4XBYvwIyPMf83RtY5x9USFVOKcjrweD4+vkHR5BiKYEjyc45dN8iVeQel1MG8vL5r0fHD2e7ANlvkHdHx/wfWz57D5AAKYQxsuOu9Vp0rXdH+45dawCHsftTqVOQbCmmRxqOfQEZQOfeLcjOVDX3trQbEliDa1nnQD8QMDwdVXriLfLuKG0AygsQwyC6BvnUx8hrMV/lkx31paRhEJ2D7HyU7vryQzzwyw/lFYhhEAAJkFIA6aVrZcrPWw2DAMgQriOP2fXOu3KOANleAM1eRxoGAZAAKQWQTiBv9+KrSOcPzQGyW5APZ/wK8jiZu7qAdL8cB0jXy4/LfbbULBEw8vbwARlAuoK83g3ixjJAui31iCnqFu0YeQOkjwBcQPJBkl0OlBeRpiAxRvoIAJcffiLoM8i7o4FmwgqQ7Qbg1rVWXEYCZHsBOHetD2cBrKIDSFeQy4G2ezXyxqzVRwCOXWvh0mN1EkWTOvvsAKSPANxvLCcSG9CtXk1r7NcKkD4CcOpaLwst8kbQq7UXHUD6CMBxjLzdK46RG7tDGq8V9bCqNJDlthaqWplrXSP3da2X2axVbChYY79WtMiPHmrg4X5k+jcD96/HjNXYrxUgP3YL8u5o4+8+VicTQRNjZC112iI3JDmyOvu14gOBkEDOI6FJN/u1AiTufniK4GmCrLkjhXMt1AJILy2yrVqoBZAA6ccAIP0YACRA+jEASD8GAAmQfgwA0o8BQNIA2f1mEADpwyCA7VkA0odBn0AOFRqo3tisGEBWqD2QikOtJPOUQPZpjARIrfozawVIrQCyVZDK8Vw50pseHoBsF6SqHFVYpiCtx8jK1Yx2dsGDNJSpqz1IQ9/uV9Ya57cH6VaelOfTsakWGcA6vsBbpOdaACRAVhh3viATILVhtTdrBUibWgAkQFYIIPXyXAuABMgKAaRenmvhDaT3D2YA0qoWzbXIzj+2B0htWAAJkJYCSJtaACRAeoqgMQOA1IYFkABpKYC0qQVAAqSnCBozAEhtWOGBdFwo3s5K83ijJN32LNZBGOZ3X0XXHkjLU3HrXLQ+BPYgb6IXV0y7zadtLQCy5Bi4GVQmZ2x28B1vkdotzJxBqsruUddqWYMOQMquVbvNpzVIw/yuyyE9LPN0XdFpvJqxjeWQAqR2m0+0yD62SCHHIACyO5DEx0jn6VZvQGq3+SQA0jWC3oDUX0daBgGQ3YDclmMQAAmQ5QZKAaRejkEAJECWGygFkHo5BuEdZGNXDwCpdW3tMHZ/JjwxkN03KIDUHYbW7kIF0KQt8wNkqSiAtD2GIXatSj0hkI6HoLK8cjnWAiABslwAWVleuRxrAZAAWS6ArCyvXI61oAjSbdLpfAiq4lXI8DD0/wY/QFodBddahADSMj+61lIR+IjO8RBUlmck66Ngauy6qrS9hbGelqXWD6Becr9nk7tBuDc0A2+RfoNwNwDIyvLK5TcIdwOArCyvXH6DKGSouXFVACBtpwm0QW6FZ5hOebQ6/7u8tjolIiCbiwAgLYLQhOdqAJAAWc+gqy8OAciGDdqqAUA+Su+7QfUTpPdtb7tvka4R9BPklnvt8H0ZACRA+okAIP0YACRA+okAIGsZeJ90AqR0rx0+GQOAJGIAkEQMAJKIgXX+mqO8OUjdPjveakHPoK0AjEFq92t1DIKyQXAgtXvROQZB2SA4kNr9WqFgVAlSu1+r49lE2SDgFgmQIQZgDBJjZNgBGIPU7tfqGARlg+BA4joy7ADMQdaR8+y2/wZtBwCQDRkAJBEDgCRiQAMk1LoAkogAkogAkogAkogaArm+mFYnYoUPccue69+1czbW+jz66jz6vG521+JrFxIyyKrUjYgX4qGcPoIUa0FWr6bixuX9a/FlvqvP3r745WK6Pi++UFqv+G2ZRvz/YLo6/VsUcbvRv+MH8WV54mW2Okmfb+smSvPLosQnw+uL77K8iX+STKM0Gq6DrezVSgrIQ1UXvL74NorG/I1xll7WOHkmsn76TVp2MXVSyzj1ZmQeWuR8zOa8dP4wGwucq5OJaJH8iXhhfsjEC+US9ZVpxOlw8/K3k8RBPpxeyZf/8/VU2VLEbTZxdyYrSnQGq9Fvad6FfCNNptEsLVT+28heraSA+zxUdcHrcxHpoUiYppc1Tp7FofCTKD00WeqslmmouacHkKvR4sdvD/nxEzHzUOIvK7z4izh/eFz8RXU/k9QkSxN/86g8DNkBzQ9UOUh507tgI06scZY3eSO/N65SHn2x6CR79VEoFCDj0BQszjXxk8b+Jq1x8kwUKI6ndCikLtTy8YntAeT9m5/f/HT6s/TnJcpvnfzyrwsW91MHUz3IJM1owcpAjuQdtJnon8p9eG8ke8C0qNXov3EQMm/yRpJMozz6YtFp9mqlBaShagreAJlVLa6efDZaxCClQxFkoZb+QbLZ37/g/fgh22iRU94wklNZD7KYRtEi719PtJMQ0SnlNnyAHC3yvHlzusnvq5ZI0SJNWmMxjixUTcEbaCaFGifP0hYpHYqp81o2AfImkqNkPsqIgkXZs+2+fEPpePByEU+ZTn96DLLw8qvyli0OkvgpFDXn8WR5r+QbaTKNSsbILLvBQZAFrPJQ1QUX0BTSpxV/NS2MkeLQFNpvXssmQMZz1sLMUYJM+s2DqaZFrs9fJGnSWesjkMnUcR5Fn76dlPvMonzWK4sS8eR5E/+Z2ay10BNsZK9WUkAeqrrgIpo8fTy+x89E1j9epGUXU+e1jE81v7NWqAmpz/5yAWSAWp8bTrAKAkgiAkgiAkgiAkgiAkiu//3Abj9513UUbgJI1n+IQgAJkOHq4Www2N1+jIHxX7ef/GMweP6B/39vMBjsi9/74r0s2T/5K8ddV8JSFEE+nO1mP3dHx9ljBnLv2fv0NXb97L14nf+kWW73OGT+ctfVsBNFkEsBYSkBCW08xiCP48ffP7CkhcYgs2zJ2x3WoIZIgoy7zYQMS8CyYtfKH+PmuORd604GMsmWJuuyCvZ6yiDvjnbeFVskQAamJedT3bX+4X1Mbpm3yGI2gAxAxcnO5sRnnz/uZJMdQe52b+ddMhHKJjsAGYoUlx/x5caf/yQvP8TzSz5C/otTvBzsblx+AGQ/1DtIJgJIIgJIInqKIEkKIIkIIIkIIIkIIIkIIIkIIIno/6m64d55B78TAAAAAElFTkSuQmCC" /></p>
+<!-- rnb-plot-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>The Null hypothesis in ANOVA is that ALL of the means are the same. The alternative is that at least one is different from at least one other. It certainly looks like these means are different, but we can use ANOVA to test this.</p>
@@ -491,6 +670,18 @@ shapiro.test(trees$Height)</code></pre>
 <!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYW92KHdhZ2UgfiBvY2N1cGF0aW9uKVxuYGBgIn0= -->
 <pre class="r"><code>aov(wage ~ occupation)</code></pre>
 <!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiQ2FsbDpcbiAgIGFvdihmb3JtdWxhID0gd2FnZSB+IG9jY3VwYXRpb24pXG5cblRlcm1zOlxuICAgICAgICAgICAgICAgIG9jY3VwYXRpb24gUmVzaWR1YWxzXG5TdW0gb2YgU3F1YXJlcyAgICAyNTM3LjY5NyAxMTUzOS4wMDFcbkRlZy4gb2YgRnJlZWRvbSAgICAgICAgICA1ICAgICAgIDUyOFxuXG5SZXNpZHVhbCBzdGFuZGFyZCBlcnJvcjogNC42NzQ4NDRcbkVzdGltYXRlZCBlZmZlY3RzIG1heSBiZSB1bmJhbGFuY2VkXG4ifQ== -->
+<pre><code>Call:
+   aov(formula = wage ~ occupation)
+
+Terms:
+                occupation Residuals
+Sum of Squares    2537.697 11539.001
+Deg. of Freedom          5       528
+
+Residual standard error: 4.674844
+Estimated effects may be unbalanced</code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>This test result doesn’t actually tell us much. We need to save this test result as an object and use the <em>summary()</em> command on that object.</p>
@@ -500,6 +691,13 @@ shapiro.test(trees$Height)</code></pre>
 <pre class="r"><code>anova1 &lt;- aov(wage ~ occupation)
 summary(anova1)</code></pre>
 <!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiICAgICAgICAgICAgIERmIFN1bSBTcSBNZWFuIFNxIEYgdmFsdWUgUHIoPkYpICAgIFxub2NjdXBhdGlvbiAgICA1ICAgMjUzOCAgIDUwNy41ICAgMjMuMjIgPDJlLTE2ICoqKlxuUmVzaWR1YWxzICAgNTI4ICAxMTUzOSAgICAyMS45ICAgICAgICAgICAgICAgICAgIFxuLS0tXG5TaWduaWYuIGNvZGVzOiAgMCDigJgqKirigJkgMC4wMDEg4oCYKirigJkgMC4wMSDigJgq4oCZIDAuMDUg4oCYLuKAmSAwLjEg4oCYIOKAmSAxXG4ifQ== -->
+<pre><code>             Df Sum Sq Mean Sq F value Pr(&gt;F)    
+occupation    5   2538   507.5   23.22 &lt;2e-16 ***
+Residuals   528  11539    21.9                   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1</code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>This table tells us whether or not we reject the null hypothesis…the Pr(&gt;F) is our p-value, and that is way less than 0.05. so we reject the null hypothesis that all the group means are the same and accept the alternative hypothesis that at least one is different from the rest.</p>
@@ -509,6 +707,30 @@ summary(anova1)</code></pre>
 <!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuVHVrZXlIU0QoYW5vdmExKVxuYGBgIn0= -->
 <pre class="r"><code>TukeyHSD(anova1)</code></pre>
 <!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiICBUdWtleSBtdWx0aXBsZSBjb21wYXJpc29ucyBvZiBtZWFuc1xuICAgIDk1JSBmYW1pbHktd2lzZSBjb25maWRlbmNlIGxldmVsXG5cbkZpdDogYW92KGZvcm11bGEgPSB3YWdlIH4gb2NjdXBhdGlvbilcblxuJG9jY3VwYXRpb25cbiAgICAgICAgICAgICAgICAgICAgICAgICAgIGRpZmYgICAgICAgbHdyICAgICAgICAgdXByICAgICBwIGFkalxudGVjaG5pY2FsLXdvcmtlciAgICAgIDMuNTIwOTU0MiAgMS44MzMxMjIgIDUuMjA4Nzg2NzQgMC4wMDAwMDAxXG5zZXJ2aWNlcy13b3JrZXIgICAgICAtMS44ODkwMDQ1IC0zLjcwNTYyMyAtMC4wNzIzODYzMSAwLjAzNjEyODhcbm9mZmljZS13b3JrZXIgICAgICAgIC0xLjAwMzg5NzAgLTIuNzMyODMwICAwLjcyNTAzNTg4IDAuNTU4NDc0OVxuc2FsZXMtd29ya2VyICAgICAgICAgLTAuODMzODQyOCAtMy4yNTI3MTQgIDEuNTg1MDI4ODIgMC45MjIzNDk2XG5tYW5hZ2VtZW50LXdvcmtlciAgICAgNC4yNzc1MjU2ICAyLjE4MDY5NCAgNi4zNzQzNTc2MiAwLjAwMDAwMDFcbnNlcnZpY2VzLXRlY2huaWNhbCAgIC01LjQwOTk1ODcgLTcuMzczODIyIC0zLjQ0NjA5NTI5IDAuMDAwMDAwMFxub2ZmaWNlLXRlY2huaWNhbCAgICAgLTQuNTI0ODUxMyAtNi40MDc4OTggLTIuNjQxODA0MDEgMC4wMDAwMDAwXG5zYWxlcy10ZWNobmljYWwgICAgICAtNC4zNTQ3OTcwIC02Ljg4NjEyMCAtMS44MjM0NzM2OCAwLjAwMDAxNzBcbm1hbmFnZW1lbnQtdGVjaG5pY2FsICAwLjc1NjU3MTQgLTEuNDY5MDQ0ICAyLjk4MjE4NjQ2IDAuOTI2NTcxNFxub2ZmaWNlLXNlcnZpY2VzICAgICAgIDAuODg1MTA3NCAtMS4xMTQxOTAgIDIuODg0NDA0NzggMC44MDMyOTMxXG5zYWxlcy1zZXJ2aWNlcyAgICAgICAgMS4wNTUxNjE3IC0xLjU2Mzc5MiAgMy42NzQxMTU4MSAwLjg1ODk5NDJcbm1hbmFnZW1lbnQtc2VydmljZXMgICA2LjE2NjUzMDEgIDMuODQxNzMyICA4LjQ5MTMyODAwIDAuMDAwMDAwMFxuc2FsZXMtb2ZmaWNlICAgICAgICAgIDAuMTcwMDU0MyAtMi4zODg4NTcgIDIuNzI4OTY1NzYgMC45OTk5NjU3XG5tYW5hZ2VtZW50LW9mZmljZSAgICAgNS4yODE0MjI3ICAzLjAyNDQ3OSAgNy41MzgzNjU4OCAwLjAwMDAwMDBcbm1hbmFnZW1lbnQtc2FsZXMgICAgICA1LjExMTM2ODQgIDIuMjkwODE1ICA3LjkzMTkyMjE3IDAuMDAwMDA0NlxuIn0= -->
+<pre><code>  Tukey multiple comparisons of means
+    95% family-wise confidence level
+
+Fit: aov(formula = wage ~ occupation)
+
+$occupation
+                           diff       lwr         upr     p adj
+technical-worker      3.5209542  1.833122  5.20878674 0.0000001
+services-worker      -1.8890045 -3.705623 -0.07238631 0.0361288
+office-worker        -1.0038970 -2.732830  0.72503588 0.5584749
+sales-worker         -0.8338428 -3.252714  1.58502882 0.9223496
+management-worker     4.2775256  2.180694  6.37435762 0.0000001
+services-technical   -5.4099587 -7.373822 -3.44609529 0.0000000
+office-technical     -4.5248513 -6.407898 -2.64180401 0.0000000
+sales-technical      -4.3547970 -6.886120 -1.82347368 0.0000170
+management-technical  0.7565714 -1.469044  2.98218646 0.9265714
+office-services       0.8851074 -1.114190  2.88440478 0.8032931
+sales-services        1.0551617 -1.563792  3.67411581 0.8589942
+management-services   6.1665301  3.841732  8.49132800 0.0000000
+sales-office          0.1700543 -2.388857  2.72896576 0.9999657
+management-office     5.2814227  3.024479  7.53836588 0.0000000
+management-sales      5.1113684  2.290815  7.93192217 0.0000046</code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>This shows the confidence intervals and p-values for all of the pairwise comparisons–since there are 6 levels of the occupation variable, there are 6*5/2=15 different combinations to examine! We can display this visually by plotting the Tukey results:</p>
@@ -517,6 +739,9 @@ summary(anova1)</code></pre>
 <!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucGxvdChUdWtleUhTRChhbm92YTEpKVxuYGBgIn0= -->
 <pre class="r"><code>plot(TukeyHSD(anova1))</code></pre>
 <!-- rnb-source-end -->
+<!-- rnb-plot-begin eyJoZWlnaHQiOjI4MS44Mjk0LCJ3aWR0aCI6NDU2LCJzaXplX2JlaGF2aW9yIjowLCJjb25kaXRpb25zIjpbXX0= -->
+<p><img src="data:image/png;base64,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" /></p>
+<!-- rnb-plot-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>Ugh this is unreadable. Let’s try that again, some minor edits for readability:</p>
@@ -526,6 +751,9 @@ summary(anova1)</code></pre>
 <pre class="r"><code>par(mar = c(3,10,3,3))
 plot(TukeyHSD(anova1), las=1)</code></pre>
 <!-- rnb-source-end -->
+<!-- rnb-plot-begin eyJoZWlnaHQiOjI4MS44Mjk0LCJ3aWR0aCI6NDU2LCJzaXplX2JlaGF2aW9yIjowLCJjb25kaXRpb25zIjpbXX0= -->
+<p><img src="data:image/png;base64,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" /></p>
+<!-- rnb-plot-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>Any combination where 0 is not included in the confidence interval is considered to be a significant difference! Looks like there are quite a few of them.</p>
@@ -560,6 +788,9 @@ plot(TukeyHSD(anova1), las=1)</code></pre>
           axis.ticks.x = element_blank()) +
     scale_x_discrete(labels = c(&quot;no&quot; = &quot;Unmarried&quot;, &quot;yes&quot; = &quot;Married&quot;))</code></pre>
 <!-- rnb-source-end -->
+<!-- rnb-plot-begin eyJoZWlnaHQiOjI4MS44Mjk0LCJ3aWR0aCI6NDU2LCJzaXplX2JlaGF2aW9yIjowLCJjb25kaXRpb25zIjpbXX0= -->
+<p><img src="data:image/png;base64,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" /></p>
+<!-- rnb-plot-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>Let’s run this ANOVA and see what the results are:</p>
@@ -569,6 +800,15 @@ plot(TukeyHSD(anova1), las=1)</code></pre>
 <pre class="r"><code>anova2&lt;-aov(wage ~ gender*married)
 summary(anova2)</code></pre>
 <!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiICAgICAgICAgICAgICAgIERmIFN1bSBTcSBNZWFuIFNxIEYgdmFsdWUgICBQcig+RikgICAgXG5nZW5kZXIgICAgICAgICAgIDEgICAgNTk0ICAgNTkzLjcgIDI0LjExOCAxLjIxZS0wNiAqKipcbm1hcnJpZWQgICAgICAgICAgMSAgICAxNDkgICAxNDkuMCAgIDYuMDU0ICAwLjAxNDIwICogIFxuZ2VuZGVyOm1hcnJpZWQgICAxICAgIDI4NyAgIDI4Ni44ICAxMS42NTIgIDAuMDAwNjkgKioqXG5SZXNpZHVhbHMgICAgICA1MzAgIDEzMDQ3ICAgIDI0LjYgICAgICAgICAgICAgICAgICAgICBcbi0tLVxuU2lnbmlmLiBjb2RlczogIDAg4oCYKioq4oCZIDAuMDAxIOKAmCoq4oCZIDAuMDEg4oCYKuKAmSAwLjA1IOKAmC7igJkgMC4xIOKAmCDigJkgMVxuIn0= -->
+<pre><code>                Df Sum Sq Mean Sq F value   Pr(&gt;F)    
+gender           1    594   593.7  24.118 1.21e-06 ***
+married          1    149   149.0   6.054  0.01420 *  
+gender:married   1    287   286.8  11.652  0.00069 ***
+Residuals      530  13047    24.6                     
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1</code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>We can reject all 3 null hypotheses at the 5% level. Get used to looking at stars! We can dig deeper into the results by looking at the Tukey-Kremer test:</p>
@@ -577,6 +817,29 @@ summary(anova2)</code></pre>
 <!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuVHVrZXlIU0QoYW5vdmEyKVxuYGBgIn0= -->
 <pre class="r"><code>TukeyHSD(anova2)</code></pre>
 <!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiICBUdWtleSBtdWx0aXBsZSBjb21wYXJpc29ucyBvZiBtZWFuc1xuICAgIDk1JSBmYW1pbHktd2lzZSBjb25maWRlbmNlIGxldmVsXG5cbkZpdDogYW92KGZvcm11bGEgPSB3YWdlIH4gZ2VuZGVyICogbWFycmllZClcblxuJGdlbmRlclxuICAgICAgICAgICAgICAgICBkaWZmICAgICAgIGx3ciAgICAgICB1cHIgICBwIGFkalxuZmVtYWxlLW1hbGUgLTIuMTE2MDU2IC0yLjk2MjUwMiAtMS4yNjk2MTEgMS4yZS0wNlxuXG4kbWFycmllZFxuICAgICAgICAgICBkaWZmICAgICAgIGx3ciAgICAgIHVwciAgICAgcCBhZGpcbnllcy1ubyAxLjExMTU0NCAwLjIyNDAwNDIgMS45OTkwODQgMC4wMTQyMDE5XG5cbiRgZ2VuZGVyOm1hcnJpZWRgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgZGlmZiAgICAgICAgbHdyICAgICAgICB1cHIgICAgIHAgYWRqXG5mZW1hbGU6bm8tbWFsZTpubyAgICAtMC4wOTUxMTM5MiAtMS45ODk1MzUzICAxLjc5OTMwNzUgMC45OTkyMjU3XG5tYWxlOnllcy1tYWxlOm5vICAgICAgMi41MjEzMTEzNSAgMC45NDM3ODQ2ICA0LjA5ODgzODEgMC4wMDAyNTczXG5mZW1hbGU6eWVzLW1hbGU6bm8gICAtMC42NzA5ODcwNCAtMi4yOTIxNTE2ICAwLjk1MDE3NzUgMC43MDk5OTMyXG5tYWxlOnllcy1mZW1hbGU6bm8gICAgMi42MTY0MjUyOCAgMC45MzEyOTI3ICA0LjMwMTU1NzkgMC4wMDA0MTcxXG5mZW1hbGU6eWVzLWZlbWFsZTpubyAtMC41NzU4NzMxMiAtMi4zMDE5MjUyICAxLjE1MDE3OTAgMC44MjU1MDMyXG5mZW1hbGU6eWVzLW1hbGU6eWVzICAtMy4xOTIyOTg0MCAtNC41NjMwNjk3IC0xLjgyMTUyNzEgMC4wMDAwMDAwXG4ifQ== -->
+<pre><code>  Tukey multiple comparisons of means
+    95% family-wise confidence level
+
+Fit: aov(formula = wage ~ gender * married)
+
+$gender
+                 diff       lwr       upr   p adj
+female-male -2.116056 -2.962502 -1.269611 1.2e-06
+
+$married
+           diff       lwr      upr     p adj
+yes-no 1.111544 0.2240042 1.999084 0.0142019
+
+$`gender:married`
+                            diff        lwr        upr     p adj
+female:no-male:no    -0.09511392 -1.9895353  1.7993075 0.9992257
+male:yes-male:no      2.52131135  0.9437846  4.0988381 0.0002573
+female:yes-male:no   -0.67098704 -2.2921516  0.9501775 0.7099932
+male:yes-female:no    2.61642528  0.9312927  4.3015579 0.0004171
+female:yes-female:no -0.57587312 -2.3019252  1.1501790 0.8255032
+female:yes-male:yes  -3.19229840 -4.5630697 -1.8215271 0.0000000</code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>The bottom panel examines the interaction effects, and is pretty interesting.</p>
@@ -602,6 +865,12 @@ summary(anova2)</code></pre>
 <pre class="r"><code>affair2 &lt;- affairs %&gt;% select(c(affair, kids))
 table(affair2)</code></pre>
 <!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiICAgICAga2lkc1xuYWZmYWlyICAgMCAgIDFcbiAgICAgMCAxNDQgMzA3XG4gICAgIDEgIDI3IDEyM1xuIn0= -->
+<pre><code>      kids
+affair   0   1
+     0 144 307
+     1  27 123</code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>On a percentage basis, it looks like affairs are more prevalent among couples with kids. Maybe this is more clear with a barplot:</p>
@@ -613,6 +882,9 @@ table(affair2)</code></pre>
     scale_fill_viridis_d() +
     labs(y = &quot;&quot;)</code></pre>
 <!-- rnb-source-end -->
+<!-- rnb-plot-begin eyJoZWlnaHQiOjI4MS44Mjk0LCJ3aWR0aCI6NDU2LCJzaXplX2JlaGF2aW9yIjowLCJjb25kaXRpb25zIjpbXX0= -->
+<p><img src="data:image/png;base64,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" /></p>
+<!-- rnb-plot-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>Is this difference big enough to be statistically significant? This is where we call in the Chi Square test:</p>
@@ -621,6 +893,14 @@ table(affair2)</code></pre>
 <!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuY2hpc3EudGVzdChhZmZhaXJzJGtpZHMsIGFmZmFpcnMkYWZmYWlyKVxuYGBgIn0= -->
 <pre class="r"><code>chisq.test(affairs$kids, affairs$affair)</code></pre>
 <!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG5cdFBlYXJzb24ncyBDaGktc3F1YXJlZCB0ZXN0IHdpdGggWWF0ZXMnIGNvbnRpbnVpdHlcblx0Y29ycmVjdGlvblxuXG5kYXRhOiAgYWZmYWlycyRraWRzIGFuZCBhZmZhaXJzJGFmZmFpclxuWC1zcXVhcmVkID0gMTAuMDU1LCBkZiA9IDEsIHAtdmFsdWUgPSAwLjAwMTUyXG4ifQ== -->
+<pre><code>
+    Pearson&#39;s Chi-squared test with Yates&#39; continuity
+    correction
+
+data:  affairs$kids and affairs$affair
+X-squared = 10.055, df = 1, p-value = 0.00152</code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>The p-value is less than .05, so it appears that there is a significant difference in the rate of affairs between couples with kids from those without kids.</p>

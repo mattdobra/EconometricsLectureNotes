@@ -200,7 +200,7 @@ Typically this error is violated when you have **confounding** variables or **om
 
 ## Assumption 4: The error term is not serially correlated.
 
-This is mostly a problem in time series regression, and refers to a situation in which you can use error terms to predict each other.  Let's take a look at this data from the New York Stock Exchange from the wooldridge package--these data are about 12 years of Wednesday closing prices of the NYSE.  This data includes a pretty big market crash around observation 620 or so, which leads me to speculate that this data is from the 1980s and the huge drop is in October, 1987.  
+This is mostly a problem in time series regression (a regression where you use a continuous measure of time as an independent variable), and refers to a situation in which you can use error terms to predict each other.  Let's take a look at this data from the New York Stock Exchange from the wooldridge package--these data are about 12 years of Wednesday closing prices of the NYSE.  This data includes a pretty big market crash around observation 620 or so, which leads me to speculate that this data is from the 1980s and the huge drop is in October, 1987.  
 
 ```{r}
 tempdata2 <- nyse 
