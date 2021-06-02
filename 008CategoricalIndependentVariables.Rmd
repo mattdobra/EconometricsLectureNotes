@@ -15,6 +15,8 @@ library(stargazer)
 library(wooldridge)
 library(AER)
 data(CPS1985)
+data(HousePrices)
+data(diamonds)
 data(gpa2)
 
 
@@ -248,10 +250,134 @@ CPS1985 %>% ggplot(aes(x = education, y = wage, color = gender)) +
     geom_abline(slope = .751, intercept = .218-2.124, color = "orange") +
     theme_classic()
 ```
-This is an important tool, so let's work through a few more examples, starting with the gpa2 data in the wooldridge package.  Let's model GPA as a function of SAT score, an athlete dummy, and a gender dummy.  
+This is an important tool, so let's work through a few more examples, starting with the HousePrices data in the AER package:
+
+```{r}
+head(HousePrices)
+```
+This table has data on houses sold in Windsor, Ontario (Canada) in the summer of 1987.  The data include the sales price, along with a number of attributes of each house sold, and gives us a great set of data to estimate what is called a **hedonic regression**.  Hedonic regression is a model that attempts to predict the market value of set of goods based on the attributes of those goods, and is useful for pricing decisions.  Let's take a look at the data: 
+
+```{r}
+head(HousePrices)
+```
+```{r}
+summary(HousePrices)
+```
+Let's use price as the dependent variable, and use all of the house characteristic variables.
 
 ```{r, warning = FALSE}
-reg4b <- lm(colgpa ~ sat + athlete + female, data = gpa2)
+reg4b <- lm(price ~ lotsize + bedrooms + bathrooms + stories + driveway + recreation + fullbase + gasheat + aircon + garage + prefer, data = HousePrices)
 stargazer(reg4b, type = "text")
 ```
+These results have many useful, real-world applications. For example, let's say it is the summer of 1987 and you have a house in Windsor, Ontario that you would like to sell...what is a good guess of the market price?  You simply enter the attributes into the regression equation and create a prediction.  For example, let's say your house has the following characteristics:
+
+* 5000 sqft lot 
+* 4 bedrooms
+* 2 bathrooms
+* 2 stories
+* driveway
+* rec room
+* no basement
+* no gas heating
+* no air conditioning
+* 2 car garage
+* preferred neighborhood
+
+We can take these attributes and put them into a new `data.frame` with the same variable names as in HousePrices:
+
+```{r}
+yourhouse <- data.frame(lotsize = 5000, bedrooms = 4, bathrooms = 2, stories = 2, driveway = "yes", recreation = "yes", fullbase = "no", gasheat = "no", aircon = "no", garage = 2, prefer = "yes")
+```
+Next, we can use the `predict` function and use our regression object but feed it in our custom house using the `newdata` option:
+
+```{r}
+predict(reg4b, newdata = yourhouse)
+```
+Such a house is predicted to sell for \$91,864.  Let's take this logic a little further.  Let's say that our real estate agent tells us that if we want top dollar for our home, we should  finish our basement, add a bedroom and a bathroom, and upgrade our HVAC to have gas heating and air conditioning.  So we get a quote for all this work and it's going to cost \$35,000.  Is it worth it?
+
+Let's start by duplicating row 1 of the yourhouse dataframe into row 2:
+
+```{r}
+yourhouse[2,] <- yourhouse[1,]
+```
+Next, let's edit row 2 to have the new attributes:
+
+```{r}
+yourhouse[2,]$bedrooms <- 5
+yourhouse[2,]$bathrooms <- 3
+yourhouse[2,]$fullbase <- "yes"
+yourhouse[2,]$gasheat <- "yes"
+yourhouse[2,]$aircon <- "yes"
+```
+Finally, let's rerun our prediction command:
+
+```{r}
+predict(reg4b, newdata = yourhouse)
+```
+It looks like those additions would add approximately \$47,000 in value to our house, so perhaps the updates are worth doing!
+
+Let's look at another dataset that is prime for hedonic regression, the `diamonds` dataset that comes in the *ggplot* package:
+
+```{r}
+head(diamonds)
+summary(diamonds)
+```
+This dataset includes information about over 50,000 round cut diamonds; let's use a hedonic pricing model to estimate diamond price as a function of the 4 Cs of diamonds:
+
+* Carat
+* Cut
+* Color
+* Clarity
+
+Carat is the weight of the diamond, so it is a number.  However, cut, color, and clarity are all categorical (factor) variables with lots of levels, so this is going to be a big dummy variable regression.
+
+For ease of reading the output tables, we will first force R to read the categorical variables as unordered
+
+```{r, warning = FALSE}
+diamonds2 <- as.data.frame(diamonds)
+diamonds2$cut <- factor(diamonds2$cut, ordered = FALSE)
+diamonds2$color <- factor(diamonds2$color, ordered = FALSE)
+diamonds2$clarity <- factor(diamonds2$clarity, ordered = FALSE)
+diamonds2$color <- relevel(diamonds2$color, c("J")) 
+reg4c <- lm(price ~ carat + cut + color + clarity, data = diamonds2)
+stargazer(reg4c, type = "text")
+```
+Could we predict the price of a 32 carat, D color, internally flawless with ideal cut diamond?  Mathematically, sure we could:
+
+```{r}
+mydiamond <- data.frame(carat = 32, clarity = "IF", cut = "Ideal", color = "D")
+predict(reg4c, newdata = mydiamond)
+```
+But statistically this is a bad idea.  If we look at a summary of the data:
+
+```{r}
+summary(diamonds2$carat)
+```
+We see that the biggest diamond in the data set was only 5.01 carats.  This prediction is beyond the scope of the model, as the prediction is trying to estimate a point outside of the range of the sample data.  This is called *extrapolation* and is generally frowned upon.  
+
+```{r, fig.align = "center", echo=FALSE, fig.cap="XKCD: Extrapolating", out.width = '100%'}
+knitr::include_graphics("images/extrapolating.png")
+```
+
+Turning away from hedonic regression, let's look at the gpa2 data in the wooldridge package.  Let's model GPA as a function of SAT score, an athlete dummy, and a gender dummy. Note that this data set has the athlete and gender variables coded as dummies already, so we are not dealing with factor variables.   
+
+```{r, warning = FALSE}
+reg4d <- lm(colgpa ~ sat + athlete + female, data = gpa2)
+stargazer(reg4d, type = "text")
+```
+
+These results suggest:
+
+* For each additional 100 points on the SAT, the model predicts a (statistically significant) .2 increase in GPA.  This effect is assumed to be the same for males and females, athletes and non-athletes.
+* The average GPA among athletes is 0.02 higher than for non-athletes.  THis is not statistically significant.
+* Females have on average a .23 higher GPA than males. This difference is statistically significant.
+
+Lets try this again with a slight variation: here we include a female athlete interaction effect.
+
+```{r, warning = FALSE}
+reg4e <- lm(colgpa ~ sat + athlete*female, data = gpa2)
+stargazer(reg4d, reg4e, type = "text")
+```
+
+Judging from the lack of significance of the interaction term and the fact that the adjusted $R^2$ did not move, it seems like there is no interaction effect.  This implies that the effect of gender on grades is not affected by one's status of being an athlete (or equivalently, the effect of being an athlete is not different between males and females).
 
