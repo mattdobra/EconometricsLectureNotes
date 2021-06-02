@@ -18,6 +18,7 @@ data(CPS1985)
 data(HousePrices)
 data(diamonds)
 data(gpa2)
+data(TeachingRatings)
 
 
 data(wage1)
@@ -331,7 +332,7 @@ This dataset includes information about over 50,000 round cut diamonds; let's us
 
 Carat is the weight of the diamond, so it is a number.  However, cut, color, and clarity are all categorical (factor) variables with lots of levels, so this is going to be a big dummy variable regression.
 
-For ease of reading the output tables, we will first force R to read the categorical variables as unordered
+For ease of reading the output tables, we will first force R to read the categorical variables as unordered.
 
 ```{r, warning = FALSE}
 diamonds2 <- as.data.frame(diamonds)
@@ -353,7 +354,7 @@ But statistically this is a bad idea.  If we look at a summary of the data:
 ```{r}
 summary(diamonds2$carat)
 ```
-We see that the biggest diamond in the data set was only 5.01 carats.  This prediction is beyond the scope of the model, as the prediction is trying to estimate a point outside of the range of the sample data.  This is called *extrapolation* and is generally frowned upon.  
+We see that the biggest diamond in the data set was only 5.01 carats. Thus, making a prediction about a 32 carat diamond is beyond the scope of the model, as the prediction is trying to estimate a point outside of the range of the sample data.  This is called *extrapolation* and is generally frowned upon; we may be fairly sure that the relationship between size and price is linear in the range we are looking at, there is no guarantee that it is linear beyond the range of the data (and in the case of diamonds, it almost certainly is not!)
 
 ```{r, fig.align = "center", echo=FALSE, fig.cap="XKCD: Extrapolating", out.width = '100%'}
 knitr::include_graphics("images/extrapolating.png")
@@ -381,3 +382,14 @@ stargazer(reg4d, reg4e, type = "text")
 
 Judging from the lack of significance of the interaction term and the fact that the adjusted $R^2$ did not move, it seems like there is no interaction effect.  This implies that the effect of gender on grades is not affected by one's status of being an athlete (or equivalently, the effect of being an athlete is not different between males and females).
 
+Let's examine one more example involving interaction effects before moving on with the *TeachingRatings* data set from the AER package. We will estimate a regression looking at the relationship between student evaluation of instructors and the attractiveness of instructors, interacted dummies for minority and female faculty, a native english speaker dummy, and a dummy to indicate whether or not the class is a single credit elective course (e.g. yoga)
+
+```{r, warning = FALSE}
+reg4f <- lm(eval~beauty + gender + minority + native + credits, data = TeachingRatings)
+reg4g <- lm(eval~beauty + gender*minority + native + credits, data = TeachingRatings)
+stargazer(reg4f, reg4g, type = "text")
+```
+
+Let's look specifically at the interacted variables.  The function of an interaction effect is really to give an "it depends" sort of answer.  So if I were to ask the question, do minority faculty receive lower teaching evaluations, the answer to that question is that it depends on if whether or not that faculty is male or female.  A minority male would have a 1 for the minority dummy, but a 0 for the interaction dummy, so in aggregate he would be expected to receive a teaching evaluation, all else equal, that is .003 lower than the omitted group (here, that is non-minority males). However, a minority female would receive a 1 for the minority dummy, the female dummy, AND the interaction dummy, so she would be expected to receive a teaching evaluation (again all else equal) .414 lower than a non-minority male.  
+
+# Interacting Numeric and Categorical Independent Variables

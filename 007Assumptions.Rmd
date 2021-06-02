@@ -20,6 +20,7 @@ data(ceosal1)
 data(nyse)
 data(smoke)
 data(vote1)
+data(hprice3)
 ```
 
 # The Key Assumptions
@@ -94,8 +95,70 @@ Here all 4 specifications are side-by-side.  We've already interpreted columns 1
 
 * Column 3 is the log-linear model.  A \$1,000,000 increase in sales is associated with a .001% higher salary.
 
+The model in column 4 seems to be the best model of the bunch.  
 
-The model in column 4 seems to be the best model of the bunch.  We will look at other non-linear transformations as we move forward in the class.
+Another common non-linear transformation is the quadratic transformation; this is particularly useful in cases where you thinka relationship may be decreasing up to a point, and then start increasing after that point (or vice versa).  To see this in action, let's look at a graph that looks at the relationship between the age and selling prices of homes in the `hprice3` data from the `wooldridge` package.
+
+```{r}
+hprice3 %>% ggplot(aes(x = age, y = price)) +
+    geom_point() +
+    theme_classic() +
+    labs(title = "House Value and Age")
+```
+This relationship looks somewhat U-shaped; moving left to right, it seems that the value of houses falls as they get older, but at a certain point, the relationship reverses course and older becomes **more** valuable!
+
+This is a great place to estimate a quadratic regression, which is just a fancy term for including both $age$ and $age^2$ in our regression.
+
+\begin{equation}
+Price_{i} = \alpha + \beta_1 age_{i} + \beta_2 age_i^2 + \epsilon_i
+\end{equation}
+
+We can either use the `I()` argument in our regression, or we can manually create a squared term and put it in our regression.  The hprice3 data already has a squared term in it called agesq, so let's verify that both methods get us to the same place:
+
+```{r, warning = FALSE}
+reg1e <- lm(price ~ age, data = hprice3)
+reg1f <- lm(price ~ age + I(age^2), data = hprice3)
+reg1g <- lm(price ~ age + agesq, data = hprice3)
+stargazer(reg1e, reg1f, reg1g, type = "text")
+```
+Both columns 2 and 3 are the same, as expected.  Our regression model, then, looks like:
+
+\begin{equation}
+Price_{i} = \$113,762.10 - \$1691.90 age_{i} + \$9.26 age_i^2 + \epsilon_i
+\end{equation}
+
+We can look at these two models graphically as well: the orange line is the linear model (column 1 above), the purple line is the quadratic model (column 2/3 above).  The purple line is clearly a better fit.
+
+```{r, message = FALSE}
+hprice3 %>% ggplot(aes(x = age, y = price)) +
+    geom_point(color = "darkgreen",
+               alpha = .4) +
+    theme_classic() +
+    labs(title = "House Value and Age",
+         y = "Price",
+         x = "Age") +
+    geom_smooth(method = lm, 
+                color = "orange",
+                se = FALSE) +
+    geom_smooth(method = lm, 
+                formula = y ~ x + I(x^2),
+                color = "Purple",
+                se = FALSE) +
+    scale_y_continuous(labels=scales::dollar_format())
+```
+We can also, with a little bit of calculus, figure out the age at which the relationship stops decreasing and starts increasing.  You simply need to take the derivative of the regression equation with respect to age, set it equal to zero, and solve for age!
+
+\begin{equation}
+Price_{i} = \$113,762.10 - \$1691.90 age_{i} + \$9.26 age_i^2 + \epsilon_i
+\end{equation}
+\begin{equation}
+\frac{\partial Price_i}{\partial age} = \$1691.90 + 2 \cdot \$9.26 age_i = 0 \: at \: age^\star
+\end{equation}
+\begin{equation}
+\frac{\$1691.90}{\$18.52} = age^\star=91.4 
+\end{equation}
+
+As houses age, they lose value until they hit 91.4 years of age, at which point they start increasing in value! 
 
 ## Assumption 2: The average of the error term is 0
 
@@ -133,7 +196,7 @@ cor(tempdata$lnsales, tempdata$resid)
 ```
 Pretty darn close to zero.  
 
-Typically this error is violated when you have **confounding** variables or **omitted variables**, which basically means you need to add more independent variables to your model.  We will discuss this idea more when we get into regression with more than one independent variable.
+Typically this error is violated when you have **confounding** variables or **omitted variables**, which basically means you need to add more independent variables to your model.  We already discussed this idea in the previous notebook.  
 
 ## Assumption 4: The error term is not serially correlated.
 
