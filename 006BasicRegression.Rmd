@@ -19,7 +19,7 @@ attach(CPS1985)
 
 # Prelude to Regression: The Correlation Test
 
-We saw how to calculate a correlation (Pearson's r) in a previous notebook; let's see the correlation between wage and years of education from the use the CPS1985 dataset using *cor()* function
+We saw how to calculate a correlation (Pearson's r) in a previous notebook; let's see the correlation between wage and years of education from the use the CPS1985 dataset using `cor()` function
 
 ```{r}
 cor(wage, education)
@@ -37,7 +37,7 @@ The correlation is a measure of the strength on the linear relationship between 
 * $H_0$: The true correlation coefficient is 0
 * $H_1$: The true correlation coefficient is not 0
 
-We can test this hypothesis with the function *cor.test*:
+We can test this hypothesis with the function `cor.test()`:
 
 ```{r}
 cor.test(education, wage)
@@ -69,7 +69,7 @@ So let's take a look at the Spearman test results:
 ```{r}
 cor.test(wage, experience, method = "spearman", exact = FALSE)
 ```
-The Spearman statistic (rho = 0.17) is significantly different from 0.  Because this data is skewed, the Spearman statistic is probably more accurate than the Pearson.
+The Spearman statistic $\rho = 0.17$ is significantly different from 0.  Because this data is skewed, the Spearman statistic is probably more accurate than the Pearson.
 
 # Ordinary Least Squares
 
@@ -77,7 +77,7 @@ The most basic regression model is referred to as Ordinary Least Squares, or OLS
 
 ## OLS Intuition
 
-In a simple, bivariate OLS, we are looking at the *linear* relationship between our *dependent variable* and **one** *independent variable.*  Let's imagine that we are looking at the relationship between years of education and wages, where education is our independent variable, X, and wages are our dependent variable, Y.  To say this model is linear implies that the relationship between X and Y looks like:
+In a simple, bivariate OLS, we are looking at the **linear** relationship between our **dependent variable** and *one* **independent variable**.  Suppose we are looking at the relationship between years of education and wages, where education is our independent variable, X, and wages are our dependent variable, Y.  To say this model is linear implies that the relationship between X and Y looks like:
 
 \begin{equation}
 Y_{i} = \alpha + \beta X_{i} 
@@ -111,7 +111,7 @@ ggplot(df) +
   theme(axis.text = element_blank(),
         axis.ticks = element_blank())
 ```
-This is an example of a model that is *fully determined* -- there is no scope for individuals to not be on the line.  If, for example, $\beta = 1$ and $\alpha = 0.5$, then we would say that someone with 7 years of education should have an hourly wage of \$7.50, someone with 13 years an hourly wage of \$13.50, and so forth.  The real world is rarely so neat and tidy, and a regression is an example of a *stochastic* model.  
+This is an example of a model that is **fully determined** -- there is no scope for individuals to not be on the line.  If, for example, $\beta = 1$ and $\alpha = 0.5$, then we would say that someone with 7 years of education should have an hourly wage of \$7.50, someone with 13 years an hourly wage of \$13.50, and so forth.  The real world is rarely so neat and tidy, and a regression is an example of a *stochastic* model.  
 
 In a stochastic model, we use statistical tools to approximate the line that best fits the data.  That is, we are still trying to figure out what $\alpha$ and $\beta$ are, but we are aware that not everybody will be on the line that is implied by $\alpha$ and $\beta$.  This means that the model looks more like:
 
@@ -119,13 +119,13 @@ In a stochastic model, we use statistical tools to approximate the line that bes
 Y_{i} = \alpha + \beta X_{i} + \epsilon_i
 \end{equation}
 
-The new term, $\epsilon_i$, is called the *error term*.  Where does the error term come from?  We take our values of \alpha and \beta and combine them with $X_i$ to calculate a predicted value of Y.  Typically we refer to the predicted value of Y as $\hat{Y}$ (pronounced Y-hat).  The difference between the actual value of $Y_i$ and $\hat{Y}$ is $\epsilon_i$:
+The new term, $\epsilon_i$, is called the **error term** or the **residual**.  Where does the error term come from?  We take our values of \alpha and \beta and combine them with $X_i$ to calculate a predicted value of Y.  Typically we refer to the predicted value of Y as $\hat{Y}$ (pronounced Y-hat).  The difference between the actual value of $Y_i$ and $\hat{Y}$ is $\epsilon_i$:
 
 \begin{equation}
 \epsilon_{i} = \hat{Y} - Y_i
 \end{equation}
 
-The theory (and math) behind a regression model focuses on trying to estimate values for $\alpha$ and $\beta$ that best fits the observed data. Because we don't know $\alpha$ and $\beta$, we estimate $\hat{\alpha}$ and $\hat{\beta}$ by using $\epsilon$.  
+The theory (and math) behind a regression model focuses on trying to estimate values for $\alpha$ and $\beta$ that best fits the observed data. Because we don't know $\alpha$ and $\beta$, we estimate $\hat{\alpha}$ and $\hat{\beta}$ with our regression.  
 
 In a regression model, we estimate a model that looks like: 
 
@@ -133,12 +133,11 @@ In a regression model, we estimate a model that looks like:
 Y_{i} = \hat{\alpha} + \hat{\beta} X_{i}+ \epsilon_{i} 
 \end{equation}
 
-In this model, $\epsilon_i$ is referred to as our *residual*, which is just the vertical distance each individual data point is from the line implied by $\hat{\alpha}$ and $\hat{\beta}$.
+In this model, $\epsilon_i$ is referred to as our **residual**, which is just the vertical distance each individual data point is from the line implied by $\hat{\alpha}$ and $\hat{\beta}$.
 
 Perhaps this is easier to understand if looked at graphically:
 
 ```{r, echo=FALSE}
-library(tidyverse)
 library(broom)
 set.seed(5)
 y <-rnorm(5)
@@ -161,9 +160,9 @@ ggplot(df) +
 ```
 Assume that the black line is the one implied by our estimates of $\hat{\alpha}$ and $\hat{\beta}$, and each purple point represents one of our data poins.  The vertical distance each point is from the line is its residual $\epsilon_i$.
 
-So where do $\hat{\alpha}$ and $\hat{\beta}$ come from?  How do we determine the line of best fit?  The best fitting line is the one where the values of $\hat{\alpha}$ and $\hat{\beta}$ minimize the sum of squared errors, $\Sigma{\epsilon_i^2}$.  This is why the method is called Ordinary Least **Squares**! In principle, we could take a data set, run it through every single possible combination of $\hat{\alpha}$ and $\hat{\beta}$, calculate, square, and sum all the values of $\epsilon_i$ that result from those values of $\hat{\alpha}$ and $\hat{\beta}$, and choose the $\hat{\alpha}$ and $\hat{\beta}$ that minimize $\Sigma{\epsilon_i^2}$.  There is a much cleaner way of doing this, but it involves calculus so it will be left as an exercise for the interested student to research on his/her own.  
+So where do $\hat{\alpha}$ and $\hat{\beta}$ come from?  How do we determine the line of best fit?  The best fitting line is the one where the values of $\hat{\alpha}$ and $\hat{\beta}$ minimize the sum of squared errors, $\Sigma{\epsilon_i^2}$.  This is why the method is called Ordinary Least **Squares**! In principle, we could take a data set, run it through every single possible combination of $\hat{\alpha}$ and $\hat{\beta}$, calculate, square, and sum all the values of $\epsilon_i$ that result from those values of $\hat{\alpha}$ and $\hat{\beta}$, and choose the $\hat{\alpha}$ and $\hat{\beta}$ that minimize $\Sigma{\epsilon_i^2}$.  There is a much cleaner way of doing this, but it involves a fair bit of calculus so it will be left as an exercise for the interested student to research on his/her own.  
 
-## Estimating and Interpreting a Bivariate Regression.
+## Estimating and Interpreting a Bivariate Regression
 
 ### Estimating the Model
 
@@ -174,7 +173,7 @@ CPS1985 %>% ggplot(aes(x = education, y = wage)) +
     geom_point() 
 ```
 
-We can estimate a regression model between wage and education with the *lm()* command, If it helps you remember the command, *lm* stands for **linear model**. Because we attached the CPS1985 dataset, we could simply use the command `lm(wage ~ education)` if we wanted.
+We can estimate a regression model between wage and education with the `lm()` command, If it helps you remember the command, `lm()` stands for **linear model**. Because we attached the CPS1985 dataset, we could simply use the command `lm(wage ~ education)` if we wanted, but here I will explicitly tell R which data to use.
 
 ```{r}
 lm(wage ~ education, data = CPS1985)
@@ -187,11 +186,11 @@ The immediate output from a regression model is not very helpful; it tells you t
 reg1 <- lm(wage ~ education)
 ```
 
-We can use the *attributes()* command to see what is contained within this object; we will make use of some of these shortly.  
+We can use the `attributes()` command to see what is contained within this object; we will make use of some of these shortly.  
 ```{r}
 attributes(reg1)
 ```
-To interpret the model, we need to take a deeper look at this regression object.  The Base R method is to use the *summary()* command, though I prefer *stargazer* because it's cleaner and the format looks like the way regressions get published in academic journals. 
+To interpret the model, we need to take a deeper look at this regression object.  The Base R method is to use the `summary()` command, though I prefer `stargazer` because it's cleaner and the format looks like the way regressions get published in academic journals. 
 
 ```{r}
 summary(reg1)
@@ -201,7 +200,7 @@ summary(reg1)
 stargazer(reg1, type = "text")
 ```
 
-Now this is a lot more useful.  There's lots of stuff in here.  The values of $\hat{\alpha}$ and $\hat{\beta}$ are found in the coefficients panel--the estimate of the (Intercept) is $\hat{\alpha}$ and the estimated coefficient on education is $\hat{\beta}$.  This means that our regression model is in fact:
+Now this is a lot more useful.  There's lots of stuff in here.  The values of $\hat{\alpha}$ and $\hat{\beta}$ are found in the coefficients panel--the estimate of the Intercept/constant is $\hat{\alpha}$ and the estimated coefficient on education is $\hat{\beta}$.  This means that our regression model is in fact:
 
 \begin{equation}
 \hat{Wage_{i}} = -0.74598 + 0.75046 Education_{i} 
@@ -219,7 +218,7 @@ We can use this equation to make predictions: the predicted wages of somebody wi
 \hat{Wage_{i}} = \$8.26
 \end{equation}
 
-Let's take a look at some of the data - here are the first 10 observations in the data set, along with their predicted values and residuals:
+Recall above that we used the `attributes(reg1)` command and saw that we can grab the model's residuals, $\epsilon_i$, and fitted values, $\hat{Y_1}$.  This next code clones the CPS1985 data into a new dataset called tempdata, attaches the residuals and fitted values to that new dataset, and gets rid of all the variables we didn't use in our regression. Here are the first 10 observations in the data set, along with their predicted values and residuals:
 
 
 ```{r}
@@ -235,35 +234,36 @@ Recall, wage is our dependent variable ($Y$), and education is our independent v
 
 ### Look at the stars, look how they shine for you
 
-As an aside, Coldplay sucks. Rather than think about their excrementary music, let's look back at the *stargazer()* output so we can think happy thoughts again:
+As an aside, Coldplay sucks. Rather than think about their excrementary music, let's look back at the `stargazer()` output so we can think happy thoughts again:
 
 ```{r, warning = FALSE}
 stargazer(reg1, type = "text")
 ```
 
-You should have noticed all the stars next to the education coefficient.  The the stars are very useful for interpreting the *statistical significance* of your regression model.  In a regression, the null hypothesis is that the true coefficients ($\beta$ and $\alpha$) are equal to zero, the alternative hypothesis is that they are not equal to zero.  For the most part, the significance of $\alpha$ doesn't matter; we focus on $\beta$ and whether or not our estimate of $\hat{\beta}$ is significantly different from zero.
+You should have noticed all the stars next to the education coefficient.  The the stars are very useful for interpreting the **statistical significance** of your regression model.  In a regression, the null hypothesis is that the true coefficients ($\beta$ and $\alpha$) are equal to zero, the alternative hypothesis is that they are not equal to zero.  For the most part, the significance of $\alpha$ doesn't matter; we focus on $\beta$ and whether or not our estimate of $\hat{\beta}$ is significantly different from zero.
 
 Why zero?  If $\beta > 0$, higher values of $X_i$ are associated with higher values of $Y_i$.  If $\beta < 0$, higher values of $X_i$ are associated with lower values of $Y_i$.  If $\beta = 0$, then there is no relationship between our dependent variable and our independent variable.  In other words, our null hypothesis is that X and Y are unrelated, and by rejecting the null hypothesis we are saying that we believe that X and Y are in fact related.   
 
-The bottom panel shows useful information about the regression.  Observations is your sample size, and R2 is actually $R^2$ (R-squared) and is a measure of goodness of fit.  The possible range for$R^2$ is $0 \geq R^2 \geq 1$.  In a bivariate model, $R^2$ is actually the correlation coefficient squared!
+The bottom panel shows useful information about the regression.  Observations is your sample size, and R2 is actually $R^2$ (pronounced R-squared) and is a measure of goodness of fit.  The possible range for$R^2$ is $0 \geq R^2 \geq 1$.  In a bivariate model, $R^2$ is actually the correlation coefficient squared!
 
 ```{r}
 cor(wage, education)
 cor(wage, education)^2
 ```
 
-$R^2$ is often called the **coefficient of determination**, and, while not technically true, is easiest thought of as the percentage of the variation in $Y$ that you can explain with your independent variable $X$.  OUr $R^2=0.146$ then might be interpreted as saying that we can explain roughly 15% of the variation in wages with education, and therefore the other 85% of the variation in wages is left unexplained.  
+$R^2$ is often called the **coefficient of determination**, and, while not technically true, is easiest thought of as the percentage of the variation in $Y$ that you can explain with your independent variable $X$.  Our $R^2=0.146$ then might be interpreted as saying that we can explain roughly 15% of the variation in wages with education, and therefore the other 85% of the variation in wages is left unexplained.  
 
 The F-test is a measure of the significance of the entire model--the null hypothesis is that every $\hat{\beta}$ that you estimated is equal to zero.  In a bivariate model, there is only $\hat{\beta}$ so the F-test of the model is basically the same thing as the t-test of $\hat{\beta}$.  
 
 ### Visualizing the Regression Line
 
-Using *ggplot*, it is easy to add the regression line to a scatterplot by adding the `geom_smooth(method = lm)` argument. 
+Using `ggplot()`, it is easy to add the regression line to a scatterplot by adding the `geom_smooth(method = lm)` argument. 
 
 ```{r, message = FALSE}
 CPS1985 %>% ggplot(aes(x = education, y = wage)) +
     geom_point() +
-    geom_smooth(method = lm)
+    geom_smooth(method = lm,
+                se = FALSE)
 ```
 
 ## More Examples of Bivariate Regression
@@ -291,13 +291,13 @@ airfare %>% ggplot(aes(x = dist, y = fare)) +
     geom_point() + 
     geom_smooth(method=lm)
 ```
-Next, we can estimate the regression model using the *lm()* command.  Because I didn't attach the dataset, I need to tell the lm function where the variables are.  One option would be to use the \$ notation, as in `lm(airfare$fare ~ airfare$dist)`, though I prefer this syntax:
+Next, we can estimate the regression model using the `lm()` command.  Because I didn't attach the dataset, I need to tell the `lm()` function where the variables are.  One option would be to use the \$ notation, as in `lm(airfare$fare ~ airfare$dist)`, though I prefer the `lm(fare ~ dist, data = airfare)` syntax because I stopped paying attention in typing class when we got to the section on symbols and I always make typos when I type \$:
 
 ```{r}
 reg2 <- lm(fare ~ dist, data = airfare)
 ```
 
-The regression output is stored in the object *reg2*, so let's use *stargazer()* to check it out. The *stargazer()* function defaults to output in $\LaTeX$, so you may want to stick with the `type = "text"` option. 
+The regression output is stored in the object *reg2*, so let's use `stargazer()` to check it out. The `stargazer()` function defaults to output in $\LaTeX$, so you may want to stick with the `type = "text"` option. If you want to make prettier versions of `stargazer()` output to cut and paste into MS Word or the like, you might want to look into how to use the `type = "HTML` option and how to save `stargazer()` output.  
 
 ```{r, warning = FALSE}
 stargazer(reg2, type = "text")
@@ -333,7 +333,7 @@ gpa2 %>%  ggplot(aes(x = sat, y = colgpa)) +
     geom_point() +
     geom_smooth(method = lm)
 ```
-Next, store the regression in an object and look at it using *stargazer()*
+Next, store the regression in an object and look at it using `stargazer()`
 ```{r, warning = FALSE}
 reg3 <- lm(colgpa ~ sat, data = gpa2)
 stargazer(reg3, type = "text")
@@ -440,7 +440,7 @@ returns <- merge(returns, tbill, by = "date")
 returns <- drop_na(returns)
 ```
 
-This downloads stock ticker data for First Solar (FSLR), Vanguard 500 (VFINX), Coca-Cola (KO), and S&P 500 (SPX), and the 3 month T-bill rate (which will be used for our risk-free rate).  Next, we estimate 3 CAPM regressions; one for Coke, one for First Solar, and one for the Vanguard 500, and display them in stargazer.
+This downloads stock ticker data for First Solar (FSLR), Vanguard 500 (VFINX), Coca-Cola (KO), and S&P 500 (SPX), and the 3 month T-bill rate (which will be used for our risk-free rate).  Next, we estimate 3 CAPM regressions; one for Coke, one for First Solar, and one for the Vanguard 500, and display them in `stargazer()`.
 
 ```{r, warning = FALSE}
 capm1 <- lm(coke-tbill~spx-tbill, data = returns)
@@ -470,7 +470,8 @@ Let's return to some simpler examples, starting with the meap01 data; this data 
 
 ```{r, message = FALSE}
 meap01 %>% ggplot(aes(x = exppp, y = math4)) +
-    geom_point() +
+    geom_point(color = "goldenrod",
+               alpha = .4) +
     geom_smooth(method = lm)
 ```
 If you have read a paper or two in the economics of education literature, the slope of that line shouldn't come as a surprise to you.  Let's estimate a regression:
@@ -488,13 +489,13 @@ vote1 %>% ggplot(aes(x = shareA, y = voteA)) +
     geom_point() +
     geom_smooth(method = lm)
 ```
-Next, we estimate the regression and put the results into *stargazer()* 
+Next, we estimate the regression and put the results into `stargazer()*` for ease of viewing. 
 
 ```{r, warning = FALSE}
 reg5 <- lm(voteA ~ shareA, data = vote1)
 stargazer(reg5, type = "text")
 ```
-The $R^2$ is pretty huge $R^2 = 0.86$ and the $\hat{\beta}$ is positive and significant at the 99% level.  This is a tricky $\beta$ to interpret, because the variable shareA is defined as $\frac{Expenditures\:by\: Candiate\:A}{Expenditures\:by\:Candidate\:A + Expenditures\:by\:Candidate\:B}$. It can be done, but it is tricky.  In some cases, you are best off just interpreting the **signs** and **significance** of the coefficients, and not focusing so much on the actual **magnitude** of the coefficients.  
+The $R^2$ is pretty huge $R^2 = 0.86$ and the $\hat{\beta}$ is positive and significant at the 99% level.  This is a tricky $\beta$ to interpret, because the variable shareA is defined as $\frac{Expenditures\:by\: Candiate\:A}{Expenditures\:by\:Candidate\:A + Expenditures\:by\:Candidate\:B}$. It can be done, but it is tricky.  In some cases, it is easier just interpreting the **signs** and **significance** of the coefficients, and not focusing so much on the actual **magnitude** of the coefficients.  
 
 # Multivariate Regression
 
@@ -538,7 +539,7 @@ sd(resid(reg7))
 
 Hypothesis testing typically focuses on attempting to estimate the "true" relationship between one or more independent variables of interest and the dependent variable.  One might naturally wonder, why worry about other variables if you are only interested in one specific $\hat{\beta}$?  The answer lies in developing a bit deeper intuition of how the regression math works.  Ordinary least squares works by attributing the variation in the dependent variable Y to the variation in your independent variables.  Consider the model $Y=\alpha +\beta X + \epsilon$: it turns out that if you go through the calculus behind OLS, you will find that $\beta=\frac{cov(X,Y)}{var(Y)}$!
 
-The big concern here is that maybe your variable of interest ($X_1$) is correlated (*multicollinear*) with another variable not in your model ($X_2$), so your estimate of $\hat{\beta}$ will include both the direct effect of $X_1$ ***and*** the indirect effect of $X_2$ to the extent $X_2$ is correlated with $X_1$.  THis is referred to as **omitted variable bias**, which we will discuss more in the next notebook.  For the purposes of hypothesis testing, however, if what we really care about is the *true* effect of $X_1$ on $Y$, then we need to include any other variables ($X_2$, $X_3$, etc) that we also think might have an effect on $Y$ as well.
+The big concern here is that maybe your variable of interest ($X_1$) is correlated (**multicollinear**) with another variable not in your model ($X_2$), so your estimate of $\hat{\beta}$ will include both the direct effect of $X_1$ ***and*** the indirect effect of $X_2$ to the extent $X_2$ is correlated with $X_1$.  THis is referred to as **omitted variable bias**, which we will discuss more in the next notebook.  For the purposes of hypothesis testing, however, if what we really care about is the *true* effect of $X_1$ on $Y$, then we need to include any other variables ($X_2$, $X_3$, etc) that we also think might have an effect on $Y$ as well.
 
 ## Example of multivariate regression
 
@@ -553,8 +554,8 @@ stargazer(reg1, reg6, reg7, type = "text")
 The first column has the first regression in this notebook.  The second looks at the relationship between age and wage, and the third column looks at the model with both education and age. What observations might we make when we consider these regressions side by side by side?
 
 * The $\hat{\beta}$ estimates in column 3 are not equal to those in column 1 or 2.  As noted before, this is expected and is probably a sign that column 3 is a better model the other 2.
-* The $R^2$ in the multivariate model is larger than in either of the bivariate models.  This **by definition** has to be true.  Recall that our coefficient of determination $R^2$ roughly measures the percentage of variation in $Y$ that is explained by our dependent variable(s).  In other words, how much of the variation in $Y$ is explained by the *information* contained with in our $X$ variables. Adding more $X$ variables does not remove information, it only potentially adds information. If I added a variable that had no explanatory power to this model, I would expect $R^2$ to not move at all.
-* So why not just add a bunch of variables?  If $R^2$ can only go up, why not run a *kitchen sink* regression and include every variable I can think of?  This results in a problem called *overfitting*, and to avoid this we look to the adjusted $R^2$.  Adjusted $R^2$ is simply $R^2$ but adds a penalty for the number of independent variables included in the model.  Basically, the idea is to only add anothe variable to your model if that variable adds a significant amount of explanatory power. Say you estimate a multivariate model and are wondering if you should add another variable.  By definition, adding that variable will cause $R^2$ to go up.  But if adding that variable causes adjusted $R^2$ to fall, then you shouldn't do it, because adding the variable does not add enough information to the model to justify its inclusion.
+* The $R^2$ in the multivariate model is larger than in either of the bivariate models.  This *by definition* has to be true.  Recall that our coefficient of determination $R^2$ roughly measures the percentage of variation in $Y$ that is explained by our dependent variable(s).  In other words, how much of the variation in $Y$ is explained by the **information** contained with in our $X$ variables. Adding more $X$ variables does not remove information, it only potentially adds information. If I added a variable that had no explanatory power to this model, I would expect $R^2$ to not move at all.
+* So why not just add a bunch of variables?  If $R^2$ can only go up, why not run a **kitchen sink** regression and include every variable I can think of?  This results in a problem called **overfitting**, and to avoid this we look to the adjusted $R^2$.  Adjusted $R^2$ is simply $R^2$ but adds a penalty for the number of independent variables included in the model.  Basically, the idea is to only add anothe variable to your model if that variable adds a significant amount of explanatory power. Say you estimate a multivariate model and are wondering if you should add another variable.  By definition, adding that variable will cause $R^2$ to go up.  But if adding that variable causes adjusted $R^2$ to fall, then you shouldn't do it, because adding the variable does not add enough information to the model to justify its inclusion.
 * We interpret the coefficients in the same way as in a bivariate model - column 3 implies that a 1 year increase in education is associated with a \$0.82 increase in hourly wage, and a 1 year increase in age is associated with a \$0.11 increase in wage.  It is always useful to keep in mind the economic notion of *ceteris parebus* here!
 * We can make predictions the same way as well.  If somebody has 16 years of education and is 34 years old, the model predicts that their wage will be $-\$5.53 + \$0.82(16) + \$0.11(34) = \$11.33$. Even if a variable is not significant, we need to include it in our math to make predictions.
 
