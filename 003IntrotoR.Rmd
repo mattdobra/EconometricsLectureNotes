@@ -462,7 +462,7 @@ class(age)
 class(married)
 class(union)
 ```
-What went wrong with the `class(union)` command?  It turns out there is a function in base R called `union`, so R is not sure what you are referring to.  This is a case where you are stuck using \$ notation, even though we used `attach()` on the data set.
+What went wrong with the `class(union)` command?  It turns out there is a function in base R called `union`, so R is not sure what you are referring to.  This is a case where you are stuck using \$ notation, even though we used `attach()` on the data set.  This is why our original `attach()` command spit out a weird error message too.
 
 ```{r}
 class(CPS1985$union)
