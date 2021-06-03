@@ -3,11 +3,11 @@ title: "Messing around with Gapminder"
 output: html_notebook
 ---
 
-Let's start with a bit of a whirlwind introduction to R using the Gapminder data.  The focus today will be on doing stuff, rather than understanding how the code works.  
+Let's start with a bit of a whirlwind introduction to R using the Gapminder data.  The focus of this notebook will be on doing stuff and seeing what R is capable of and developing some basic coding intuition; we will go into greater detail on the code works in later notebooks.    
 
 We will need 3 packages.
 
-To load them into memory, use the *library()* function.  If you haven't yet installed them, use the *install.packages()* function first.
+To load them into memory, use the `library()` function.  If you haven't yet installed them, use the `install.packages()` function first.
 
 ```{r eval=FALSE}
 install.packages("gapminder")
@@ -23,70 +23,71 @@ library(tidyverse)
 library(stargazer)
 ```
 
-Let's see what the *gapminder* package is all about.  You can get help in a couple of ways
+Let's see what the `gapminder` package is all about.  You can get help in a couple of ways;
 
 ```{r eval=FALSE}
 ?gapminder
 help(gapminder)
 ```
-Typing either of these commands into the R Console will result in a help file popping up in the bottom right panel of RStudio with detailed information
+Typing either of these commands into the R Console will result in a help file popping up in the bottom right panel of RStudio with detailed information.
 
-Some packages have long-form help documents called a *vignette*.  The *gapminder* package does not, but stargazer does.
+Some packages have long-form help documents called a `vignette`.  The `gapminder` package does not, but stargazer does.
 
 ```{r eval=FALSE}
 vignette("stargazer")
 ```
 
-If you type this into your console, a pdf helpfile should open on your computer about *stargazer*.  
+If you type this into your console, a pdf helpfile should open on your computer about `stargazer`.  
 
 ## Looking at the data
 
-The *gapminder* package includes 2 datasets.  Let's grab the main dataset.
+The `gapminder` package includes 2 datasets.  Let's grab the main dataset.
 
 ```{r}
 data("gapminder")
 ```
 
-The *gapminder* data should now exist as an object in your environment window.  You can easily look at the data by clicking on the object.  The helpfile (discussed above) has some variable descriptions.
+The `gapminder` data should now exist as an object in your environment window.  You can easily look at the data by clicking on the object.  The helpfile (discussed above) has some variable descriptions.
 
-Another way to look a the data is to use the *head* or *tail* command - this shows you the first 6 or last 6 lines of data, which is a pretty useful trick.
+Another way to look a the data is to use the `head()` or `tail()` command - this shows you the first 6 or last 6 lines of data, which is a pretty useful trick.
 
 ```{r}
 head(gapminder)
 tail(gapminder)
 ```
 
-We can further explore the data by making a *summary* of it:
+We can further explore the data by making a `summary()` of it:
 ```{r eval=FALSE}
 summary(gapminder)
 ```
 
-Another useful tool for creating tables is the *stargazer* package. It's a bit finicky in this instance, but the result is a nicely formatted table.
+Another useful tool for creating tables is `stargazer()`. It's a bit finicky in this instance, but the result is a nicely formatted table.
 ```{r}
 stargazer(as.data.frame(gapminder), type="text")
 ```
-We can apply functions to this dataset. Let's find the *mean* GDP per capita.
+We can apply functions to this dataset. Let's find the `mean` GDP per capita.
 ```{r}
 mean(gapminder$gdpPercap)
 ```
-Or maybe we want to know the *mean* GDP per capita in the first and last years of the dataset (1952 and 2007)
+Or maybe we want to know the `mean` GDP per capita in the first and last years of the dataset (1952 and 2007):
 ```{r}
 mean(gapminder$gdpPercap[gapminder$year==1952])
 mean(gapminder$gdpPercap[gapminder$year==2007])
 ```
-If you are feeling lazy and don't want to have to type the name of the data set every time you refer to a variable in it, you can *attach* it.  This practice is generally frowned upon, but is a useful crutch while learning how to use R.  
+If you are feeling lazy and don't want to have to type the name of the data set every time you refer to a variable in it, you can `attach()` it.  This practice is generally frowned upon, but is a very useful crutch while learning how to use R.  
 
 ```{r, warning=FALSE, message=FALSE}
 attach(gapminder)
 mean(gdpPercap[year==1952])
 mean(gdpPercap[year==2007])
 ```
-We can also graph this data.  R has a bunch of inbuilt graphing utilities, but *ggplot2* is the current gold standard for displaying data.  Let's see a bit of both looking at life expectancy. the *hist* command is included in base R.
+We can also graph this data.  R has a bunch of inbuilt graphing utilities, but `ggplot2` is the current gold standard for displaying data.  Let's see a bit of both looking at life expectancy. the `hist()` command is included in base R.
 
 ```{r}
 hist(lifeExp)
 ```
-If we use *ggplot* (this is in the *tidyverse* package we already installed), we can get something much more detailed and visually appealing.
+If we use `ggplot()` (this is in the `tidyverse` package we already installed), we can get something much more detailed and visually appealing with just a couple extra lines of code.
+
 ```{r}
 ggplot(data = gapminder, aes(x = lifeExp))+
     geom_histogram(aes(fill = continent), binwidth = 5, show.legend = TRUE) +
@@ -112,20 +113,20 @@ We will come back to doing visualizationsa bit later.
 
 ## Manipulating the Data
 
-Also included in the *tidyverse* package is a package called *dplyr*, which is indispensable for manipulating data.
+Also included in the `tidyverse` package is a package called `dplyr`, which is indispensable for manipulating data.
 
-The most important *dplyr* verbs to remember are:
+The most important `dplyr` verbs to remember are:
 
-* *select* - Selects columns
-* *filter* - Filters Rows
-* *arrange* - re-orders rows
-* *mutate* - creates new columns
-* *summarize* - summarizes stuff
-* *group_by* - allows you to split-apply-recombine data along with *ungroup*
+* `select` - Selects columns
+* `filter` - Filters Rows
+* `arrange` - re-orders rows
+* `mutate` - creates new columns
+* `summarize` - summarizes stuff
+* `group_by` - allows you to split-apply-recombine data along with `ungroup`
 
-One of the most useful things to learn early in in *dplyr* is the **pipe** operator, which looks like this **%>%**.
+One of the most useful things to learn early in in `dplyr` is the **pipe** operator, which looks like this `%>%`.
 
-The keyboard shortcut for %>% is Control-Shift-M.  That's a useful one to know!
+The keyboard shortcut for `%>%` is Control-Shift-M.  That's a useful one to memorize!
 
 The way to think about the pipe operator is that it "pipes" the results from one line of code into the next.
 
@@ -172,7 +173,7 @@ dat %>%
 
 Let's dig a bit deeper into the Life Expectancy means. The data show that Oceania and Europe have a 3 year difference in their life expectancy.  Is this difference **statistically significant**?  We can test this using a concept you might be familiar with from your earlier statistics class: the 2-sample T-test.  
 
-First, we take our dataset of life expectancy from 2007 (dat), filter out everything that is not Europe and Oceania, get rid of the GDP data, and save that in a new object called dat2
+First, we take our dataset of life expectancy from 2007 (dat), filter out everything that is not Europe and Oceania, get rid of the GDP data, and save that in a new object called dat2.
 
 ```{r}
 dat2 <- dat %>% 
@@ -180,7 +181,7 @@ dat2 <- dat %>%
     select(-gdpPercap)
 dat2
 ```
-Now, we can estimate a T-test using the *t.test* function:
+Now, we can estimate a T-test using the `t.test` function:
 ```{r}
 t.test(data=dat2, lifeExp ~ continent)
 ```
@@ -203,16 +204,16 @@ dat %>%
     group_by(continent) %>% 
     summarize(StDev = sd(lifeExp))
 ```
-The *sd* function calculates the Standard Deviation, which is a measure of variation. Asia and the Americas have a lot more heterogeneity than Europe and Oceania!
+The `sd()` function calculates the Standard Deviation, which is a measure of variation. Asia and the Americas have a lot more heterogeneity than Europe and Oceania!
 
-Let's look at the issue of whether or not higher GDP per capita is associated with longer life expectancy.  For this question, we want to estimate a regression which can be done with the *lm* function.
+Let's look at the issue of whether or not higher GDP per capita is associated with longer life expectancy.  For this question, we want to estimate a regression which can be done with the `lm()` function.
 
 ```{r}
 lm(lifeExp ~ gdpPercap, data = dat)
 ```
 The data set needed to be specified here because the only attached dataset is gapminder, but we want to use the dat data!
 
-This output is not very useful. However, we can save it as an object and then use *summary* or *stargazer* on that object and see what the results are.
+This output is not very useful. However, we can save it as an object and then use `summary` or `stargazer` on that object and see what the results are.
 
 ```{r}
 reg1 <- lm(lifeExp ~ gdpPercap, data = dat)
@@ -223,7 +224,7 @@ summary(reg1)
 ```{r warning = FALSE}
 stargazer(reg1, type = "text")
 ```
-These results indicate that, if GDP per capita goes up by $1000, life expectancy is expected to rise by roughly .6 years.  As we will soon, see, this relationship is not terribly linear, so it might make sense to do a log transformation of the GDP variable.
+These results indicate that, if GDP per capita goes up by $1000, life expectancy is expected to rise by roughly .6 years.  If we think this relationship is non-linear, it might make sense to do a log transformation of the GDP variable.
 
 
 ```{r}
@@ -232,11 +233,11 @@ reg2 <- lm(lifeExp ~ log(gdpPercap), data = dat)
 ```{r warning = FALSE}
 stargazer(reg2, type = "text")
 ```
-The R^2^ is much higher here, I'd argue that this model is a better fit.  The results here say that an increase of GDP per capita of 1% corresponds with an increase in life expectancy of 0.07 years -- doubling GDP per capita should increase life expectancy by 7 years
+The $R^2$ is much higher here, I'd argue that this model is a better fit.  The results here say that an increase of GDP per capita of 1% corresponds with an increase in life expectancy of 0.07 years -- doubling GDP per capita should increase life expectancy by 7 years.
 
 ## Displaying Data
 
-Let's use *ggplot* to explore this last relationship visually.  
+Let's use `ggplot()` to explore this last relationship visually.  
 
 Let's start by overwriting the dat object, putting population back in but taking out Oceania so I can make pretty graphs!
 
@@ -246,7 +247,7 @@ dat <- gapminder %>%
     filter(continent != "Oceania")
 ```
 
-Now, start with a quick graph
+Now, start with a quick graph:
 
 
 ```{r}
