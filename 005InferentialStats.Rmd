@@ -51,24 +51,24 @@ summary(mrate)
 ```
 We should start by stating our Null and Alternative Hypotheses.  In this case, our hypothesis is about our population mean (mu), so we have:
 
-* H~0~: mu = .75
-* H~1~: mu != .75
+* $H_0$: $\mu = .75$
+* $H_1$: $\mu \ne .75$
 
 The t-test is executed with the `t.test()` function:
 
 ```{r}
 t.test(mrate, alternative = "two.sided", mu = .75, conf.level = 0.95)
 ```
-Here, we se see the results of the t-test. We  **do not** reject the null hypothesis. Why not?
+Here, we se see the results of the t-test. The results state that we do not have enough evidence to reject $H_0$, the expert's claim. Why not?
 
-* the p-value (p=0.3531) is not less than 0.05
+* the p-value ($p=0.3531$) is not less than 0.05
 * the confidence interval (.69 to 0.77) includes our hypothesized value of 0.75
-* the t value (-0.929) is not in the rejection region (it would have to be less than -1.96--you can use the *qt()* function to look up t-values)
+* the t value (-0.929) is not in the rejection region (it would have to be less than -1.96--you can use the `qt()` function to look up t-values)
 
 Let's say that this same expert tells you that the average participation rate in 401k programs is over 90%  This indicates a 1 sided test, where:
 
-* H~0~: mu >= .90
-* H~1~: mu < .90
+* $H_0$: $\mu \geq .9$ 
+* $H_1$: $\mu < .9$ 
 
 We can calculate a one-sided t-test for prate as follows:
 
@@ -77,11 +77,11 @@ t.test(prate, alternative = "less", mu = 90, conf.level = .95)
 ```
 This suggests that we reject the null hypothesis, that the mean in the data set of 87.3 is far enough below 90 to say that the true mean is probably below 90.  We see this in the results because:
 
-* the p-value (p=4.135e-10) is definitely less than 0.05
-* the confidence interval (-infinity to 88.1) does not include our hypothesized value of 90
+* the p-value ($p=4.135e-10$) is definitely less than 0.05
+* the confidence interval ($-\infty $ to 88.1) does not include our hypothesized value of 90
 * the t value (-6.18) is in the rejection region (it starts around -1.65)
 
-It is often useful to store the resutls of a test in an object, for example:
+It is often useful to store the results of a test in an object, for example:
 ```{r}
 test1 <- t.test(prate, alternative = "less", mu = 90, conf.level = .95)
 
@@ -89,11 +89,11 @@ test1 <- t.test(prate, alternative = "less", mu = 90, conf.level = .95)
 
 An object called test1 should be in your environment window.  
 
-To see what is in this object, see what its *attributes* are:
+To see what is in this object, see what its `attributes()` are:
 ```{r}
 attributes(test1)
 ```
-Now, you can refer to these elements using the $.
+Now, you can refer to these elements using the \$.
 ```{r}
 test1$statistic
 test1$estimate
@@ -103,7 +103,7 @@ test1$estimate
 
 The two-sample t-test is used to compare the means of two populations.  Typically, you are looking at a situation where you have a numeric dependent variable that you think varies based on the value of some categorical independent variable that has two possible levels.   
 
-Let's consider the CPS1985 data.  Perhaps you think that union members have higher incomes than non-union members.  Here, wage is your numeric dependent variable, union membership is your categorical independent variale with 2 levels (union member and non-union member), so a two-sample t-test is appropriate. First, let's start by looking at the data with a boxplot:
+Let's consider the CPS1985 data.  Perhaps you think that union members have higher incomes than non-union members.  Here, wage is your numeric dependent variable, union membership is your categorical independent variable with 2 levels (union member and non-union member), so a two-sample t-test is appropriate. First, let's start by looking at the data with a `boxplot()`:
 
 ```{r}
 CPS1985 %>% ggplot(aes(y = wage, x = union)) +
@@ -111,22 +111,21 @@ CPS1985 %>% ggplot(aes(y = wage, x = union)) +
 ```
 Again, we should start by stating our Null and Alternative Hypotheses.  In this case, our hypothesis is about our population mean (mu), so we have:
 
-* H~0~: mean wage of union members = mean wage of non-union members
-* H~1~: the means are different
+* $H_0$: $\mu_{union} = \mu_{non-union}$
+* $H_1$: $\mu_{union} \ne \mu_{non-union}$
 
-Looks like there may be a difference.  Let's do the statistical test using the same *t.test()* command as before.  Here, we use the code `wage ~ union`; in R, the tilde *~* is the formula operator; when I see I tilde, in my head I say "is a function of" so I read `wage ~ union` to say that wage is a function of union membership.  The dependent variable goes on the left, the independent variable on the right.  Get used to this, you will be seeing it a lot this semester.
-
+Based on the graph, it Looks like there may be a difference.  Let's do the statistical test using the same `t.test()` command as before.  Here, we use the code `wage ~ union`.  Again, the tilde *~* is the formula operator; when I see I tilde, in my head I say "is a function of" so I read `wage ~ union` to say that wage is a function of union membership.  The dependent variable goes on the left, the independent variable on the right.  
 
 
 ```{r}
 t.test(wage ~ union, mu = 0, alt = "two.sided", conf.level = .95)
 ```
-The format of this code might be confusing.  Why test mu=0?  Technically, the test is that the difference of the means is equal to 0.  But that being said, most of the arguments in this code are the default paramaters of the *t.test*.  When you look at the help for *t.test* using `?t.test`, it tells you what the default values are. The options `mu = 0, alt = "two.sided", conf.level = .95` are all defaults, so this code can be simplified as:
+The format of this code might be confusing.  Why test `mu=0`?  Technically, the test is that the difference of the means is equal to 0.  But that being said, most of the arguments in this code are the default paramaters of the `t.test()`.  When you look at the help for `t.test` using `?t.test`, it tells you what the default values are. The options `mu = 0, alt = "two.sided", conf.level = .95` are all defaults, so this code can be simplified as:
 
 ```{r}
 t.test(wage ~ union)
 ```
-Note that I get the same results.  So why bother typing all the options?  When you are learning R, typing all the options is a good way to learn the syntax. 
+Note that we get the same results.  So why bother typing all the options?  When you are learning R, typing all the options is a good way to learn the syntax. 
 
 Anyhow, what does this result tell us?  We reject the null hypothesis!
 
@@ -136,7 +135,7 @@ Anyhow, what does this result tell us?  We reject the null hypothesis!
 
 Let's push a little farther with our two-sample t-tests.  what if our research question is whether union membership affects wages, but only for males and only for those whose occupation is worker.  How do we do this?  
 
-There are lots of ways--we could try to do it all using brackets to subset our data, or we could use dplyr to filter our data into a smaller dataset and  do a simple *t.test*
+There are lots of ways--we could try to do it all using brackets to subset our data, or we could use dplyr to filter our data into a smaller dataset and do a simple `t.test()` as follows:
 
 Option 1: bracketpalooza
 ```{r}
@@ -184,7 +183,7 @@ shapiro.test(wage)
 shapiro.test(trees$Height)
 ```
 
-Which confirms that wage is non-normal and tree height is normal.
+Which confirms that the distribution of the wage variable is non-normal while the distribution of the tree height variable is normal.
 
 Anyhow, since it appears that our wage data may not be normal, perhaps a Wilcoxon test is in order.  Rather than comparing the means, were are comparing the ranks of the data. 
 
@@ -200,14 +199,14 @@ A paired t-test is used to compare 2 populations that are paired with each other
 ```{r}
 sleep
 ```
-Because the same group of people recieved both drugs, we can conduct a paired t-test here.  This looks a lot like the 2 sample t-test we did earlier, witn one extra argument:
+Because the same group of people recieved both drugs, we can conduct a paired t-test here.  This looks a lot like the 2 sample t-test we did earlier, with one extra argument:
 
 ```{r}
 t.test(extra ~ group, data = sleep, paired =TRUE)
 ```
 ## ANOVA
 
-ANOVA statds for Analysis of Variance and is a very common statistical technique in experimental sciences where one can run an experiment with a control group and multiple treatment groups.  Though there are some noteable exceptions, economics is not usually viewed as an experimental science. However, ANOVA is a special case of Regression analysis, which is at the core of econometrics. 
+**ANOVA** stands for **Analysis of Variance** and is a very common statistical technique in experimental sciences where one can run an experiment with a control group and multiple treatment groups.  Though there are some noteable exceptions, economics is not usually viewed as an experimental science. However, ANOVA is a special case of regression analysis, which is at the core of econometrics. 
 
 In many ways, ANOVA is just an amped-up 2-sample t-test; amped up because you can have your dependent variable explained my more than 1 independent variable, and those independent variables can have more than two levels. 
 
@@ -220,19 +219,19 @@ CPS1985 %>% ggplot(aes(x = occupation, y = wage)) +
     geom_boxplot() +
     stat_boxplot(geom = "errorbar", width = 0.5)
 ```
-The Null hypothesis in ANOVA is that ALL of the means are the same.  The alternative is that at least one is different from at least one other.  It certainly looks like these means are different, but we can use ANOVA to test this.
+The Null hypothesis in ANOVA is that ALL of the means are the same...$\mu_1 = \mu_2 = ... = \mu_k$.  The alternative is that at least one is different from at least one other.  It certainly looks like these means are different, but we can use ANOVA to test this.
 
 ```{r}
 aov(wage ~ occupation)
 ```
-This test result doesn't actually tell us much.  We need to save this test result as an object and use the *summary()* command on that object.
+The outupt of the `aov()` command doesn't actually tell us much.  We need to save this test result as an object and use the `summary()` command on that object.
 ```{r}
 anova1 <- aov(wage ~ occupation)
 summary(anova1)
 ```
 This table tells us whether or not we reject the null hypothesis...the Pr(>F) is our p-value, and that is way less than 0.05. so we reject the null hypothesis that all the group means are the same and accept the alternative hypothesis that at least one is different from the rest.
 
-If we want to know **which** means are different, we can run the Tukey-Kremer test. To do this, we simply put our anova object into the *TukeyHSD()* function.
+If we want to know **which** means are different, we can run the Tukey-Kremer test. To do this, we simply put our anova object into the `TukeyHSD()` function.
 
 ```{r}
 TukeyHSD(anova1)
@@ -246,7 +245,7 @@ Ugh this is unreadable.  Let's try that again, some minor edits for readability:
 
 ```{r}
 par(mar = c(3,10,3,3))
-plot(TukeyHSD(anova1), las=1)
+plot(TukeyHSD(anova1), las=1, cex.axis = .75)
 ```
 Any combination where 0 is not included in the confidence interval is considered to be a significant difference!  Looks like there are quite a few of them.
 
@@ -260,10 +259,10 @@ This type of anova has 3 null hypotheses:
 
 **Interaction** is an complex idea.  It is related to the idea in probability regarding independence.  Here, an interaction effect would imply that either:
 
-* The effect of gender on wages varies depends on whether or not hte person is married or unmarried, or equivalently
+* The effect of gender on wages varies depends on whether or not the person is married or unmarried, or equivalently
 * The effect of marital status on wages depends on whether or not the person is a man or a woman.
 
-Let's take a look at this data graphically (I'm going to plagiarize this from my previous notebook!):
+Let's take a look at this data graphically using a graph from the previous notebook:
 
 ```{r}
 CPS1985 %>% ggplot(aes(x = married, y = wage, fill = gender)) +
@@ -288,7 +287,7 @@ Let's run this ANOVA and see what the results are:
 anova2<-aov(wage ~ gender*married)
 summary(anova2)
 ```
-We can reject all 3 null hypotheses at the 5% level.  Get used to looking at stars!  We can dig deeper into the results by looking at the Tukey-Kremer test:
+We can reject all 3 null hypotheses at the 5% level.  We can dig deeper into the results by looking at the Tukey-Kremer test:
 
 ```{r}
 TukeyHSD(anova2)
@@ -309,7 +308,7 @@ This is enough ANOVA for here.  Econometrics typically focuses on regression ana
 
 ## Chi-Square
 
-The Chi-Square test looks at relationships between 2 (or more) categorical variables.  Let's look at the **affairs** dataset from the *AER* package. This data is from a 1978 paper that looks into the prevalence of extramarital affairs.  We might ask the question whether or not there is a relationship between extramarital affairs and whether or not a married couple has kids.  
+The Chi-Square test looks at relationships between 2 (or more) categorical variables.  Let's look at the *affairs* dataset from the `AER` package. This data is from a 1978 paper that looks into the prevalence of extramarital affairs.  We might ask the question whether or not there is a relationship between extramarital affairs and whether or not a married couple has kids.  
 
 Let's start by making a cross tabulation of couples with kids and couples where an affair is occurring.  It is easiest to use dplyr to create a new data frame that only has the 2 variables of interest.
 
@@ -317,7 +316,7 @@ Let's start by making a cross tabulation of couples with kids and couples where 
 affair2 <- affairs %>% select(c(affair, kids))
 table(affair2)
 ```
-On a percentage basis, it looks like affairs are more prevalent among couples with kids.  Maybe this is more clear with a barplot:
+On a percentage basis, it looks like affairs are more prevalent among couples with kids.  Maybe this is more clear with a graph:
 ```{r}
 affair2 %>% ggplot(aes(x = as.factor(kids), fill = as.factor(affair))) +
     geom_bar(position = "fill") +
