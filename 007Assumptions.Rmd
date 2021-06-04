@@ -5,7 +5,7 @@ output: html_notebook
 
 # Overview
 
-The OLS model encountered in the previous notebook is built on a series of assumptions that we will now examine.  We will also look at some of the tools at our disposal when one or more of the assumptions do not hold.  As usual, we start with loading in the data and libraries we will be using.  Some of these libraries are ones we are encountering for the first time; you may need to use the *install.packages()* function on them first.  Also, we won't be attaching the CPS1985 or wage1 datasets because many of the variable names in there clash with each other, which would make the analysis messy.
+The OLS model encountered in the previous notebook is built on a series of assumptions that we will now examine.  We will also look at some of the tools at our disposal when one or more of the assumptions do not hold.  As usual, we start with loading in the data and libraries we will be using.  Some of these libraries are ones we are encountering for the first time; you may need to use the `install.packages()` function on them first.  Also, we won't be attaching the CPS1985 or wage1 datasets because many of the variable names in there clash with each other, which would make the analysis messy.
 
 ```{r, warning=FALSE, message = FALSE}
 library(tidyverse)
@@ -66,7 +66,7 @@ tempdata %>% ggplot(aes(x = lnsales, y = lnsalary)) +
     geom_point()
     
 ```
-Wow, quite a change.  This data looks like it might actually have a *linear* relationship.
+Wow, quite a change.  This data looks like it might actually have a **linear** relationship now.
 
 ```{r, warning = FALSE}
 reg1b <- lm(lnsalary ~ lnsales, data = tempdata)
@@ -97,7 +97,7 @@ Here all 4 specifications are side-by-side.  We've already interpreted columns 1
 
 The model in column 4 seems to be the best model of the bunch.  
 
-Another common non-linear transformation is the quadratic transformation; this is particularly useful in cases where you thinka relationship may be decreasing up to a point, and then start increasing after that point (or vice versa).  To see this in action, let's look at a graph that looks at the relationship between the age and selling prices of homes in the `hprice3` data from the `wooldridge` package.
+Another common non-linear transformation is the quadratic transformation; this is particularly useful in cases where you think a relationship may be decreasing up to a point, and then start increasing after that point (or vice versa).  To see this in action, let's look at a graph that looks at the relationship between the age and selling prices of homes in the `hprice3` data from the `wooldridge` package.
 
 ```{r}
 hprice3 %>% ggplot(aes(x = age, y = price)) +
@@ -167,7 +167,7 @@ You may have wondered why we bother with having a constant term $\alpha$ in our 
 ```{r}
 summary(reg1b)
 ```
-The *Residuals* panel looks at the distribution of the error term.  Each residual from the regression is stored in the regression object; let's put them in our tempdata dataset and take a look at the first few rows.
+The **Residuals** panel looks at the distribution of the error term.  Each residual from the regression is stored in the regression object; let's put them in our tempdata dataset and take a look at the first few rows.
 
 ```{r}
 tempdata$resid <- reg1b$residuals
@@ -216,7 +216,7 @@ tempdata2 %>% ggplot(aes(x = t, y = resid)) +
     geom_point() +
     geom_line()
 ```
-This graph exhibits what is called *serial correlation* or *autocorrelation* as the error terms are correlated with each other.  In other words, if we know the error term for week 1, we can use that to make a pretty good gess about the error term for week 2, and so forth. Again, the issues of serial correlation are mostly time series issues, so if we get to time series at the end of the semester, we will discuss these issues more then.
+This graph exhibits what is called **serial correlation** or **autocorrelation** as the error terms are correlated with each other.  In other words, if we know the error term for week 1, we can use that to make a pretty good guess about the error term for week 2, and so forth. Again, the issues of serial correlation are mostly time series issues, so if we get to time series at the end of the semester, we will discuss these issues more then.
 
 ## Assumption 5: Homoskedasticity of the error term
 
@@ -240,7 +240,7 @@ abline(a = 0, b = 0)
 ```
 See how the shape of the residual plot looks a bit like a cone, with less spread on the left and a lot more spread on the right?  This is heteroskedasticity.  
 
-For the most part, academic economists simply assume that heteroskedasticity is always a problem and as a matter of course just report **robust standard errors**.  In R, we can get this from the *sandwich* library.  If you haven't already, install and load the *sandwich* library and use *coeftest* function with the *vcovHC* option.
+For the most part, academic economists simply assume that heteroskedasticity is always a problem and as a matter of course just report **robust standard errors**.  In R, we can get this from the `sandwich` library.  If you haven't already, install and load the `sandwich` library and use `coeftest` function with the `vcovHC` option.
 
 ```{r, eval = FALSE}
 install.packages("sandwich")
@@ -249,7 +249,7 @@ library(sandwich)
 ```{r}
 coeftest(reg5b, vcovHC)
 ```
-We can compare this result side-by-side with the original regression
+We can compare this result side-by-side with the original regression:
 
 ```{r, warning = FALSE}
 stargazer(reg5b, coeftest(reg5b, vcovHC), type = "text")
@@ -257,13 +257,13 @@ stargazer(reg5b, coeftest(reg5b, vcovHC), type = "text")
 ```
 It's a bit tough to see here, but the coefficients didn't change at all, only the standard errors (the numbers in the parentheses) changed.  
 
-If a model is not *heteroskedastic* and doesn't have *autocorrelation*, it is said to have *spherical errors* and the error terms are *IID* (Independent and Identically Distributed).
+If a model is not **heteroskedastic** and doesn't have **autocorrelation**, it is said to have **spherical errors** and the error terms are **IID** (Independent and Identically Distributed).
 
 ## Assumption 6: No indepentent variable is perfect linear function of other explanatory variables.
 
 This one is important and will probably create quite a few headaches for you when we get to regression with categorical independent variables.  Let's introduce the concept quickly here though.  
 
-As discussed in a previous notebook, ordinary least squares works by attributing the variation in the dependent variable Y to the variation in your independent variables.  If you have more than one independent variable, OLS needs to figure out which independent variable to attribute the variation to.  If you have two identical independent variables, R cannot distinguish one variable from the other when trying to apportion variation.  If you attempt to estimate a model that contains independent variables that are perfectly correlated, R will spit out an error message.  Typically, the way to proceed is to simply remove one of the offending variables.  
+As discussed in a previous notebook, ordinary least squares works by attributing the variation in the dependent variable Y to the variation in your independent variables.  If you have more than one independent variable, OLS needs to figure out which independent variable to attribute the variation to.  If you have two identical independent variables, R cannot distinguish one variable from the other when trying to apportion variation.  If you attempt to estimate a model that contains independent variables that are perfectly correlated, R will attempt to thwart you.  Typically, the way to proceed is to simply remove one of the offending variables.  
 
 For example:
 
@@ -282,7 +282,7 @@ summary(reg6b)
 ```
 Now R is quite displeased with us.  R simply dropped the shareAclone variable because it is impossible to run a regression with both shareA and shareAclone.
 
-Let's dig a little deeper into the *linear function* idea.  Let's say you are running a regression with 3 independent variables, $X_1$, $X_2$, and $X_3$.
+Let's dig a little deeper into the **linear function** idea.  Let's say you are running a regression with 3 independent variables, $X_1$, $X_2$, and $X_3$.
 
 \begin{equation}
 Y = \alpha + \beta_1 X_{1} + \beta_2 X_{2} +\beta_3 X_{3} +\epsilon_i
@@ -294,7 +294,7 @@ This assumption basically states that:
 * $X_1$ is not simply a rescaled version of $X_2$ or $X_3$.  For example, If $X_1$ is height in inches, $X_2$ can't be height in centimeters because then $X_2 = 2.5X_1$
 * $X_1$ cannot be reached with a linear combination of  $X_2$ and $X_3$. So, if $X_1$ is income, $X_2$ is consumption, and $X_3$ is savings, and thus $X_1 = X_2 + X_3$, you can't include all 3 variables in your equation. This is true of more compicated linear combinations as well; if $X_1 = 23.1 + .2X_2 - 12.4X_3$, you couldn't run that either.  
 
-Why this typically causes trouble for people, however, is that they are not usually aware that there is another variable hidden in the regression, $X_0$, which carries a value of 1 for every observation.  This is technically what the $\alpha$ is multiplied by.  This means that $X_1$, $X_2$, and $X_3$ **cannot** be constants, because otherwise you will violate this assumption. 
+Why this typically causes trouble for people new to regression, however, is that they are not usually aware that there is another variable hidden in the regression, $X_0$, which carries a value of 1 for every observation.  This is technically what the $\alpha$ is multiplied by.  This means that $X_1$, $X_2$, and $X_3$ **cannot** be constants, because otherwise you will violate this assumption. 
 
 Let's see what happens when we include another constant in the voting model:
 
@@ -307,7 +307,7 @@ R didn't like the constant in the regression and just chucked it out.
 
 Remember this lesson for when we start talking about dummy variable regressions!
 
-A related issue you might run into is *multicollinearity*, which is where you don't have perfectly correlated independent variables but they are very, very close.  If these correlations are high enough, they generally cause problems. Let's see what happens.  Here, I will use the voting data and create a new variable called shareArand which is the value of shareA plus a random number between -1 and 1. 
+A related issue you might run into is **multicollinearity**, which is where you don't have perfectly correlated independent variables but they are very, very close.  If these correlations are high enough, they generally cause problems. Let's see what happens.  Here, I will use the voting data and create a new variable called shareArand which is the value of shareA plus a random number between -1 and 1. 
 
 ```{r}
 set.seed(8675309)
@@ -323,7 +323,7 @@ stargazer(reg6a, reg6d, type = "text")
 ```
 Compare the model with the multicollinearity on the right with the original model on the left. The coefficients are huge in absolute value compared to column 1.  One of the coefficients has the wrong sign.  And if you add the two $\beta$s in column 2 dogether, you get a number very close to the coefficient on shareA in column 1.  This is typical of models with multicollinearity.
 
-Solving multicollinearity is pretty easy.  Just drop one of the collinear variables and you are golden.
+Solving multicollinearity is pretty easy.  Just drop one of the collinear variables and the problem is solved.
 
 ## Assumption 7: Normality of Error Terms
 
