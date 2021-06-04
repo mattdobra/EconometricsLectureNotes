@@ -149,7 +149,7 @@ Thus far, we have excluded either the male or the female dummy.  Why not simply 
 reg1e <- lm(wage ~ male + female, data = tempdata)
 stargazer(reg1e, type = "text")
 ```
-R won't allow it, but why not?  Recall the discussion from the previous notebook regarding *multicollinearity*; we cannot have a variable that is a linear combination of other variables.  What would happen if you added the male dummy to the female dummy?
+R won't allow it, but why not?  Recall the discussion from the previous notebook regarding **multicollinearity**; we cannot have a variable that is a linear combination of other variables.  What would happen if you added the male dummy to the female dummy?
 
 ```{r}
 tempdata$tempvar <- tempdata$male + tempdata$female
@@ -176,7 +176,7 @@ reg2b <- lm(wage ~ relevel(occupation, "services"), data = tempdata)
 stargazer(reg2b, type = "text")
 ```
 
-The releveled variables are a bit ugly in the table, this is because we releveled the factor variable inside the `lm` command.  We could also permanently relevel the variable with the relevel command and get cleaner looking regression tables:
+The releveled variables are a bit ugly in the table, this is because we releveled the factor variable inside the `lm()` command.  We could also permanently relevel the variable with the relevel command and get cleaner looking regression tables:
 
 ```{r, warning = FALSE}
 tempdata$occupation <- relevel(tempdata$occupation, "services")
@@ -219,7 +219,7 @@ In this model, the omitted group would be the group of individuals who have a 0 
 stargazer(reg3a, type = "text")
 ```
 
-The ones on gender and marital status are fairly straigtforward; they state that women make on average 9 cents less than men (this result is not statistically significant), and that married people make on average \$2.52 more than unmarried people (this result is statistically significant). Interpreting the interaction term is a bit trickier, and how you do it depends on your hypothesis.  To illustrate this idea, the following two statements are both supported by the regression (and are actually saying the same thing!):
+The ones on gender and marital status are fairly straightforward; they state that women make on average 9 cents less than men (this result is not statistically significant), and that married people make on average \$2.52 more than unmarried people (this result is statistically significant). Interpreting the interaction term is a bit trickier, and how you do it depends on your hypothesis.  To illustrate this idea, the following two statements are both supported by the regression (and are actually saying the same thing!):
 
 * The effect of gender on wages is \$3.10 bigger for married women than it is for single women.
 * THe effect of being married on wages is \$3.10 bigger for men than it is for women.
@@ -317,7 +317,7 @@ predict(reg4b, newdata = yourhouse)
 ```
 It looks like those additions would add approximately \$47,000 in value to our house, so perhaps the updates are worth doing!
 
-Let's look at another dataset that is prime for hedonic regression, the `diamonds` dataset that comes in the *ggplot* package:
+Let's look at another dataset that is prime for hedonic regression, the `diamonds` dataset that comes in the `ggplot2` package:
 
 ```{r}
 head(diamonds)
@@ -354,7 +354,7 @@ But statistically this is a bad idea.  If we look at a summary of the data:
 ```{r}
 summary(diamonds2$carat)
 ```
-We see that the biggest diamond in the data set was only 5.01 carats. Thus, making a prediction about a 32 carat diamond is beyond the scope of the model, as the prediction is trying to estimate a point outside of the range of the sample data.  This is called *extrapolation* and is generally frowned upon; we may be fairly sure that the relationship between size and price is linear in the range we are looking at, there is no guarantee that it is linear beyond the range of the data (and in the case of diamonds, it almost certainly is not!)
+We see that the biggest diamond in the data set was only 5.01 carats. Thus, making a prediction about a 32 carat diamond is beyond the scope of the model, as the prediction is trying to estimate a point outside of the range of the sample data.  This is called **extrapolation** and is generally frowned upon; we may be fairly sure that the relationship between size and price is linear in the range we are looking at, there is no guarantee that it is linear beyond the range of the data (and in the case of diamonds, it almost certainly is not!).  This is also, generally speaking, why the intercept is not often of practical importance!
 
 ```{r, fig.align = "center", echo=FALSE, fig.cap="XKCD: Extrapolating", out.width = '100%'}
 knitr::include_graphics("images/extrapolating.png")
@@ -379,10 +379,11 @@ Lets try this again with a slight variation: here we include a female athlete in
 reg4e <- lm(colgpa ~ sat + athlete*female, data = gpa2)
 stargazer(reg4d, reg4e, type = "text")
 ```
+Note that R includes both the interaction variable, as well as the two variables individually.  This is what you want it to do.
 
 Judging from the lack of significance of the interaction term and the fact that the adjusted $R^2$ did not move, it seems like there is no interaction effect.  This implies that the effect of gender on grades is not affected by one's status of being an athlete (or equivalently, the effect of being an athlete is not different between males and females).
 
-Let's examine one more example involving interaction effects before moving on with the *TeachingRatings* data set from the AER package. We will estimate a regression looking at the relationship between student evaluation of instructors and the attractiveness of instructors, interacted dummies for minority and female faculty, a native english speaker dummy, and a dummy to indicate whether or not the class is a single credit elective course (e.g. yoga)
+Let's examine one more example involving interaction effects before moving on with the `TeachingRatings` data set from the AER package. We will estimate a regression looking at the relationship between student evaluation of instructors and the attractiveness of instructors, interacted dummies for minority and female faculty, a native english speaker dummy, and a dummy to indicate whether or not the class is a single credit elective course (e.g. yoga)
 
 ```{r, warning = FALSE}
 reg4f <- lm(eval~beauty + gender + minority + native + credits, data = TeachingRatings)
@@ -394,4 +395,4 @@ Let's look specifically at the interacted variables.  The function of an interac
 
 # Interactions with Numeric Variables
 
-In the final section of the notebook on dummy variables, we will look at interactions with numeric variables.  Interpreting these can be tricky.  
+In the final section of the notebook on dummy variables, we will look at interactions with numeric variables.  Interpreting these can be tricky, but remember, the overall intuition behind interaction effects remains the same--we are looking for  
