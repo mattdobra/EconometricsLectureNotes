@@ -559,6 +559,19 @@ The first column has the first regression in this notebook.  The second looks at
 * We interpret the coefficients in the same way as in a bivariate model - column 3 implies that a 1 year increase in education is associated with a \$0.82 increase in hourly wage, and a 1 year increase in age is associated with a \$0.11 increase in wage.  It is always useful to keep in mind the economic notion of *ceteris parebus* here!
 * We can make predictions the same way as well.  If somebody has 16 years of education and is 34 years old, the model predicts that their wage will be $-\$5.53 + \$0.82(16) + \$0.11(34) = \$11.33$. Even if a variable is not significant, we need to include it in our math to make predictions.
 
+Let's take a look at one more regression to see the importance of **controlling for** (including) all the relevant variables in a regression.  Above, we used the meap01 data to estimate the relationship between educational expenditures and test scores:
+
+```{r, warning = FALSE}
+stargazer(reg4, type = "text")
+```
+We found a negative relationship between expenditures and math scores.  Let's add a second variable to this model, the percent of students eligible for free or reduced lunch:
+
+```{r, warning = FALSE}
+reg4z <- lm(math4 ~ exppp + lunch, data = meap01)
+stargazer(reg4, reg4z, type = "text")
+```
+The $R^2$ shot up, and now we see that per pupil expenditures is positively (and significantly) correlated with student math scores, while the percent of students eligible for free or reduced lunch (a measure of poverty) is negative and significant.  
+
 # Wrapping Up
 
 At this point, you should be able to use R to estimate a simple bivariate or multivariate OLS regression and to interpret the regression output.  We will next turn to some of the key assumptions of regression analysis.

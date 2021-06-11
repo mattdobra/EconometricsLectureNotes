@@ -1,0 +1,179 @@
+---
+title: "Categorical Dependent Variables"
+output: html_notebook
+---
+
+# Overview
+
+Until now, we have been limited to using numeric variables as our dependent variables.  In this notebook we look at how we can use OLS modeling for categorical dependent variables with the **linear probability model**, as well as the related **logit** and **probit** models.  This set of models is designed for looking at **dichotomous** dependent variables, variables with only 2 possible outcomes.  These types of outcomes are of the sort that can be answered as a yes or no type question, for example:
+
+* Was a job candidate hired?
+* Did a customer make a purchase?
+* Was a patient cured?
+* Did a product break?
+* DId a politician vote for a specific bill?
+
+As you might be starting to suspect, there are tons of interesting questions that can be answered with these types of models! 
+
+While not often utilized in economics, there are versions of probit and logit that are designed for **multinomial** (categorical variables with more than 2 outcomes) and **ordered** (multinomial variables whose levels can be ordered from worst to best, lowest to highest, etc.) dependent variables.  
+
+Let's begin by loading in some essential packages.  We have not yet used `margins` or `jtools` so you may need to install those now.  Additionally, `jtools` requires a couple more packages to be installed to do what we will be asking it to do, `broom` and `huxtable`:
+
+
+```{r, eval = FALSE}
+install.packages("margins")
+install.packages("jtools")
+install.packages("broom")
+install.packages("huxtable")
+```
+
+```{r, warning=FALSE, message = FALSE}
+library(tidyverse)
+library(stargazer)
+library(margins)
+library(jtools)
+library(wooldridge)
+library(AER)
+data(k401ksubs)
+
+data(CPS1985)
+data(HousePrices)
+data(diamonds)
+data(gpa2)
+data(TeachingRatings)
+data(CPS1988)
+
+
+```
+
+
+# Linear Probability Model
+
+The linear probability model (LPM) is the easiest place to begin -- while the model is generally thought to be inferior to probit or logit, estimating and interpreting the model is far more straightforward because it essentially just an OLS regression with a dummy variable as our dependent variable.  
+
+Let's start with a simple bivariate model; it should help develop the intuition of predicting dichotomous outcomes without getting too complicated too quickly.  We will use the `k401ksubs` dataset in the `wooldridge` package, which contains 9275 individual level observations.  We will start by seeing whether or not income level, `inc` is predictive of whether or not an individual participates in a 401k account, captured in the `p401k` variable.
+
+Let's start by just putting the two variables we are going to analyze into a smaller dataframe called `retdata` and look at some summary statistics.
+
+```{r}
+retdata <- k401ksubs %>% select(inc, p401k)
+summary(retdata)
+```
+How do we interpret the results of the `p401k` variable? Because it is coded as a dummy variable, `p401k=1` tells us that an individual has a 401k account, and `p401k=0` tells us they do not. The mean of `r mean(retdata$p401k)` tells us that 27.6% of the individuals in the data set have a 401k account.  We can look to see if there is a different mean income of the two groups:
+
+```{r, message = FALSE}
+retdata %>% group_by(p401k) %>% 
+    summarize(mean = mean(inc))
+```
+
+As a reminder, we could have gotten the same summary statistics using `mean(retdata$inc[retdata$p401k == 0])` and `mean(retdata$inc[retdata$p401k == 1])`.  These results do suggest that individuals who participate in their company's 401k program tend to have higher incomes on average.  
+
+The **linear probability model** is simple to estimate; we run a regression using `p401k` as our dependent variable with `inc` as the sole independent variable.  
+
+Luckily, the `k401ksubs` data has coded the `p401k` variable as a dummy for us already; if it were not and instead was coded as a factor, we would need an extra step (e.g. we could create a dummy variable using the `ifelse()` command, we could use the `as.numeric()` command, etc.). We will see examples of this sort later!  
+
+```{r, warning = FALSE}
+reg1a <- lm(p401k ~ inc, data = k401ksubs)
+stargazer(reg1a, type = "text")
+```
+
+What does this result tell us?  The $\hat{\beta} = .005$ tells us that, for every \$1,000 increase in income, the expected probability of an individual participating in the 401k program increases by half a percentage point.  
+
+\begin{equation}
+Probability\:of\:401k\:Participation_{i} = .079 + .005 \cdot income_i 
+\end{equation}
+
+Just as with a regression, we can calculate a predicted probability by plugging in values for $income_i$; for example, we would estimate that somebody with \$50,000 income ($inc_i=50$), as:
+
+\begin{equation}
+Probability\:of\:401k\:Participation_{i} = .079 + .005 \cdot 50 = 32.9\% 
+\end{equation}
+
+What if we wanted to predict the probability of 401k participation for somebody with an income of \$190,000 ($inc_i=190$)
+
+\begin{equation}
+Probability\:of\:401k\:Participation_{i} = .079 + .005 \cdot 190 = 102.9\% 
+\end{equation}
+
+Somehow the model gives this individual a greater than 100% chance of participating in their company's 401k program, which is a problem, especially considering that $inc_i=190$ isn't extrapolation.
+
+```{r, message = FALSE}
+k401ksubs %>% ggplot(aes(x = inc, y = p401k)) +
+    geom_point() +
+    geom_smooth(method = lm)
+```
+
+A second problem with the LPM becomes apparent when examining the Q-Q plot.  Recall, the Q-Q plot examines the residuals of the model, and the Q-Q plot is expected to be a relatively straight line.  For a the linear probability model, it will almost certainly never be so:
+
+
+```{r}
+qqnorm(reg1a$residuals)
+qqline(reg1a$residuals)
+```
+This is a funky looking graph, but this level of heteroskedasticity is completely expected for a linear probability model; you are predicting a probability, so most of your predictions are between 0 and 1.  However, the outcome variable `p401k` can ONLY be 0 or 1. This pretty much guarantees that you will have too many huge outliers.
+
+Estimating a **logit** or **probit** model mitigates both of these problems.  Estimating these models are fairly straightforward and require the `glm()` command; GLM stands for **Generalized Linear Model**.  Let's estimate both the logit and probit models:
+
+```{r}
+reg1b <- glm(p401k ~ inc, family = binomial(link = "logit"), data = k401ksubs)
+reg1c <- glm(p401k ~ inc, family = binomial(link = "probit"), data = k401ksubs)
+```
+The syntax for these are very similar to the syntax for `lm`; the function is specified in the same way (`p401k ~ inc`), the data is specified in the same way (`data = k401ksubs`), the only difference is that you need to specify the `family` option.  
+
+While estimating the model is fairly straightforward, interpreting the results is not.  Let's look at the 3 results, side-by-side:
+
+```{r, warning = FALSE}
+stargazer(reg1a, reg1b, reg1c, type = "text")
+```
+Some things stand out.  The $R^2$ in this model has been replaced by the log likelihood and the AIC, and the estimated $\hat{\alpha}$ and $\hat{beta}$ look very different from those of the linear model.  Interpreting $\hat{\alpha}$ and $\hat{beta}$ in this form is quite difficult; it requires wrapping ones mind around the concept of log-likelihood and odds ratios and other such things.  If you are just interested in predictive modeling, these results are sufficient. But for the sake of learning how to interpret the model, we will learn how to convert these coefficients to a format that is interpreted like OLS coefficients shortly.
+
+First though, let's look at a graph of what we just estimated.  
+
+```{r, message = FALSE}
+k401ksubs %>% ggplot(aes(x = inc, y = p401k)) +
+    geom_point() +
+    geom_smooth(method = lm, color = "blue") +
+    stat_smooth(method = "glm", 
+                method.args = list(family = binomial(link = "probit")),
+                color = "red") +
+    stat_smooth(method = "glm", 
+                method.args = list(family = binomial(link = "logit")),
+                color = "darkgreen") 
+
+```
+The blue line is the linear model that we plotted earlier, the red and green lines are the probit and logit models respectively.  Some points of note:
+
+* The probit and logit models are very similar to each other.  Logit is often preferred in disciplines like biostats, because the logit coefficients have a useful interpretation in terms of odds ratios.  Generally speaking, there may be a slight preference for probit in economics, but for the most part, it doesn't much matter which one you use.
+* The probit and logit models are clearly non-linear, and they will asymptotically approach 0 and 1 but will never actually hit 0 or 1. 
+
+The fact that the model is non-linear provides a useful place to think about the concept of the **margin**.  In economics, the idea of "marginal" is very similar to the idea of "additional"; for example, the marginal cost of production is the additional cost incurred from producing one more item, marginal utility is the additional utility received from consuming a tiny bit more, and so on.  With that in mind, the estimated values of $\hat{\beta}$ from an OLS regression have a very similar interpretation -- a small, one unit change in your $X$ variable leads to a $\hat{\beta}$ sized increase in your $Y$ variable.  In the linear model, the value of $\hat{\beta}$ is constant; that is, regardless of the value of $X$, the marginal effect of $X$ on $Y$ is the same: $\hat{\beta}$. In a non-linear model like probit or logit, the marginal effect of $X$ on $Y$ varies by the value of $X$; where the curve is relatively flat, the marginal effect of $X$ on $Y$ is relatively small, whereas when the curve is relatively steep, the marginal effect of $X$ on $Y$ is relatively large. 
+
+The upshot of all of this is that it takes some work to be able to interpret our probit and logit estimates in the same way we interpret our OLS estimates. To do so, we need to obtain **marginal effects** from our probit and logit model. Luckily, there are multiple packages we can install that will do all the work for us.  We will use the `margins` package.
+
+There are two primary methods of calculating marginal effects:
+
+* **Marginal Effect at the Means (MEM)** -- find the mean of all of your independent variables, and calculate the marginal effect of each variable at that point.
+* **Average Marginal Effect (AME)** -- find the marginal effect for every observation in the data, and calculate the mean of those marginal effects.
+
+MEM is easier to calculate, though in my opinion AME is the more generally appropriate method.  By default, `margins` uses the AME option.  The syntax for the `margins()` function is quite simple -- simply feed it a logit or probit object.
+
+Unfortunately, `stargazer` does not work well with the output of the margins command, so we will switch to use `export_summs()` from the `jtools` package.  
+
+```{r}
+reg1bmargins <- margins(reg1b)
+reg1cmargins <- margins(reg1c)
+export_summs(reg1a, reg1bmargins, reg1cmargins)
+```
+
+One drawback of `export_summs()` is that the statistical significance stars don't match those of `stargazer` (and therefore are not those standard in economics), though this can be manually changed by adding a `stars` option. I will also add a couple options to aid with readability: naming the models, and changing the number format to add a couple of decimal places so we aren't looking at a table full of zeroes!
+
+```{r, warning = FALSE}
+reg1bmargins <- margins(reg1b)
+reg1cmargins <- margins(reg1c)
+export_summs(reg1a, reg1bmargins, reg1cmargins, 
+             number_format = "%.4f",
+             stars = c(`***` = 0.01, `**` = 0.05, `*` = 0.1),
+             model.names = c("OLS", "Logit", "Probit"))
+
+```
+Here we see that the estimated marginal effects of the Logit and Probit model are very similar to each other.  They are also a fair bit smaller than the OLS estimates, and are probably a more accurate representation of the data.

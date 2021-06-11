@@ -19,13 +19,8 @@ data(HousePrices)
 data(diamonds)
 data(gpa2)
 data(TeachingRatings)
+data(CPS1988)
 
-
-data(wage1)
-data(ceosal1)
-data(nyse)
-data(smoke)
-data(vote1)
 ```
 
 # Incorporating Categorical Independent Variables
@@ -395,4 +390,69 @@ Let's look specifically at the interacted variables.  The function of an interac
 
 # Interactions with Numeric Variables
 
-In the final section of the notebook on dummy variables, we will look at interactions with numeric variables.  Interpreting these can be tricky, but remember, the overall intuition behind interaction effects remains the same--we are looking for  
+In this section, we will look at interactions with numeric variables.  Interpreting these can be tricky, but remember, the overall intuition behind interaction effects remains the same--we believe that the relationship between the dependent varaible $Y$ and an independent variable $X_1$ depends on some other variable $X_2$.
+
+Let's take a look at the CPS1988 data and estimate a regression with log of wages as our dependent variable and experience, experience squared, and an interaction between years of education (a numeric variable) and ethnicity (a factor variable) as our independent variables.
+
+```{r, warning = FALSE}
+reg5a <- lm(log(wage) ~ experience + I(experience^2) + education*ethnicity, data = CPS1988)
+stargazer(reg5a, type = "text")
+```
+Interpreting this regression requires us to combine a lot of things we have learned already:
+
+* First, recall that using the log term for wages affects our interpretation of the coefficients!  
+* The fact that the linear term on experience has a positive sign and the squared term has a negative sign indicates *decreasing returns to experience*: more experience leads to higher wages, but earlier years have a larger *marginal effect* on wages than later years.
+
+Let's dig deeper into the interaction effect and start off by writing out the entire regression model:
+
+\begin{equation}
+ln(Wage_{i}) = 4.313 + 0.078 \cdot experience_i - .001 \cdot experience_i^2 - 0.124 \cdot ethnicity_i + .086 \cdot education_i - .010 \cdot education_i \cdot ethnicity_i 
+\end{equation}
+
+Let's simplify our discussion by assuming the individual in question has 10 years of experience, so the first three terms can be simplified as $4.313 + 0.078 \cdot 10 - 0.001 \cdot 10^2 = 4.993$, so now: 
+
+\begin{equation}
+ln(Wage_{i}) = 4.993 - 0.124 \cdot ethnicity_i + .086 \cdot education_i - .010 \cdot education_i \cdot ethnicity_i 
+\end{equation}
+
+The ethnicity variable has two levels, "cauc" (Caucasian) and "afam" (African American).  In this model, $ethnicity_i = 1$ for observations identified in the data as African American and $ethinicity_i = 0$ for observations coded as Caucasian.  
+
+If we plug in $ethnicity_i = 1$ for African Americans, we get:
+
+\begin{equation}
+ln(Wage_{i}) = 4.993 - 0.124 + .086 \cdot education_i - .010 \cdot education_i
+\end{equation}
+\begin{equation}
+ln(Wage_{i}) = 4.869 + 0.076 \cdot education_i
+\end{equation
+}
+If we plug in $ethnicity_i = 0$ for Caucasians, we get:
+
+\begin{equation}
+ln(Wage_{i}) = 4.993 + .086 \cdot education_i
+\end{equation}
+
+For African Americans, both the intercept is different (due to the $\hat{\beta}$ on the ethnicity dummy), ***and*** the slope on education is different (due to the $\hat{\beta}$ on the interaction effect).  Reminding ourselves of the regression results:
+```{r, warning = FALSE}
+stargazer(reg5a, type = "text")
+```
+The negative $\hat{\beta}$ on the interaction effect is telling us that the marginal effect of an additional year of education appears to be lower for African Americans than it is for Caucasians.  
+
+It is possible, though not terribly common, to estimate interaction effects between two numeric variables.  Let's consider a model we looked at in an earlier notebook, looking at the relationship between school funding and test scores in the meap01 data set:
+
+```{r, warning = FALSE}
+reg5b <- lm(math4 ~ exppp + lunch, data = meap01)
+stargazer(reg5b, type = "text")
+```
+
+In this regression, we saw that higher poverty rates were correlated with lower math scores, while higher levels of funding were correlated with higher math scores. Perhaps your theory is that there ought to be an interaction between these variables; for example, maybe you believe that increases in funding should be more important in poor schools. we could test this by interacting the `exppp` and `lunch` variables:
+
+```{r warning = FALSE}
+reg5c <- lm(math4 ~ exppp * lunch, data = meap01)
+stargazer(reg5b, reg5c, type = "text")
+```
+If your theory were correct, you would expect to see a positive and significant sign on the interaction term.  However, the interaction term is the wrong sign and insignificant as well, suggesting that perhaps the impact of funding is not different based on the poverty characteristics of schools.
+
+# Wrapping up
+
+When we began our discussion of regression, we limited ourselves to using only numeric independent variables; in this notebook, we extended power of regression modeling can be extended to include categorical independent variables as well.  The next step is to consider the ability of regression modeling to explain categorical dependent variables.     
