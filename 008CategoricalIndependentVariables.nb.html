@@ -221,10 +221,11 @@ pre code {
 <p>Let’s begin by loading in some essential packages:</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeSh0aWR5dmVyc2UpXG5saWJyYXJ5KHN0YXJnYXplcilcbmxpYnJhcnkod29vbGRyaWRnZSlcbmRhdGEoQ1BTMTk4NSlcbmRhdGEoSG91c2VQcmljZXMpXG5kYXRhKGRpYW1vbmRzKVxuZGF0YShncGEyKVxuZGF0YShUZWFjaGluZ1JhdGluZ3MpXG5kYXRhKENQUzE5ODgpXG5cbmBgYCJ9 -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeSh0aWR5dmVyc2UpXG5saWJyYXJ5KHN0YXJnYXplcilcbmxpYnJhcnkod29vbGRyaWRnZSlcbmxpYnJhcnkoQUVSKVxuZGF0YShDUFMxOTg1KVxuZGF0YShIb3VzZVByaWNlcylcbmRhdGEoZGlhbW9uZHMpXG5kYXRhKGdwYTIpXG5kYXRhKFRlYWNoaW5nUmF0aW5ncylcbmRhdGEoQ1BTMTk4OClcblxuYGBgIn0= -->
 <pre class="r"><code>library(tidyverse)
 library(stargazer)
 library(wooldridge)
+library(AER)
 data(CPS1985)
 data(HousePrices)
 data(diamonds)
@@ -244,7 +245,7 @@ data(CPS1988)
 <!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuaGVhZChDUFMxOTg1KVxuYGBgIn0= -->
 <pre class="r"><code>head(CPS1985)</code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-frame-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbImRhdGEuZnJhbWUiXSwibnJvdyI6NiwibmNvbCI6MTEsInN1bW1hcnkiOnsiRGVzY3JpcHRpb24iOlsiZGZbLDExXSBbNiB4IDExXSJdfX0sInJkZiI6Ikg0c0lBQUFBQUFBQUJxVlVRVy9UTUJSMmt5YWpLUjJUdGhNSGhPQ0NKcTFhVzhvSlJCRWdMaHdRcDEyTjQ3YlJVanR5bkhYanhJL2h2RjhDWjg3OEEzN0J4blBpbDZacGl0Umh5WHJQejM3dmUvNzhuaisvT3hzRlp3RWh4Q1Z0NGhIWEE1WDRiejhOaHVNaElXMEhWaTNZNlJoNUNhY09RZW5DM0RmSEprZlRmRXdPZjVqeGMvTHcrdWpyN3cvWGt3T1NqOGtqSzQrZi9ncGVKZDlMdjhmVy9zVEtaMXZrTWNGUitJMnQvWDBoWC8reGE4UWJyTWN0L2Q1OEsrd2ZyUnpaY3krc3hQMlg2T2IyakIvTWdvQ051VWFNSC9NTEhxZWdIVmdpamJYTmFNYXNmbThlcFFrVkVhNDlxZWRjMWNKNExLWXBSaWxqVHluVEVvNlNtMXBXRGRPRWMyNXRCQWZEcGpMVDh3Wmc5M1luckFZR05yRGFDeHJ6TWhyUFY3dGdOVEM5Z2VWamhLVlU1M0NYWXRYUm5NMkJZQm9qNVNsWEZ4SGpLUjZYMHlrc1MxSWdOZHdLRmxUUUdWOXdvZStjcmJ1YWE5bGlOZlFBSXpOUk1oV0ptVFhlWjFLa1dtVk1SMUxjL1lXYVdOdFdEWTZRVm5PdmdJRC9LUVRuSDRXd084eDZLd2k2NE5nS1hTeXVKVHdTUGpjUE0wWXJ0QVg4TXVFcTRxSjhZcmQ2V3B2YWlQUVZJaXMrVy9uNk15N0NzcElDeVZpV1ZHUDdLYy96dExsbFlyVzF0NkFLVU1OYS9oMGxsLzNxSGJCb1d3Tzh6R0J3ZW9yR0lTb2pWSjZqTXQ3Q1hSQlNUZnRUQlJnTi9PM0p4T1FQNkk3NXNMMmFjMHZWREE4eVliSU5UOWc4RStjbjVwc05LaS9kczlLdjZOMENzbzJKZVVnV0Y3TklsSDBXMHk4Y1czSWZXTWxKNlNmUUJCcHZBdGEwcjZVdVd6ZGdNa1pMZmpkeTh4ZjVaMWtCcUFZQUFBPT0ifQ== -->
+<!-- rnb-frame-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbImRhdGEuZnJhbWUiXSwibnJvdyI6NiwibmNvbCI6MTEsInN1bW1hcnkiOnsiRGVzY3JpcHRpb24iOlsiZGZbLDExXSBbNiB4IDExXSJdfX0sInJkZiI6Ikg0c0lBQUFBQUFBQUJxVlVRVy9UTUJSMmt5YWpLUjJUdGhNSGhPQ0NKcTFhVzhvSlJCRWdMaHdRcDEyTjQ3YlJVanR5bkhYanhJL2h2RjhDWjg3OEEzN0J4blBpbDZacGl0Umh5WHJQejM3dmUvNzhuaisvT3hzRlp3RWh4Q1Z0NGhIWEE1WDRiejhOaHVNaElXMEhWaTNZNlJoNUNhY09RZW5DM0RmSEprZlRmRXdPZjVqeGMvTHcrdWpyN3cvWGt3T1NqOGtqSzQrZi9ncGVKZDlMdjhmVy9zVEtaMXZrTWNGUitJMnQvWDBoWC8reGE4UWJyTWN0L2Q1OEsrd2ZyUnpaY3krc3hQMlg2T2IyakIvTWdvQ051VWFNSC9NTEhxZWdIVmdpamJYTmFNYXNmbThlcFFrVkVhNDlxZWRjMWNKNExLWXBSaWxqVHluVEVvNlNtMXBXRGRPRWMyNXRCQWZEcGpMVDh3Wmc5M1luckFZR05yRGFDeHJ6TWhyUFY3dGdOVEM5Z2VWamhLVlU1M0NYWXRYUm5NMkJZQm9qNVNsWEZ4SGpLUjZYMHlrc1MxSWdOZHdLRmxUUUdWOXdvZStjcmJ1YWE5bGlOZlFBSXpOUk1oV0ptVFhlWjFLa1dtVk1SMUxjL1lXYVdOdFdEWTZRVm5PdmdJRC9LUVRuSDRXd084eDZLd2k2NE5nS1hTeXVKVHdTUGpjUE0wWXJ0QVg4TXVFcTRxSjhZcmQ2V3B2YWlQUVZJaXMrVy9uNk15N0NzcElDeVZpV1ZHUDdLYy96dExsbFlyVzF0NkFLVU1OYS9oMGxsLzNxSGJCb1d3Tzh6R0J3ZW9yR0lTb2pWSjZqTXQ3Q1hSQlNUZnRUQlJnTi9PM0p4T1FQNkk3NXNMMmFjMHZWREE4eVliSU5UOWc4RStjbjVuc01LaS9kczlLdjZOMENzbzJKZVVnV0Y3TklsSDBXMHk4Y1czSWZXTWxKNlNmUUJCcHZBdGEwcjZVdVd6ZGdNa1pMZmpkeTh4ZDByZXlScUFZQUFBPT0ifQ== -->
 <div data-pagedtable="false">
 <script data-pagedtable-source type="application/json">
 {"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["wage"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["education"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["experience"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["age"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["ethnicity"],"name":[5],"type":["fctr"],"align":["left"]},{"label":["region"],"name":[6],"type":["fctr"],"align":["left"]},{"label":["gender"],"name":[7],"type":["fctr"],"align":["left"]},{"label":["occupation"],"name":[8],"type":["fctr"],"align":["left"]},{"label":["sector"],"name":[9],"type":["fctr"],"align":["left"]},{"label":["union"],"name":[10],"type":["fctr"],"align":["left"]},{"label":["married"],"name":[11],"type":["fctr"],"align":["left"]}],"data":[{"1":"5.10","2":"8","3":"21","4":"35","5":"hispanic","6":"other","7":"female","8":"worker","9":"manufacturing","10":"no","11":"yes","_rn_":"1"},{"1":"4.95","2":"9","3":"42","4":"57","5":"cauc","6":"other","7":"female","8":"worker","9":"manufacturing","10":"no","11":"yes","_rn_":"1100"},{"1":"6.67","2":"12","3":"1","4":"19","5":"cauc","6":"other","7":"male","8":"worker","9":"manufacturing","10":"no","11":"no","_rn_":"2"},{"1":"4.00","2":"12","3":"4","4":"22","5":"cauc","6":"other","7":"male","8":"worker","9":"other","10":"no","11":"no","_rn_":"3"},{"1":"7.50","2":"12","3":"17","4":"35","5":"cauc","6":"other","7":"male","8":"worker","9":"other","10":"no","11":"yes","_rn_":"4"},{"1":"13.07","2":"13","3":"9","4":"28","5":"cauc","6":"other","7":"male","8":"worker","9":"other","10":"yes","11":"no","_rn_":"5"}],"options":{"columns":{"min":{},"max":[10],"total":[11]},"rows":{"min":[10],"max":[10],"total":[6]},"pages":{}}}
@@ -292,7 +293,7 @@ tempdata$male &lt;- ifelse(tempdata$gender == &quot;male&quot;, 1, 0)</code></pr
 <!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudGVtcGRhdGFbMTY4OjE3NywgYyg3LCAxMiwgMTMpXVxuYGBgIn0= -->
 <pre class="r"><code>tempdata[168:177, c(7, 12, 13)]</code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-frame-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbImRhdGEuZnJhbWUiXSwibnJvdyI6MTAsIm5jb2wiOjMsInN1bW1hcnkiOnsiRGVzY3JpcHRpb24iOlsiZGZbLDNdIFsxMCB4IDNdIl19fSwicmRmIjoiSDRzSUFBQUFBQUFBQnBXU1gwL0RJQkRBYjZYTWpHVFR4TSt4eG5adWMwOCs2QWN3UHUwVld6b2JHU3kwVXorMm4yQktLWXpTRjVXRTNPLytjTndkUEQ5dUYyUkxBQUJCREJnUTFnampoNmMwVzJZQWNhUzFrZlpNV3ZtcG82NU5LS0NwbHNRNHV4M1pQV1NyQjRuR25MMHpYbXU2TXQ3T0d1OHBaeTZpWkVZTHorR2MwOW9kT3ljcmFkNUlwZW1rOTh5V0ZhejdyMUQrWmgvNlhkNS94UC94bnJBOVFmZk10WWRjZXpzbUNxWUdjK2xQTEV3eVVmSWo2U2NpMW9IUzFkcmpuY2ZOR2RjM0hsT1BtY2VGeDF1UFM0K3JyaHowRGVFcmtZSTJOQ21WTGd6TVN3VkZYOGhEVTBtaFM0N2EvNFVIaDBkcVlMZzhpcmJGWXA2L0hzWGJmQVBoWDV4YVNYcU11aXRqVnhoMkUyVmlWd2szVWN6cEMrTldtZWxSbWtrbUIxV0p4bldpclhYU3lJYTZPSkpMN2l6ZEx6ejlBUExXcDVoWEF3QUEifQ== -->
+<!-- rnb-frame-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbImRhdGEuZnJhbWUiXSwibnJvdyI6MTAsIm5jb2wiOjMsInN1bW1hcnkiOnsiRGVzY3JpcHRpb24iOlsiZGZbLDNdIFsxMCB4IDNdIl19fSwicmRmIjoiSDRzSUFBQUFBQUFBQnBXU1gwL0RJQkRBYjZQTWpHVFR4TSt4eG5adTFTY2Y5QU9ZUGUwVld6b2JHVjBvVXorMm4yQktLWXpTRjVXRTNPLytjTndkYko2MlM3SWxBSUFnQWd3SWE0VEo0M09TcmxLQWFLeTFrZlpNVy9tcG82NU5LS0NabHNRNHV6MjJlOGhXRHhKTk9IdG52TkYwWmJ5ZE5kcFR6bHhFeVl3V25zTTVwNDA3ZGs1VzBselZVdE5KNzdrdEsxZ1BYNkg4elQ3MHU3ei9pUC9qUFdGN2d1Nlphdys1OW5aTUZFd081dEtmV0poa0t1dVB1SitJV0FkSzFwbkhPNC8zWjh4dVBDWWVVNDlMajdjZVZ4N1hYVG5vRzhKWElnVlZOQzZsTGd6TVN3VkZYOVFIVmRWQ2x6eHUveGNlSEI3SmdlSHlLTm9XaTBYK2VoUnZpd3pDdnppemt2UVlkVmRHcmpEc0pzckVyaEp1b3BqVEY4YXRNdGVqTkpPTUQ3SVN5bldpclUyc2FrVmRITWxyN2l6ZEx6ejlBTzBCQWFSWEF3QUEifQ== -->
 <div data-pagedtable="false">
 <script data-pagedtable-source type="application/json">
 {"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["gender"],"name":[1],"type":["fctr"],"align":["left"]},{"label":["female"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["male"],"name":[3],"type":["dbl"],"align":["right"]}],"data":[{"1":"male","2":"0","3":"1","_rn_":"167"},{"1":"male","2":"0","3":"1","_rn_":"168"},{"1":"female","2":"1","3":"0","_rn_":"169"},{"1":"female","2":"1","3":"0","_rn_":"170"},{"1":"male","2":"0","3":"1","_rn_":"171"},{"1":"female","2":"1","3":"0","_rn_":"172"},{"1":"female","2":"1","3":"0","_rn_":"173"},{"1":"male","2":"0","3":"1","_rn_":"174"},{"1":"male","2":"0","3":"1","_rn_":"175"},{"1":"female","2":"1","3":"0","_rn_":"176"}],"options":{"columns":{"min":{},"max":[10],"total":[3]},"rows":{"min":[10],"max":[10],"total":[10]},"pages":{}}}
@@ -304,16 +305,13 @@ tempdata$male &lt;- ifelse(tempdata$gender == &quot;male&quot;, 1, 0)</code></pr
 <p>What if we wanted to look at a categorical variable with more than 2 levels, like occupation?</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudGVtcGRhdGFbMTY4OjE3NywgYyg3LCAxMiwgMTMpXVxuYGBgIn0= -->
-<pre class="r"><code>tempdata[168:177, c(7, 12, 13)]</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc3VtbWFyeShDUFMxOTg1JG9jY3VwYXRpb24pXG5gYGAifQ== -->
+<pre class="r"><code>summary(CPS1985$occupation)</code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-frame-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbImRhdGEuZnJhbWUiXSwibnJvdyI6MTAsIm5jb2wiOjMsInN1bW1hcnkiOnsiRGVzY3JpcHRpb24iOlsiZGZbLDNdIFsxMCB4IDNdIl19fSwicmRmIjoiSDRzSUFBQUFBQUFBQnBXU1gwL0RJQkRBYjZQTWpHVFR4TSt4eG5hdTB5Y2Y5QU9ZUGUwVld6b2JHVjBvVXorMm4yQktLWXpTRjVXRTNPLytjTndkYko2MlM3SWxBSUFnQWd3SWE0VEo0M09TcmxLQWFLeTFrZlpNVy9tcG82NU5LS0NabHNRNHV6MjJlOGhXRHhKTk9IdG52TkYwWmJ5ZE5kcFR6bHhFeVl3V25zTTVwNDA3ZGs1VzBselZVdE5KNzdrdEsxZ1BYNkg4elQ3MHU3ei9pUC9qUFdGN2d1Nlphdys1OW5aTUZFd081dEtmV0poa0t1dVB1SitJV0FkS3NyWEhPNC8zWjF6ZmVFdzhwaDZYSG04OXJqeG1YVG5vRzhKWElnVlZOQzZsTGd6TVN3VkZYOVFIVmRWQ2x6eHUveGNlSEI3SmdlSHlLTm9XaTBYK2VoUnZpd3pDdnppemt2UVlkVmRHcmpEc0pzckVyaEp1b3BqVEY4YXRNdGVqTkpPTUQ3SVN5bldpclUyc2FrVmRITWxyN2l6ZEx6ejlBTThqWDhkWEF3QUEifQ== -->
-<div data-pagedtable="false">
-<script data-pagedtable-source type="application/json">
-{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["gender"],"name":[1],"type":["fctr"],"align":["left"]},{"label":["female"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["male"],"name":[3],"type":["dbl"],"align":["right"]}],"data":[{"1":"male","2":"0","3":"1","_rn_":"167"},{"1":"male","2":"0","3":"1","_rn_":"168"},{"1":"female","2":"1","3":"0","_rn_":"169"},{"1":"female","2":"1","3":"0","_rn_":"170"},{"1":"male","2":"0","3":"1","_rn_":"171"},{"1":"female","2":"1","3":"0","_rn_":"172"},{"1":"female","2":"1","3":"0","_rn_":"173"},{"1":"male","2":"0","3":"1","_rn_":"174"},{"1":"male","2":"0","3":"1","_rn_":"175"},{"1":"female","2":"1","3":"0","_rn_":"176"}],"options":{"columns":{"min":{},"max":[10],"total":[3]},"rows":{"min":[10],"max":[10],"total":[10]},"pages":{}}}
-  </script>
-</div>
-<!-- rnb-frame-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiICAgIHdvcmtlciAgdGVjaG5pY2FsICAgc2VydmljZXMgICAgIG9mZmljZSAgICAgIHNhbGVzIG1hbmFnZW1lbnQgXG4gICAgICAgMTU2ICAgICAgICAxMDUgICAgICAgICA4MyAgICAgICAgIDk3ICAgICAgICAgMzggICAgICAgICA1NSBcbiJ9 -->
+<pre><code>    worker  technical   services     office      sales management 
+       156        105         83         97         38         55 </code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>This has 6 levels, so you would create 6 dummies.</p>
@@ -381,11 +379,14 @@ Wage_{i} = \alpha + \beta female_i
 <pre class="r"><code>reg1a &lt;- lm(wage ~ female, data = tempdata)
 stargazer(reg1a, type = &quot;text&quot;)</code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiXG49PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PVxuICAgICAgICAgICAgICAgICAgICAgICAgRGVwZW5kZW50IHZhcmlhYmxlOiAgICBcbiAgICAgICAgICAgICAgICAgICAgLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAoMC40MzcpICAgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbkNvbnN0YW50ICAgICAgICAgICAgICAgICAgICAgOS45OTUqKiogICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAoMC4yOTYpICAgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXG5PYnNlcnZhdGlvbnMgICAgICAgICAgICAgICAgICAgIDUzNCAgICAgICAgICAgIFxuUjIgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDAuMDQyICAgICAgICAgICBcbkFkanVzdGVkIFIyICAgICAgICAgICAgICAgICAgICAwLjA0MCAgICAgICAgICAgXG5SZXNpZHVhbCBTdGQuIEVycm9yICAgICAgNS4wMzQgKGRmID0gNTMyKSAgICAgIFxuRiBTdGF0aXN0aWMgICAgICAgICAgIDIzLjQyNioqKiAoZGYgPSAxOyA1MzIpICBcbj09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09XG5Ob3RlOiAgICAgICAgICAgICAgICpwPDAuMTsgKipwPDAuMDU7ICoqKnA8MC4wMVxuIn0= -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG49PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PVxuICAgICAgICAgICAgICAgICAgICAgICAgRGVwZW5kZW50IHZhcmlhYmxlOiAgICBcbiAgICAgICAgICAgICAgICAgICAgLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgd2FnZSAgICAgICAgICAgIFxuLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS1cbmZlbWFsZSAgICAgICAgICAgICAgICAgICAgICAgLTIuMTE2KioqICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAoMC40MzcpICAgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbkNvbnN0YW50ICAgICAgICAgICAgICAgICAgICAgOS45OTUqKiogICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAoMC4yOTYpICAgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXG5PYnNlcnZhdGlvbnMgICAgICAgICAgICAgICAgICAgIDUzNCAgICAgICAgICAgIFxuUjIgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDAuMDQyICAgICAgICAgICBcbkFkanVzdGVkIFIyICAgICAgICAgICAgICAgICAgICAwLjA0MCAgICAgICAgICAgXG5SZXNpZHVhbCBTdGQuIEVycm9yICAgICAgNS4wMzQgKGRmID0gNTMyKSAgICAgIFxuRiBTdGF0aXN0aWMgICAgICAgICAgIDIzLjQyNioqKiAoZGYgPSAxOyA1MzIpICBcbj09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09XG5Ob3RlOiAgICAgICAgICAgICAgICpwPDAuMTsgKipwPDAuMDU7ICoqKnA8MC4wMVxuIn0= -->
 <pre><code>
 ===============================================
                         Dependent variable:    
                     ---------------------------
+                               wage            
+-----------------------------------------------
+female                       -2.116***         
                               (0.437)          
                                                
 Constant                     9.995***          
@@ -518,11 +519,11 @@ Note:                           *p&lt;0.1; **p&lt;0.05; ***p&lt;0.01</code></pre
 <p>What would have happened if we estimated a regression with the male dummies instead?</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucmVnMWIgPC0gbG0od2FnZSB+IGdlbmRlciwgZGF0YSA9IHRlbXBkYXRhKVxuc3RhcmdhemVyKHJlZzFhLCByZWcxYiwgdHlwZSA9IFwidGV4dFwiKVxuYGBgIn0= -->
-<pre class="r"><code>reg1b &lt;- lm(wage ~ gender, data = tempdata)
-stargazer(reg1a, reg1b, type = &quot;text&quot;)</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucmVnMWMgPC0gbG0od2FnZSB+IG1hbGUsIGRhdGEgPSB0ZW1wZGF0YSlcbnN0YXJnYXplcihyZWcxYSwgcmVnMWMsIHR5cGUgPSBcInRleHRcIilcbmBgYCJ9 -->
+<pre class="r"><code>reg1c &lt;- lm(wage ~ male, data = tempdata)
+stargazer(reg1a, reg1c, type = &quot;text&quot;)</code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiXG49PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PVxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBEZXBlbmRlbnQgdmFyaWFibGU6ICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgd2FnZSAgICAgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgKDEpICAgICAgICAgICAgKDIpICAgICBcbi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXG5mZW1hbGUgICAgICAgICAgICAgICAgICAgICAgICAgICAtMi4xMTYqKiogICAgICAgICAgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICgwLjQzNykgICAgICAgICAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG5nZW5kZXJmZW1hbGUgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAtMi4xMTYqKiogIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICgwLjQzNykgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG5Db25zdGFudCAgICAgICAgICAgICAgICAgICAgICAgICAgOS45OTUqKiogICAgICA5Ljk5NSoqKiAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICgwLjI5NikgICAgICAgICgwLjI5NikgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG4tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLVxuT2JzZXJ2YXRpb25zICAgICAgICAgICAgICAgICAgICAgICAgNTM0ICAgICAgICAgICAgNTM0ICAgICBcblIyICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgMC4wNDIgICAgICAgICAgMC4wNDIgICAgXG5BZGp1c3RlZCBSMiAgICAgICAgICAgICAgICAgICAgICAgIDAuMDQwICAgICAgICAgIDAuMDQwICAgIFxuUmVzaWR1YWwgU3RkLiBFcnJvciAoZGYgPSA1MzIpICAgICA1LjAzNCAgICAgICAgICA1LjAzNCAgICBcbkYgU3RhdGlzdGljIChkZiA9IDE7IDUzMikgICAgICAgIDIzLjQyNioqKiAgICAgIDIzLjQyNioqKiAgXG49PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PVxuTm90ZTogICAgICAgICAgICAgICAgICAgICAgICAgICAqcDwwLjE7ICoqcDwwLjA1OyAqKipwPDAuMDFcbiJ9 -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG49PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PVxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBEZXBlbmRlbnQgdmFyaWFibGU6ICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgd2FnZSAgICAgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgKDEpICAgICAgICAgICAgKDIpICAgICBcbi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXG5mZW1hbGUgICAgICAgICAgICAgICAgICAgICAgICAgICAtMi4xMTYqKiogICAgICAgICAgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICgwLjQzNykgICAgICAgICAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG5tYWxlICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAyLjExNioqKiAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICgwLjQzNykgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG5Db25zdGFudCAgICAgICAgICAgICAgICAgICAgICAgICAgOS45OTUqKiogICAgICA3Ljg3OSoqKiAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICgwLjI5NikgICAgICAgICgwLjMyMikgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG4tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLVxuT2JzZXJ2YXRpb25zICAgICAgICAgICAgICAgICAgICAgICAgNTM0ICAgICAgICAgICAgNTM0ICAgICBcblIyICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgMC4wNDIgICAgICAgICAgMC4wNDIgICAgXG5BZGp1c3RlZCBSMiAgICAgICAgICAgICAgICAgICAgICAgIDAuMDQwICAgICAgICAgIDAuMDQwICAgIFxuUmVzaWR1YWwgU3RkLiBFcnJvciAoZGYgPSA1MzIpICAgICA1LjAzNCAgICAgICAgICA1LjAzNCAgICBcbkYgU3RhdGlzdGljIChkZiA9IDE7IDUzMikgICAgICAgIDIzLjQyNioqKiAgICAgIDIzLjQyNioqKiAgXG49PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PVxuTm90ZTogICAgICAgICAgICAgICAgICAgICAgICAgICAqcDwwLjE7ICoqcDwwLjA1OyAqKipwPDAuMDFcbiJ9 -->
 <pre><code>
 ===========================================================
                                    Dependent variable:     
@@ -533,11 +534,11 @@ stargazer(reg1a, reg1b, type = &quot;text&quot;)</code></pre>
 female                           -2.116***                 
                                   (0.437)                  
                                                            
-genderfemale                                    -2.116***  
+male                                            2.116***   
                                                  (0.437)   
                                                            
-Constant                          9.995***      9.995***   
-                                  (0.296)        (0.296)   
+Constant                          9.995***      7.879***   
+                                  (0.296)        (0.322)   
                                                            
 -----------------------------------------------------------
 Observations                        534            534     
@@ -623,51 +624,48 @@ Note:               *p&lt;0.1; **p&lt;0.05; ***p&lt;0.01</code></pre>
 <p>R won’t allow it, but why not? Recall the discussion from the previous notebook regarding <strong>multicollinearity</strong>; we cannot have a variable that is a linear combination of other variables. What would happen if you added the male dummy to the female dummy?</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucmVnMWUgPC0gbG0od2FnZSB+IG1hbGUgKyBmZW1hbGUsIGRhdGEgPSB0ZW1wZGF0YSlcbnN0YXJnYXplcihyZWcxZSwgdHlwZSA9IFwidGV4dFwiKVxuYGBgIn0= -->
-<pre class="r"><code>reg1e &lt;- lm(wage ~ male + female, data = tempdata)
-stargazer(reg1e, type = &quot;text&quot;)</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiXG49PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PVxuICAgICAgICAgICAgICAgICAgICAgICAgRGVwZW5kZW50IHZhcmlhYmxlOiAgICBcbiAgICAgICAgICAgICAgICAgICAgLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgd2FnZSAgICAgICAgICAgIFxuLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS1cbm1hbGUgICAgICAgICAgICAgICAgICAgICAgICAgMi4xMTYqKiogICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAoMC40MzcpICAgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbmZlbWFsZSAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbkNvbnN0YW50ICAgICAgICAgICAgICAgICAgICAgNy44NzkqKiogICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAoMC4zMjIpICAgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXG5PYnNlcnZhdGlvbnMgICAgICAgICAgICAgICAgICAgIDUzNCAgICAgICAgICAgIFxuUjIgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDAuMDQyICAgICAgICAgICBcbkFkanVzdGVkIFIyICAgICAgICAgICAgICAgICAgICAwLjA0MCAgICAgICAgICAgXG5SZXNpZHVhbCBTdGQuIEVycm9yICAgICAgNS4wMzQgKGRmID0gNTMyKSAgICAgIFxuRiBTdGF0aXN0aWMgICAgICAgICAgIDIzLjQyNioqKiAoZGYgPSAxOyA1MzIpICBcbj09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09XG5Ob3RlOiAgICAgICAgICAgICAgICpwPDAuMTsgKipwPDAuMDU7ICoqKnA8MC4wMVxuIn0= -->
-<pre><code>
-===============================================
-                        Dependent variable:    
-                    ---------------------------
-                               wage            
------------------------------------------------
-male                         2.116***          
-                              (0.437)          
-                                               
-female                                         
-                                               
-                                               
-Constant                     7.879***          
-                              (0.322)          
-                                               
------------------------------------------------
-Observations                    534            
-R2                             0.042           
-Adjusted R2                    0.040           
-Residual Std. Error      5.034 (df = 532)      
-F Statistic           23.426*** (df = 1; 532)  
-===============================================
-Note:               *p&lt;0.1; **p&lt;0.05; ***p&lt;0.01</code></pre>
-<!-- rnb-output-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<p>It seems that you will get a column of 1s, and a column of 1s will be collinear with the variable that is added to the regression to calculate the constant term. If you <em>really</em> wanted, you could run this regression with no constant term:</p>
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
 <!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudGVtcGRhdGEkdGVtcHZhciA8LSB0ZW1wZGF0YSRtYWxlICsgdGVtcGRhdGEkZmVtYWxlXG50ZW1wZGF0YVsxNjg6MTc3LCBjKDcsIDEyLCAxMywgMTQpXVxuYGBgIn0= -->
 <pre class="r"><code>tempdata$tempvar &lt;- tempdata$male + tempdata$female
 tempdata[168:177, c(7, 12, 13, 14)]</code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-frame-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbImRhdGEuZnJhbWUiXSwibnJvdyI6MTAsIm5jb2wiOjQsInN1bW1hcnkiOnsiRGVzY3JpcHRpb24iOlsiZGZbLDRdIFsxMCB4IDRdIl19fSwicmRmIjoiSDRzSUFBQUFBQUFBQnFXUy8wN0NNQkRIeTlaQmFBSWg4VGxZMkJEUXYveERIOEQ0Ri8rV3JjUEZybHU2Z2o2MlQ0RGVmcFRTYXFMR0pjMTllbmU5WHIrN3A0ZnRrbXdKUXNoSEdBWElEd0RSOFA0eGlsY3hRdGlEM1FBaTQ4YStRZFlWQUFZN0FVdmFZTGU4ZnJuYzc2MUNRODZPak5kQXN6YmFlWEZCT2RNWkdXdDM5cmtnNGJUV3g4N0ZNcHFvVWdLZFlFMzd0cXp2N3QyMlAvbmR1Szc3aC96ZjN2TnQzZjlhVnpaQkM2Wmx3MXEyUFJNcGs0N2VYLy9FU0xHaU9sTHAxQnpMOGpXOHJFdjZnQit0TndadkRONmVjYk13R0JtTURTNE5YaHRjR1Z4MzdmZ2Z5QjRHa2xKRncweENZNmdkQ0t2cFVWbXB2QlRRc3RlTWNlQWNIa2pITVR1STVvbnBQSGsraUpkNXZFRDJ6RTk2U3k0WWQzZGkzVm1nRldaaW53dXRhc0RwanZGK013VXRXeW5EU3VaQzZhZUF0dzVWcWFqT0kwbkp0YWViOXRNbmpWNGYxNzhEQUFBPSJ9 -->
+<!-- rnb-frame-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbImRhdGEuZnJhbWUiXSwibnJvdyI6MTAsIm5jb2wiOjQsInN1bW1hcnkiOnsiRGVzY3JpcHRpb24iOlsiZGZbLDRdIFsxMCB4IDRdIl19fSwicmRmIjoiSDRzSUFBQUFBQUFBQnFXU1VVL0NNQkRIQytzZ05JR1ErRGxZM0JEUUp4LzBBeGlmZUsxYmg0dGR0M1FGL2RoK0F2UzJ0WlJXRXpVdWFlN1h1K3YxK3Q4OTNtK1haRXNRUWdIQ0tFUkJDSWhHZHc5eHNrb1F3a1BZRFNBeWFlMGJaRjBBWUxCVHNLUUw5bXVvbDg5Njd4UWFjWFpndkFHYWQ5SGVpMHZLbWNuSVdiZHp6NFVwcDQwNWRpcVcwMVJWRXVnSWE2YmJjcjdiZDlmKzVQZmpwdTRmOG45N3o3ZDEvMnQ5MlFRdG1aRU5HOWwyVEdSTWVucC8vUk5qeGNyNlFLVlhjeUtyMStpOEx0R0JJRjV2TEY1YnZEbmg1dEppYkRHeHVMUjRaWEZsY2QyM0Uzd2dkeGhJUmhXTmNnbU5vVzRnbktiSFZhMktTa0RMdzNhTVErL3dRSHFPK1Y2MFQ4d1c2Zk5ldkN5U0dMa3pQOVdXbkRIdTc4U21zOUFvek1TdUVFYlZrTk1ueHZWbUJscDJVa2ExTElReVR3RnZFNmxLVVpOSDBvb2JUei90eDArdmZFRzB2d01BQUE9PSJ9 -->
 <div data-pagedtable="false">
 <script data-pagedtable-source type="application/json">
 {"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["gender"],"name":[1],"type":["fctr"],"align":["left"]},{"label":["female"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["male"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["tempvar"],"name":[4],"type":["dbl"],"align":["right"]}],"data":[{"1":"male","2":"0","3":"1","4":"1","_rn_":"167"},{"1":"male","2":"0","3":"1","4":"1","_rn_":"168"},{"1":"female","2":"1","3":"0","4":"1","_rn_":"169"},{"1":"female","2":"1","3":"0","4":"1","_rn_":"170"},{"1":"male","2":"0","3":"1","4":"1","_rn_":"171"},{"1":"female","2":"1","3":"0","4":"1","_rn_":"172"},{"1":"female","2":"1","3":"0","4":"1","_rn_":"173"},{"1":"male","2":"0","3":"1","4":"1","_rn_":"174"},{"1":"male","2":"0","3":"1","4":"1","_rn_":"175"},{"1":"female","2":"1","3":"0","4":"1","_rn_":"176"}],"options":{"columns":{"min":{},"max":[10],"total":[4]},"rows":{"min":[10],"max":[10],"total":[10]},"pages":{}}}
   </script>
 </div>
 <!-- rnb-frame-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>It seems that you will get a column of 1s, and a column of 1s will be collinear with the variable that is added to the regression to calculate the constant term. If you <em>really</em> wanted, you could run this regression with no constant term:</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucmVnMWYgPC0gbG0od2FnZSB+IGZlbWFsZSArIG1hbGUgLSAxLCBkYXRhID0gdGVtcGRhdGEpXG5zdGFyZ2F6ZXIocmVnMWYsIHR5cGUgPSBcInRleHRcIilcbmBgYCJ9 -->
+<pre class="r"><code>reg1f &lt;- lm(wage ~ female + male - 1, data = tempdata)
+stargazer(reg1f, type = &quot;text&quot;)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG49PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PVxuICAgICAgICAgICAgICAgICAgICAgICAgRGVwZW5kZW50IHZhcmlhYmxlOiAgICBcbiAgICAgICAgICAgICAgICAgICAgLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgd2FnZSAgICAgICAgICAgIFxuLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS1cbmZlbWFsZSAgICAgICAgICAgICAgICAgICAgICAgNy44NzkqKiogICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAoMC4zMjIpICAgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbm1hbGUgICAgICAgICAgICAgICAgICAgICAgICAgOS45OTUqKiogICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAoMC4yOTYpICAgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXG5PYnNlcnZhdGlvbnMgICAgICAgICAgICAgICAgICAgIDUzNCAgICAgICAgICAgIFxuUjIgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDAuNzY2ICAgICAgICAgICBcbkFkanVzdGVkIFIyICAgICAgICAgICAgICAgICAgICAwLjc2NSAgICAgICAgICAgXG5SZXNpZHVhbCBTdGQuIEVycm9yICAgICAgNS4wMzQgKGRmID0gNTMyKSAgICAgIFxuRiBTdGF0aXN0aWMgICAgICAgICAgODY5LjYyMioqKiAoZGYgPSAyOyA1MzIpICBcbj09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09XG5Ob3RlOiAgICAgICAgICAgICAgICpwPDAuMTsgKipwPDAuMDU7ICoqKnA8MC4wMVxuIn0= -->
+<pre><code>
+===============================================
+                        Dependent variable:    
+                    ---------------------------
+                               wage            
+-----------------------------------------------
+female                       7.879***          
+                              (0.322)          
+                                               
+male                         9.995***          
+                              (0.296)          
+                                               
+-----------------------------------------------
+Observations                    534            
+R2                             0.766           
+Adjusted R2                    0.765           
+Residual Std. Error      5.034 (df = 532)      
+F Statistic          869.622*** (df = 2; 532)  
+===============================================
+Note:               *p&lt;0.1; **p&lt;0.05; ***p&lt;0.01</code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>But there is really no point in doing so. You don’t get any added information, and if your research question is about the difference between the male and female groups, this regression doesn’t tell you that. You know that <span class="math inline">\(\hat{\beta_1} =7.879\)</span> and <span class="math inline">\(\hat{\beta_2}=9.995\)</span> are significantly different from zero, but you don’t know if the difference between <span class="math inline">\(\hat{\beta_1}\)</span> and <span class="math inline">\(\hat{\beta_2}\)</span> is significantly different.</p>
@@ -717,43 +715,43 @@ Note:                *p&lt;0.1; **p&lt;0.05; ***p&lt;0.01</code></pre>
 <p>Here, constant is the average wage for the omitted group (worker), and the <span class="math inline">\(\hat{\beta}\)</span> estimates for the various occupations are interpreted relative to the omitted group; for example, people whose occupation is “management” make on average $4.28 more than those whose occupation is “worker”, and that difference is statistically significant. While mathematically it does not matter which occupation is the omitted group, when doing hypothesis testing it is often most useful to omit the group with either the highest or lowest average.</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucmVnMmEgPC0gbG0od2FnZSB+IG9jY3VwYXRpb24sIGRhdGEgPSB0ZW1wZGF0YSlcbnN0YXJnYXplcihyZWcyYSwgdHlwZSA9IFwidGV4dFwiKVxuYGBgIn0= -->
-<pre class="r"><code>reg2a &lt;- lm(wage ~ occupation, data = tempdata)
-stargazer(reg2a, type = &quot;text&quot;)</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucmVnMmIgPC0gbG0od2FnZSB+IHJlbGV2ZWwob2NjdXBhdGlvbiwgXCJzZXJ2aWNlc1wiKSwgZGF0YSA9IHRlbXBkYXRhKVxuc3RhcmdhemVyKHJlZzJiLCB0eXBlID0gXCJ0ZXh0XCIpXG5gYGAifQ== -->
+<pre class="r"><code>reg2b &lt;- lm(wage ~ relevel(occupation, &quot;services&quot;), data = tempdata)
+stargazer(reg2b, type = &quot;text&quot;)</code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiXG49PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT1cbiAgICAgICAgICAgICAgICAgICAgICAgICBEZXBlbmRlbnQgdmFyaWFibGU6ICAgIFxuICAgICAgICAgICAgICAgICAgICAgLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHdhZ2UgICAgICAgICAgICBcbi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLVxub2NjdXBhdGlvbnRlY2huaWNhbCAgICAgICAgICAgMy41MjEqKiogICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgKDAuNTkwKSAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxub2NjdXBhdGlvbnNlcnZpY2VzICAgICAgICAgICAgLTEuODg5KioqICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgKDAuNjM1KSAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxub2NjdXBhdGlvbm9mZmljZSAgICAgICAgICAgICAgIC0xLjAwNCogICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgKDAuNjA0KSAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxub2NjdXBhdGlvbnNhbGVzICAgICAgICAgICAgICAgIC0wLjgzNCAgICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgKDAuODQ2KSAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxub2NjdXBhdGlvbm1hbmFnZW1lbnQgICAgICAgICAgNC4yNzgqKiogICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgKDAuNzMzKSAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxuQ29uc3RhbnQgICAgICAgICAgICAgICAgICAgICAgOC40MjYqKiogICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgKDAuMzc0KSAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxuLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXG5PYnNlcnZhdGlvbnMgICAgICAgICAgICAgICAgICAgICA1MzQgICAgICAgICAgICBcblIyICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgMC4xODAgICAgICAgICAgIFxuQWRqdXN0ZWQgUjIgICAgICAgICAgICAgICAgICAgICAwLjE3MyAgICAgICAgICAgXG5SZXNpZHVhbCBTdGQuIEVycm9yICAgICAgIDQuNjc1IChkZiA9IDUyOCkgICAgICBcbkYgU3RhdGlzdGljICAgICAgICAgICAgMjMuMjI0KioqIChkZiA9IDU7IDUyOCkgIFxuPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09XG5Ob3RlOiAgICAgICAgICAgICAgICAqcDwwLjE7ICoqcDwwLjA1OyAqKipwPDAuMDFcbiJ9 -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG49PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT1cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBEZXBlbmRlbnQgdmFyaWFibGU6ICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHdhZ2UgICAgICAgICAgICBcbi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLVxucmVsZXZlbChvY2N1cGF0aW9uLCBcInNlcnZpY2VzXCIpd29ya2VyICAgICAgICAgICAgICAxLjg4OSoqKiAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAoMC42MzUpICAgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG5yZWxldmVsKG9jY3VwYXRpb24sIFwic2VydmljZXNcIil0ZWNobmljYWwgICAgICAgICAgIDUuNDEwKioqICAgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICgwLjY4NykgICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbnJlbGV2ZWwob2NjdXBhdGlvbiwgXCJzZXJ2aWNlc1wiKW9mZmljZSAgICAgICAgICAgICAgICAwLjg4NSAgICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgKDAuNjk5KSAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxucmVsZXZlbChvY2N1cGF0aW9uLCBcInNlcnZpY2VzXCIpc2FsZXMgICAgICAgICAgICAgICAgIDEuMDU1ICAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAoMC45MTYpICAgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG5yZWxldmVsKG9jY3VwYXRpb24sIFwic2VydmljZXNcIiltYW5hZ2VtZW50ICAgICAgICAgIDYuMTY3KioqICAgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICgwLjgxMykgICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbkNvbnN0YW50ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDYuNTM3KioqICAgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICgwLjUxMykgICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLVxuT2JzZXJ2YXRpb25zICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgNTM0ICAgICAgICAgICAgXG5SMiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDAuMTgwICAgICAgICAgICBcbkFkanVzdGVkIFIyICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgMC4xNzMgICAgICAgICAgIFxuUmVzaWR1YWwgU3RkLiBFcnJvciAgICAgICAgICAgICAgICAgICAgICAgICAgICA0LjY3NSAoZGYgPSA1MjgpICAgICAgXG5GIFN0YXRpc3RpYyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDIzLjIyNCoqKiAoZGYgPSA1OyA1MjgpICBcbj09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PVxuTm90ZTogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgKnA8MC4xOyAqKnA8MC4wNTsgKioqcDwwLjAxXG4ifQ== -->
 <pre><code>
-================================================
-                         Dependent variable:    
-                     ---------------------------
-                                wage            
-------------------------------------------------
-occupationtechnical           3.521***          
-                               (0.590)          
-                                                
-occupationservices            -1.889***         
-                               (0.635)          
-                                                
-occupationoffice               -1.004*          
-                               (0.604)          
-                                                
-occupationsales                -0.834           
-                               (0.846)          
-                                                
-occupationmanagement          4.278***          
-                               (0.733)          
-                                                
-Constant                      8.426***          
-                               (0.374)          
-                                                
-------------------------------------------------
-Observations                     534            
-R2                              0.180           
-Adjusted R2                     0.173           
-Residual Std. Error       4.675 (df = 528)      
-F Statistic            23.224*** (df = 5; 528)  
-================================================
-Note:                *p&lt;0.1; **p&lt;0.05; ***p&lt;0.01</code></pre>
+=====================================================================
+                                              Dependent variable:    
+                                          ---------------------------
+                                                     wage            
+---------------------------------------------------------------------
+relevel(occupation, &quot;services&quot;)worker              1.889***          
+                                                    (0.635)          
+                                                                     
+relevel(occupation, &quot;services&quot;)technical           5.410***          
+                                                    (0.687)          
+                                                                     
+relevel(occupation, &quot;services&quot;)office                0.885           
+                                                    (0.699)          
+                                                                     
+relevel(occupation, &quot;services&quot;)sales                 1.055           
+                                                    (0.916)          
+                                                                     
+relevel(occupation, &quot;services&quot;)management          6.167***          
+                                                    (0.813)          
+                                                                     
+Constant                                           6.537***          
+                                                    (0.513)          
+                                                                     
+---------------------------------------------------------------------
+Observations                                          534            
+R2                                                   0.180           
+Adjusted R2                                          0.173           
+Residual Std. Error                            4.675 (df = 528)      
+F Statistic                                 23.224*** (df = 5; 528)  
+=====================================================================
+Note:                                     *p&lt;0.1; **p&lt;0.05; ***p&lt;0.01</code></pre>
 <!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
@@ -1001,7 +999,7 @@ Note:               *p&lt;0.1; **p&lt;0.05; ***p&lt;0.01</code></pre>
 <!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuaGVhZChIb3VzZVByaWNlcylcbmBgYCJ9 -->
 <pre class="r"><code>head(HousePrices)</code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-frame-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbImRhdGEuZnJhbWUiXSwibnJvdyI6NiwibmNvbCI6MTIsInN1bW1hcnkiOnsiRGVzY3JpcHRpb24iOlsiZGZbLDEyXSBbNiB4IDEyXSJdfX0sInJkZiI6Ikg0c0lBQUFBQUFBQUJyMVV3VTdDTUJndWd3MVlrSkI0OWdtTUpJSjRsVVFmd0hqaVdrWVppM1VsN1FEMVpEejZJaDcxWlBRUlRId0E0OUY0OEdMaTJRUFkwdjV6V3lEaG9DNXB2dS83Ky8vNzJyOU5qdzQ2VGJmaklvVHlxSUJzbExjbFJjNys0WGFqMVVDb1lFbVZrek5saGFjeWExMlNpaHhWbGRaK3UxVHBxUDM2ZERISDkwMk5IMWNHSC9YODV3WXluNjY3ZTlIeG03Ykc2M2VORDE4YTc1ODEzcmJUZFNVdElCcnJKWEdvMi92VVlsV00vZERpK1dWeDJaODFWU2VIdFhpa0d1cFFNaVpVU0ZhYnorcW9GVExEOG1kRVpFcHNqMklCRmZGLyt0aUxHSmRzbWxoQkxqR3NIMVMvczJZcmVPWm5LOWxZR2FzL3NzbGFtUEVmTnIrM20vUnRYUDM3cHk2a2IxcUlUd2pjdEFvRWh6endpQkZGeWlJUm5JTXNkVW1QTTNZaWpDNTNjVFJJQm9wQ09nVUVaS25IZ3pHWjRET2pYVTQ4VG5BVXNCQXkraU5LdTFqRWhqNFdBNWtCYThjQjkrSmt4OGNjKzVEcUREbnBFNTdaVTVtelNUMjVMd2VldG0wZ0RTQk5JRHRBV2tCMmx6VFQ3ZUVJMS90Y0dpeG9hSkVOMWQ2a3RhVWVVVHRUbk9PWlFHMFVxcVgydHJ6QktEemVhamFWUStMYzF3dzZDVjdSbmdWWW1RM3RJS0VmaE5BY20rSXVvVVpVWlUvbUxhbkxzdzJqK0REWVJOUWpGbUhJY3oxR0lhSXY4L1FiNFNFa1l6MEdBQUE9In0= -->
+<!-- rnb-frame-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbImRhdGEuZnJhbWUiXSwibnJvdyI6NiwibmNvbCI6MTIsInN1bW1hcnkiOnsiRGVzY3JpcHRpb24iOlsiZGZbLDEyXSBbNiB4IDEyXSJdfX0sInJkZiI6Ikg0c0lBQUFBQUFBQUJyMVV3VTdDTUJndWd3MVkwSmg0OWdtTUpJQjRsVVFmd0hqaVdrWVppMlVsN1FEMVpEejZJaDcxWlBRUlRId0E0OUY0NEdMaTJZUGEwdjV6V3lEaG9DeHB2dS83Ky8vNzJyOU5qdy9iRGJmdElvVHlxSUJzbExjbFJjN0JVYTNlckNOVXNLVEt5Wm15d2xPWnRTbEpSWTUxbGRaNnUxVHBxUFg2ZERIRDZiYkc5eXVEajNyK1l3dVpUOWZkdmVqNFRVdmo5VlRqdzZmRysyZU50NjEwWFVrTGlNWjZRUnpxOWorMFdCWmpQelIvZmxGYzltZE4xY2xoelIrcGhqcVVqQWtWa20zTVpuWFVDcGxoK1RNaU1pVzJSN0dBaXZnL1BleEZqRXYybFZoQkxqR3NYMVMvczc2WDhNeC9MMlZqWmF6K3lTWnJZY1lxYlA1dU4rbmJ1UHkzb2k2a2IxcUlCd1J1V2dXQ1F4NTR4SWdpWlpFSXprR1dPcVRMR1JzSW84c2RIUFdUZ2FLUVRnRUJXZXJ5WUV3bStNeG9seE9QRXh3RkxJU00zb2pTRGhheG9ZOUZYMmJBMm5IQXZUalo4VEhIUHFRNlEwNTZoR2YyVk9ac1VrM3V5NEduclFha0RxUUJaQmRJRThqZWdtYTZYUnpoYW85TGd6a05MYktoMnB1MHR0UWphbWVLY3p3VDJCaUZhcW5kSGE4L0NrOTJHalhsa0RqM05ZTk9nbGUwWndGV1prTTdTT2dISVRUSHByaERxQkhyc2llemxsVGwyWVpSZkJoc0lxb1JpekRrdVI2akVOR1grZXNIcFdXWXBUMEdBQUE9In0= -->
 <div data-pagedtable="false">
 <script data-pagedtable-source type="application/json">
 {"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["price"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["lotsize"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["bedrooms"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["bathrooms"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["stories"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["driveway"],"name":[6],"type":["fctr"],"align":["left"]},{"label":["recreation"],"name":[7],"type":["fctr"],"align":["left"]},{"label":["fullbase"],"name":[8],"type":["fctr"],"align":["left"]},{"label":["gasheat"],"name":[9],"type":["fctr"],"align":["left"]},{"label":["aircon"],"name":[10],"type":["fctr"],"align":["left"]},{"label":["garage"],"name":[11],"type":["dbl"],"align":["right"]},{"label":["prefer"],"name":[12],"type":["fctr"],"align":["left"]}],"data":[{"1":"42000","2":"5850","3":"3","4":"1","5":"2","6":"yes","7":"no","8":"yes","9":"no","10":"no","11":"1","12":"no","_rn_":"1"},{"1":"38500","2":"4000","3":"2","4":"1","5":"1","6":"yes","7":"no","8":"no","9":"no","10":"no","11":"0","12":"no","_rn_":"2"},{"1":"49500","2":"3060","3":"3","4":"1","5":"1","6":"yes","7":"no","8":"no","9":"no","10":"no","11":"0","12":"no","_rn_":"3"},{"1":"60500","2":"6650","3":"3","4":"1","5":"2","6":"yes","7":"yes","8":"no","9":"no","10":"no","11":"0","12":"no","_rn_":"4"},{"1":"61000","2":"6360","3":"2","4":"1","5":"1","6":"yes","7":"no","8":"no","9":"no","10":"no","11":"0","12":"no","_rn_":"5"},{"1":"66000","2":"4160","3":"3","4":"1","5":"1","6":"yes","7":"yes","8":"yes","9":"no","10":"yes","11":"0","12":"no","_rn_":"6"}],"options":{"columns":{"min":{},"max":[10],"total":[12]},"rows":{"min":[10],"max":[10],"total":[6]},"pages":{}}}
@@ -1016,7 +1014,7 @@ Note:               *p&lt;0.1; **p&lt;0.05; ***p&lt;0.01</code></pre>
 <!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuaGVhZChIb3VzZVByaWNlcylcbmBgYCJ9 -->
 <pre class="r"><code>head(HousePrices)</code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-frame-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbImRhdGEuZnJhbWUiXSwibnJvdyI6NiwibmNvbCI6MTIsInN1bW1hcnkiOnsiRGVzY3JpcHRpb24iOlsiZGZbLDEyXSBbNiB4IDEyXSJdfX0sInJkZiI6Ikg0c0lBQUFBQUFBQUJyMVV1MDdETUJSMTB5WnRveFloTWZNRmlFcjB3VW9sK0FERTFOVk5uVFRDeEpXZHRzQ0VHUGtSUnBnUWZBSVNINEFZRVFNTEVqTkRpMTM3aGpScXBRNUFKT3VjYzMxdmpuMXQrZWlnMDNBN0xrSW9qd3JJUm5sYlV1VHNIKzdVVzNXRUNwWlVPVGxUVm5ncXN6WWtxY2l4cHRMYWI1Y3FIYlZmbnk1bStMNmw4ZVBLNEtPZS85eEU1dE4xZHk4NmZ0UFdlUDJ1OGVGTDQvMnp4dHYyZkYxSkM0Z21la2tjNnZZK3RWZ1ZFeiswZUg1WlhQYW5xdXJrc0JhUHVZWTZsSXdJRlpLdHoyWjExSXFZWWZreklqSWx0a2V4Z0lya1B6NzJZc1lsbTZSV2tFc042d2ZWNzZ6cENwNzU2VW8yVnNicWoyeXlGbWI4aDgzdjdXYitOcTcrL1ZNWDVtOWFoRThJM0xRS0JBYzg5SWdSUmNwaUVaNkRMSFZKanpOMklvd3VkM0hjVHdlS1FqcUZCR1NweDhNUkdlTXpvMTFPUEU1d0hMSUlNdndocFYwc0VzTUFpNzdNZ0xYamtIdEpzaE5namdOSWRRYWMrSVJuOWxUbWJGeEw3OHVCcDIwSFNCMUlBMGdUU0F2STdwSm11ajBjNDVyUHBjR0NoaGJaUU8xTldsdnFFYlV6eFRtZUNhd1BJN1hVM3JiWEgwYkgyNDJtY2tpZGU5V2drK0lWN1ZtQWxkblFEaElGWVFUTnNTbnVFbXJFbXV6SnJDVTFlYlpSbkJ3R0c0dGF6R0lNZWE3SEtFVDBaWjU4QTA3Sno1QTlCZ0FBIn0= -->
+<!-- rnb-frame-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbImRhdGEuZnJhbWUiXSwibnJvdyI6NiwibmNvbCI6MTIsInN1bW1hcnkiOnsiRGVzY3JpcHRpb24iOlsiZGZbLDEyXSBbNiB4IDEyXSJdfX0sInJkZiI6Ikg0c0lBQUFBQUFBQUJyMVVRVTRDTVJRdEF6UEFCSXlKYTA5Z0lBSFVyU1I2QU9PS2JSa0tUQ3hUMGc0aXJveExMK0pTVjBhUFlPSUJqRXZqZ28wSmF4ZGdTL3ZIWVFJSkMyV1M1cjMzKy8rODlyZnAyVW1qNWpaY2hGQWFaWkNOMHJha3lEaytyVlFQcWdobExLbFNjaWF2OEZKbTdVaFNrR05McGRVL2IxUTZxbis4WHM5eHZLZng2OWJnaTU2ZjdDTHo2YnJIZHgyL3IydThHMnQ4L3RiNDlLYnhvYjVZbDlNQ29wRmVFWWU2bzRrVzYyTGtoNWJQcjRyTC9oUlZuUnpXOHJIUVVJZVNDMEtGWk52eldSMjFBbVpZZWtSRW9zVDJLQlpRRWYybmpiMlFjY21tc1JXa1lzUDZSZlU3YTdhR1ozcTJsbzJWc1Bvbm02U0ZHWnV3K2J2ZExON0c5YjhOZFdIeHBnVzRSK0NtRlNEWTU3NUhqTWhTRmdyL0NtU3VTVnFjc1o0d090L0VZVGNleUFycDVCT1F1UmIzTDhnUWo0eDJPZkU0d2FIUEFzaG9EeWh0WWhFWmRyRG95Z3hZTy9hNUZ5VTdIY3h4QjFLZFBpZHR3aE43eW5NMkxNZjM1Y0RUVmdGU0JWSURzZy9rQU1qaGltYTZMUnppY3B0TGd5VU56YksrMnB1MHR0UWphaWVLVXp3UjJCNEVhcW10a3RjZEJPZWxXbFU1eE02OWFOQ0o4WUwyek1ES2JHZ0hDVHArQU0yeEtXNFNhc1NXN01tOEpXVjV0a0VZSFFZYmluTElRZ3g1cnNjb1JQUmxudjRBd3dONkFEMEdBQUE9In0= -->
 <div data-pagedtable="false">
 <script data-pagedtable-source type="application/json">
 {"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["price"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["lotsize"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["bedrooms"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["bathrooms"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["stories"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["driveway"],"name":[6],"type":["fctr"],"align":["left"]},{"label":["recreation"],"name":[7],"type":["fctr"],"align":["left"]},{"label":["fullbase"],"name":[8],"type":["fctr"],"align":["left"]},{"label":["gasheat"],"name":[9],"type":["fctr"],"align":["left"]},{"label":["aircon"],"name":[10],"type":["fctr"],"align":["left"]},{"label":["garage"],"name":[11],"type":["dbl"],"align":["right"]},{"label":["prefer"],"name":[12],"type":["fctr"],"align":["left"]}],"data":[{"1":"42000","2":"5850","3":"3","4":"1","5":"2","6":"yes","7":"no","8":"yes","9":"no","10":"no","11":"1","12":"no","_rn_":"1"},{"1":"38500","2":"4000","3":"2","4":"1","5":"1","6":"yes","7":"no","8":"no","9":"no","10":"no","11":"0","12":"no","_rn_":"2"},{"1":"49500","2":"3060","3":"3","4":"1","5":"1","6":"yes","7":"no","8":"no","9":"no","10":"no","11":"0","12":"no","_rn_":"3"},{"1":"60500","2":"6650","3":"3","4":"1","5":"2","6":"yes","7":"yes","8":"no","9":"no","10":"no","11":"0","12":"no","_rn_":"4"},{"1":"61000","2":"6360","3":"2","4":"1","5":"1","6":"yes","7":"no","8":"no","9":"no","10":"no","11":"0","12":"no","_rn_":"5"},{"1":"66000","2":"4160","3":"3","4":"1","5":"1","6":"yes","7":"yes","8":"yes","9":"no","10":"yes","11":"0","12":"no","_rn_":"6"}],"options":{"columns":{"min":{},"max":[10],"total":[12]},"rows":{"min":[10],"max":[10],"total":[6]},"pages":{}}}
@@ -1056,31 +1054,61 @@ Note:               *p&lt;0.1; **p&lt;0.05; ***p&lt;0.01</code></pre>
 <p>Let’s use price as the dependent variable, and use all of the house characteristic variables.</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc3VtbWFyeShIb3VzZVByaWNlcylcbmBgYCJ9 -->
-<pre class="r"><code>summary(HousePrices)</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucmVnNGIgPC0gbG0ocHJpY2UgfiBsb3RzaXplICsgYmVkcm9vbXMgKyBiYXRocm9vbXMgKyBzdG9yaWVzICsgZHJpdmV3YXkgKyByZWNyZWF0aW9uICsgZnVsbGJhc2UgKyBnYXNoZWF0ICsgYWlyY29uICsgZ2FyYWdlICsgcHJlZmVyLCBkYXRhID0gSG91c2VQcmljZXMpXG5zdGFyZ2F6ZXIocmVnNGIsIHR5cGUgPSBcInRleHRcIilcbmBgYCJ9 -->
+<pre class="r"><code>reg4b &lt;- lm(price ~ lotsize + bedrooms + bathrooms + stories + driveway + recreation + fullbase + gasheat + aircon + garage + prefer, data = HousePrices)
+stargazer(reg4b, type = &quot;text&quot;)</code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiICAgICBwcmljZSAgICAgICAgICAgbG90c2l6ZSAgICAgICAgIGJlZHJvb21zICAgICAgIGJhdGhyb29tcyAgICBcbiBNaW4uICAgOiAyNTAwMCAgIE1pbi4gICA6IDE2NTAgICBNaW4uICAgOjEuMDAwICAgTWluLiAgIDoxLjAwMCAgXG4gMXN0IFF1LjogNDkxMjUgICAxc3QgUXUuOiAzNjAwICAgMXN0IFF1LjoyLjAwMCAgIDFzdCBRdS46MS4wMDAgIFxuIE1lZGlhbiA6IDYyMDAwICAgTWVkaWFuIDogNDYwMCAgIE1lZGlhbiA6My4wMDAgICBNZWRpYW4gOjEuMDAwICBcbiBNZWFuICAgOiA2ODEyMiAgIE1lYW4gICA6IDUxNTAgICBNZWFuICAgOjIuOTY1ICAgTWVhbiAgIDoxLjI4NiAgXG4gM3JkIFF1LjogODIwMDAgICAzcmQgUXUuOiA2MzYwICAgM3JkIFF1LjozLjAwMCAgIDNyZCBRdS46Mi4wMDAgIFxuIE1heC4gICA6MTkwMDAwICAgTWF4LiAgIDoxNjIwMCAgIE1heC4gICA6Ni4wMDAgICBNYXguICAgOjQuMDAwICBcbiAgICBzdG9yaWVzICAgICAgZHJpdmV3YXkgIHJlY3JlYXRpb24gZnVsbGJhc2UgIGdhc2hlYXQgICBhaXJjb24gICBcbiBNaW4uICAgOjEuMDAwICAgbm8gOiA3NyAgIG5vIDo0NDkgICAgbm8gOjM1NSAgIG5vIDo1MjEgICBubyA6MzczICBcbiAxc3QgUXUuOjEuMDAwICAgeWVzOjQ2OSAgIHllczogOTcgICAgeWVzOjE5MSAgIHllczogMjUgICB5ZXM6MTczICBcbiBNZWRpYW4gOjIuMDAwICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbiBNZWFuICAgOjEuODA4ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbiAzcmQgUXUuOjIuMDAwICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbiBNYXguICAgOjQuMDAwICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbiAgICAgZ2FyYWdlICAgICAgIHByZWZlciAgIFxuIE1pbi4gICA6MC4wMDAwICAgbm8gOjQxOCAgXG4gMXN0IFF1LjowLjAwMDAgICB5ZXM6MTI4ICBcbiBNZWRpYW4gOjAuMDAwMCAgICAgICAgICAgIFxuIE1lYW4gICA6MC42OTIzICAgICAgICAgICAgXG4gM3JkIFF1LjoxLjAwMDAgICAgICAgICAgICBcbiBNYXguICAgOjMuMDAwMCAgICAgICAgICAgIFxuIn0= -->
-<pre><code>     price           lotsize         bedrooms       bathrooms    
- Min.   : 25000   Min.   : 1650   Min.   :1.000   Min.   :1.000  
- 1st Qu.: 49125   1st Qu.: 3600   1st Qu.:2.000   1st Qu.:1.000  
- Median : 62000   Median : 4600   Median :3.000   Median :1.000  
- Mean   : 68122   Mean   : 5150   Mean   :2.965   Mean   :1.286  
- 3rd Qu.: 82000   3rd Qu.: 6360   3rd Qu.:3.000   3rd Qu.:2.000  
- Max.   :190000   Max.   :16200   Max.   :6.000   Max.   :4.000  
-    stories      driveway  recreation fullbase  gasheat   aircon   
- Min.   :1.000   no : 77   no :449    no :355   no :521   no :373  
- 1st Qu.:1.000   yes:469   yes: 97    yes:191   yes: 25   yes:173  
- Median :2.000                                                     
- Mean   :1.808                                                     
- 3rd Qu.:2.000                                                     
- Max.   :4.000                                                     
-     garage       prefer   
- Min.   :0.0000   no :418  
- 1st Qu.:0.0000   yes:128  
- Median :0.0000            
- Mean   :0.6923            
- 3rd Qu.:1.0000            
- Max.   :3.0000            </code></pre>
+<!-- rnb-output-begin eyJkYXRhIjoiXG49PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PVxuICAgICAgICAgICAgICAgICAgICAgICAgRGVwZW5kZW50IHZhcmlhYmxlOiAgICBcbiAgICAgICAgICAgICAgICAgICAgLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgcHJpY2UgICAgICAgICAgIFxuLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS1cbmxvdHNpemUgICAgICAgICAgICAgICAgICAgICAgMy41NDYqKiogICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAoMC4zNTApICAgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbmJlZHJvb21zICAgICAgICAgICAgICAgICAgICAxLDgzMi4wMDMqICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgKDEsMDQ3LjAwMCkgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbmJhdGhyb29tcyAgICAgICAgICAgICAgICAgIDE0LDMzNS41NjAqKiogICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgKDEsNDg5LjkyMSkgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbnN0b3JpZXMgICAgICAgICAgICAgICAgICAgIDYsNTU2Ljk0NioqKiAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICg5MjUuMjkwKSAgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbmRyaXZld2F5eWVzICAgICAgICAgICAgICAgIDYsNjg3Ljc3OSoqKiAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgKDIsMDQ1LjI0NikgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbnJlY3JlYXRpb255ZXMgICAgICAgICAgICAgICA0LDUxMS4yODQqKiAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgKDEsODk5Ljk1OCkgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbmZ1bGxiYXNleWVzICAgICAgICAgICAgICAgIDUsNDUyLjM4NioqKiAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgKDEsNTg4LjAyNCkgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbmdhc2hlYXR5ZXMgICAgICAgICAgICAgICAgIDEyLDgzMS40MTAqKiogICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgKDMsMjE3LjU5NykgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbmFpcmNvbnllcyAgICAgICAgICAgICAgICAgIDEyLDYzMi44OTAqKiogICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgKDEsNTU1LjAyMSkgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbmdhcmFnZSAgICAgICAgICAgICAgICAgICAgIDQsMjQ0LjgyOSoqKiAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICg4NDAuNTQ0KSAgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbnByZWZlcnllcyAgICAgICAgICAgICAgICAgIDksMzY5LjUxMyoqKiAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgKDEsNjY5LjA5MSkgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbkNvbnN0YW50ICAgICAgICAgICAgICAgICAgICAtNCwwMzguMzUwICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgKDMsNDA5LjQ3MSkgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXG5PYnNlcnZhdGlvbnMgICAgICAgICAgICAgICAgICAgIDU0NiAgICAgICAgICAgIFxuUjIgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDAuNjczICAgICAgICAgICBcbkFkanVzdGVkIFIyICAgICAgICAgICAgICAgICAgICAwLjY2NiAgICAgICAgICAgXG5SZXNpZHVhbCBTdGQuIEVycm9yICAgIDE1LDQyMy4xOTAgKGRmID0gNTM0KSAgIFxuRiBTdGF0aXN0aWMgICAgICAgICAgOTkuOTY4KioqIChkZiA9IDExOyA1MzQpICBcbj09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09XG5Ob3RlOiAgICAgICAgICAgICAgICpwPDAuMTsgKipwPDAuMDU7ICoqKnA8MC4wMVxuIn0= -->
+<pre><code>
+===============================================
+                        Dependent variable:    
+                    ---------------------------
+                               price           
+-----------------------------------------------
+lotsize                      3.546***          
+                              (0.350)          
+                                               
+bedrooms                    1,832.003*         
+                            (1,047.000)        
+                                               
+bathrooms                  14,335.560***       
+                            (1,489.921)        
+                                               
+stories                    6,556.946***        
+                             (925.290)         
+                                               
+drivewayyes                6,687.779***        
+                            (2,045.246)        
+                                               
+recreationyes               4,511.284**        
+                            (1,899.958)        
+                                               
+fullbaseyes                5,452.386***        
+                            (1,588.024)        
+                                               
+gasheatyes                 12,831.410***       
+                            (3,217.597)        
+                                               
+airconyes                  12,632.890***       
+                            (1,555.021)        
+                                               
+garage                     4,244.829***        
+                             (840.544)         
+                                               
+preferyes                  9,369.513***        
+                            (1,669.091)        
+                                               
+Constant                    -4,038.350         
+                            (3,409.471)        
+                                               
+-----------------------------------------------
+Observations                    546            
+R2                             0.673           
+Adjusted R2                    0.666           
+Residual Std. Error    15,423.190 (df = 534)   
+F Statistic          99.968*** (df = 11; 534)  
+===============================================
+Note:               *p&lt;0.1; **p&lt;0.05; ***p&lt;0.01</code></pre>
 <!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
@@ -1158,7 +1186,7 @@ yourhouse[2,]$aircon &lt;- &quot;yes&quot;</code></pre>
 <!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuaGVhZChkaWFtb25kcylcbmBgYCJ9 -->
 <pre class="r"><code>head(diamonds)</code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-frame-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbInRibF9kZiIsInRibCIsImRhdGEuZnJhbWUiXSwibnJvdyI6NiwibmNvbCI6MTAsInN1bW1hcnkiOnsiQSB0aWJibGUiOlsiNiB4IDEwIl19fSwicmRmIjoiSDRzSUFBQUFBQUFBQnAxVU1Xd1RNUlIxN2k0WGNoTEpWZTFjR0ZrYUtTbU1LSllvU1FNbFNha1VkZWppNWh4NjRuSVhuQXZRc3JCMDdnd3JFbVBuam9nUlVRWVltTHV3d01yQzBQQjk5cjljYjZ5bHIvLyt0Ly8zOS9lem4yN3NyanU3RGlIRUpCWXBFck1Ja05nUCt2WEd2UVlobGdGV0FXYktVcitHVmNzQTVQS0tYTlk4bjN6NDZkeC8wZnh5MFQ1ZE9icEk3ZThuZTNmK2ZqNXAvZ0FMWE0xdlo5dS9qMWZQSVA2bWpBT1IrMWdnUmthYnVRM3RnTC9rd1JTUW0wUW9yOVZpdmtEY2ppSlA0L0tBaThQYkdVZXBML2pZbjQyMVdleDRuQVc1TFlyRGdFMXhCd01ESStGeHdUR1BQV0xET0JLQUxqTUhNRElpN1pJU21kMlk2NFFsN053R2dvY0lXZ2phQ0RZUmRCQThVdW5NK1hYck0zT050blAxM2RBWmpFNWRJM09uMDFqQTFEdllhU3dnZXEzQndpMXhQYzNXdWtiaGlsRzArMGtTa05BbnYwWnkwSzNwdWh5MHQ2NzFSK1h2SldxVXhqMStxK0s2V3ZlcHprT3U2aTAxRDBNM0NtNUNTUnVrQzlJRDZhZDVxKy9rZUUrcnE1TEN0NmlyNjNDL3luRk9seEtpNzlIcWNiSmdFYWVZVHl1SytkUk5Ic2dtZGFXMS9ZY3VxZnBwVmJyYnAybWNxVjRRTmFSMzVVMnFpMGs2aDlyNkhLYktuNmR6eU1ZYzZleWtIR2VDeFhoL3cxbWMrcU1nd3BkVWdvY2cvUGdRNXp3K2lRL1FpTmwrd05HWUNIK0lCbndKR21CZzRTaFhVbGxFcjJwWWx1eTVJVzlnUHAvL3k1RUVBeHlQeGF3MkVoQ2ltSEVsWFNtYXhINFVRakpqV2JNN0cxd1FPWWM3QytYbTN0cndZQlkrWDd2YklPci9LbVJZVU5CUEJyR2o5clN3TXZ4NWJCNCs4OE8wRVFIYjU0RTJLbkRLNUpBMWFFK0lIWGJBTzYzRlVjeHduUU05UjQraS9lVi8xN0JPcDRNRkFBQT0ifQ== -->
+<!-- rnb-frame-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbInRibF9kZiIsInRibCIsImRhdGEuZnJhbWUiXSwibnJvdyI6NiwibmNvbCI6MTAsInN1bW1hcnkiOnsiQSB0aWJibGUiOlsiNiB4IDEwIl19fSwicmRmIjoiSDRzSUFBQUFBQUFBQnAxVU1Xd1RNUlIxN2k0Sk9Zbmtxbll1akN5TlNBSWppaVZLMGtCSlVpcEZIYnE0T1llZXVOeWx6Z1ZvV1ZnNmQ0WVZpYkZ6UjhTSUtBTU16RjFZWUdWaGFQZysrMSt1TjliUzEzLy8yLy83Ky92Wno5WjNHdmFPVFFneGlVWHl4TXdESklXSC9WcjlmcDBReXdBckJ6TWxxVi9EcW1VQWNubFpMbXVlVHo3OHRCOGNOTDljdEU5WGppNFMrL3ZKN3AyL24wK2FQOEFDVi9QYjJkYnY0OVV6aUw4cDQwRGtQaGFJa2RKbVpzT0N6MTl5ZndySWlTT1UxMm94VHlCdWg2R3JjV25BeGVIdGxLUFlGM3pzemNiYXpIZGN6dnpNRnZtaHo2YTRnNEdCb1hDNTRKaW5NR0xES0JTQUxsTUhNRklpN2FJU21kMlk2NFJGN053NmdrY0lXZ2phQ0RZUWRCQThWdW5NK1hYck16T05MbVRxdTZFekdKMmFSdVoycDc2QWlYZXdYVjlBOUZxRGhWdmlXcEt0ZFkzQ0ZhTm85NU1rSUtGUGY0M2tvSnZUaGh5MDE5RDZvL0wzWWpWSzRwNjhWWEZkcmZ0VTV5Rlg5YWFhaDZFYkJUZWhwQTNTQmVtQjlKTzhsWGR5dktlVlZVbmhXOVRSZFRoZjVUaW5TekhSZDJubE9GNndpRlBNcDJYRmZPckVEMlNET3RMYStrT1hWUDIwSXQzdDB5VE9WQytJR3RLNzhpYlIrVGlkVFF2NkhLYktuNlZ6d01ZYzZXd25IR2VDUlhoL3cxbVUrRU0veEpkVWhJY2d2T2dRNTF3K2lmYlJpTmllejlHWUNHK0lCbndKR21CZzdpaFRVa21FcjZwWWx1eTVJVzlnUHAvL3k1QUVBMnlYUmF3NkVoQ2ltSEVsWFRHY1JGNFlRREpqV2JNN0had1RHWWN6QytUbTd0cHdmeGE4V0x0M2w2ai9LNWRpUVU0L0djUzIydFBDeXZEbktmRGd1UmNramZEWkh2ZTFVWVpUeG9lc1Fuc0M3TEFOM21rMUNpT0c2MnpvT1hvVTdTLy9BNVAwOG1HREJRQUEifQ== -->
 <div data-pagedtable="false">
 <script data-pagedtable-source type="application/json">
 {"columns":[{"label":["carat"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["cut"],"name":[2],"type":["ord"],"align":["right"]},{"label":["color"],"name":[3],"type":["ord"],"align":["right"]},{"label":["clarity"],"name":[4],"type":["ord"],"align":["right"]},{"label":["depth"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["table"],"name":[6],"type":["dbl"],"align":["right"]},{"label":["price"],"name":[7],"type":["int"],"align":["right"]},{"label":["x"],"name":[8],"type":["dbl"],"align":["right"]},{"label":["y"],"name":[9],"type":["dbl"],"align":["right"]},{"label":["z"],"name":[10],"type":["dbl"],"align":["right"]}],"data":[{"1":"0.23","2":"Ideal","3":"E","4":"SI2","5":"61.5","6":"55","7":"326","8":"3.95","9":"3.98","10":"2.43"},{"1":"0.21","2":"Premium","3":"E","4":"SI1","5":"59.8","6":"61","7":"326","8":"3.89","9":"3.84","10":"2.31"},{"1":"0.23","2":"Good","3":"E","4":"VS1","5":"56.9","6":"65","7":"327","8":"4.05","9":"4.07","10":"2.31"},{"1":"0.29","2":"Premium","3":"I","4":"VS2","5":"62.4","6":"58","7":"334","8":"4.20","9":"4.23","10":"2.63"},{"1":"0.31","2":"Good","3":"J","4":"SI2","5":"63.3","6":"58","7":"335","8":"4.34","9":"4.35","10":"2.75"},{"1":"0.24","2":"Very Good","3":"J","4":"VVS2","5":"62.8","6":"57","7":"336","8":"3.94","9":"3.96","10":"2.48"}],"options":{"columns":{"min":{},"max":[10],"total":[10]},"rows":{"min":[10],"max":[10],"total":[6]},"pages":{}}}
@@ -1294,86 +1322,13 @@ Note:                  *p&lt;0.1; **p&lt;0.05; ***p&lt;0.01</code></pre>
 <p>Could we predict the price of a 32 carat, D color, internally flawless with ideal cut diamond? Mathematically, sure we could:</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZGlhbW9uZHMyIDwtIGFzLmRhdGEuZnJhbWUoZGlhbW9uZHMpXG5kaWFtb25kczIkY3V0IDwtIGZhY3RvcihkaWFtb25kczIkY3V0LCBvcmRlcmVkID0gRkFMU0UpXG5kaWFtb25kczIkY29sb3IgPC0gZmFjdG9yKGRpYW1vbmRzMiRjb2xvciwgb3JkZXJlZCA9IEZBTFNFKVxuZGlhbW9uZHMyJGNsYXJpdHkgPC0gZmFjdG9yKGRpYW1vbmRzMiRjbGFyaXR5LCBvcmRlcmVkID0gRkFMU0UpXG5kaWFtb25kczIkY29sb3IgPC0gcmVsZXZlbChkaWFtb25kczIkY29sb3IsIGMoXCJKXCIpKSBcbnJlZzRjIDwtIGxtKHByaWNlIH4gY2FyYXQgKyBjdXQgKyBjb2xvciArIGNsYXJpdHksIGRhdGEgPSBkaWFtb25kczIpXG5zdGFyZ2F6ZXIocmVnNGMsIHR5cGUgPSBcInRleHRcIilcbmBgYCJ9 -->
-<pre class="r"><code>diamonds2 &lt;- as.data.frame(diamonds)
-diamonds2$cut &lt;- factor(diamonds2$cut, ordered = FALSE)
-diamonds2$color &lt;- factor(diamonds2$color, ordered = FALSE)
-diamonds2$clarity &lt;- factor(diamonds2$clarity, ordered = FALSE)
-diamonds2$color &lt;- relevel(diamonds2$color, c(&quot;J&quot;)) 
-reg4c &lt;- lm(price ~ carat + cut + color + clarity, data = diamonds2)
-stargazer(reg4c, type = &quot;text&quot;)</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubXlkaWFtb25kIDwtIGRhdGEuZnJhbWUoY2FyYXQgPSAzMiwgY2xhcml0eSA9IFwiSUZcIiwgY3V0ID0gXCJJZGVhbFwiLCBjb2xvciA9IFwiRFwiKVxucHJlZGljdChyZWc0YywgbmV3ZGF0YSA9IG15ZGlhbW9uZClcbmBgYCJ9 -->
+<pre class="r"><code>mydiamond &lt;- data.frame(carat = 32, clarity = &quot;IF&quot;, cut = &quot;Ideal&quot;, color = &quot;D&quot;)
+predict(reg4c, newdata = mydiamond)</code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiXG4gICAgICBEZXBlbmRlbnQgdmFyaWFibGU6ICAgICAgXG4gICAgICAgICAgICAgICAgICAgIC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLVxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBwcmljZSAgICAgICAgICAgICBcbi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXG5jYXJhdCAgICAgICAgICAgICAgICAgICAgICAgIDgsODg2LjEyOSoqKiAgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICgxMi4wMzQpICAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG5jdXRHb29kICAgICAgICAgICAgICAgICAgICAgICA2NTUuNzY3KioqICAgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICgzMy42MzQpICAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG5jdXRWZXJ5IEdvb2QgICAgICAgICAgICAgICAgICA4NDguNzE3KioqICAgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICgzMS4yNzcpICAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG5jdXRQcmVtaXVtICAgICAgICAgICAgICAgICAgICA4NjkuMzk2KioqICAgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICgzMC45MzEpICAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG5jdXRJZGVhbCAgICAgICAgICAgICAgICAgICAgICA5OTguMjU0KioqICAgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICgzMC42NTYpICAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG5jb2xvckQgICAgICAgICAgICAgICAgICAgICAgIDIsMzI1LjIyMioqKiAgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICgyNi43MjMpICAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG5jb2xvckUgICAgICAgICAgICAgICAgICAgICAgIDIsMTEzLjU0MCoqKiAgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICgyNS40ODApICAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG5jb2xvckYgICAgICAgICAgICAgICAgICAgICAgIDIsMDIxLjkxMioqKiAgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICgyNS4zMzkpICAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG5jb2xvckcgICAgICAgICAgICAgICAgICAgICAgIDEsODE5LjAyMyoqKiAgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICgyNC44NDEpICAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG5jb2xvckggICAgICAgICAgICAgICAgICAgICAgIDEsMzQ2LjUyNSoqKiAgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICgyNS40NjIpICAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG5jb2xvckkgICAgICAgICAgICAgICAgICAgICAgICA4ODQuOTIwKioqICAgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICgyNi45NTcpICAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG5jbGFyaXR5U0kyICAgICAgICAgICAgICAgICAgIDIsNjI1Ljk1MCoqKiAgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICg0NC43ODgpICAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG5jbGFyaXR5U0kxICAgICAgICAgICAgICAgICAgIDMsNTczLjY4OCoqKiAgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICg0NC41OTgpICAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG5jbGFyaXR5VlMyICAgICAgICAgICAgICAgICAgIDQsMjE3LjgyOSoqKiAgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICg0NC44NDEpICAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG5jbGFyaXR5VlMxICAgICAgICAgICAgICAgICAgIDQsNTM0Ljg3OSoqKiAgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICg0NS41MzUpICAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG5jbGFyaXR5VlZTMiAgICAgICAgICAgICAgICAgIDQsOTY3LjE5OSoqKiAgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICg0Ni44OTEpICAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG5jbGFyaXR5VlZTMSAgICAgICAgICAgICAgICAgIDUsMDcyLjAyOCoqKiAgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICg0OC4yMTEpICAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG5jbGFyaXR5SUYgICAgICAgICAgICAgICAgICAgIDUsNDE5LjY0NyoqKiAgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICg1Mi4xMzYpICAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG5Db25zdGFudCAgICAgICAgICAgICAgICAgICAgLTksNjg4LjAyNSoqKiAgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICg1NS42MTApICAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG4tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLVxuT2JzZXJ2YXRpb25zICAgICAgICAgICAgICAgICAgICA1Myw5NDAgICAgICAgICAgICBcblIyICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgMC45MTYgICAgICAgICAgICAgXG5BZGp1c3RlZCBSMiAgICAgICAgICAgICAgICAgICAgIDAuOTE2ICAgICAgICAgICAgIFxuUmVzaWR1YWwgU3RkLiBFcnJvciAgICAgMSwxNTYuODUyIChkZiA9IDUzOTIxKSAgICBcbkYgU3RhdGlzdGljICAgICAgICAgMzIsNjQxLjIxMCoqKiAoZGYgPSAxODsgNTM5MjEpXG49PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PVxuTm90ZTogICAgICAgICAgICAgICAgICAqcDwwLjE7ICoqcDwwLjA1OyAqKipwPDAuMDFcbiJ9 -->
-<pre><code>
-      Dependent variable:      
-                    ------------------------------
-                                price             
---------------------------------------------------
-carat                        8,886.129***         
-                               (12.034)           
-                                                  
-cutGood                       655.767***          
-                               (33.634)           
-                                                  
-cutVery Good                  848.717***          
-                               (31.277)           
-                                                  
-cutPremium                    869.396***          
-                               (30.931)           
-                                                  
-cutIdeal                      998.254***          
-                               (30.656)           
-                                                  
-colorD                       2,325.222***         
-                               (26.723)           
-                                                  
-colorE                       2,113.540***         
-                               (25.480)           
-                                                  
-colorF                       2,021.912***         
-                               (25.339)           
-                                                  
-colorG                       1,819.023***         
-                               (24.841)           
-                                                  
-colorH                       1,346.525***         
-                               (25.462)           
-                                                  
-colorI                        884.920***          
-                               (26.957)           
-                                                  
-claritySI2                   2,625.950***         
-                               (44.788)           
-                                                  
-claritySI1                   3,573.688***         
-                               (44.598)           
-                                                  
-clarityVS2                   4,217.829***         
-                               (44.841)           
-                                                  
-clarityVS1                   4,534.879***         
-                               (45.535)           
-                                                  
-clarityVVS2                  4,967.199***         
-                               (46.891)           
-                                                  
-clarityVVS1                  5,072.028***         
-                               (48.211)           
-                                                  
-clarityIF                    5,419.647***         
-                               (52.136)           
-                                                  
-Constant                    -9,688.025***         
-                               (55.610)           
-                                                  
---------------------------------------------------
-Observations                    53,940            
-R2                              0.916             
-Adjusted R2                     0.916             
-Residual Std. Error     1,156.852 (df = 53921)    
-F Statistic         32,641.210*** (df = 18; 53921)
-==================================================
-Note:                  *p&lt;0.1; **p&lt;0.05; ***p&lt;0.01</code></pre>
+<!-- rnb-output-begin eyJkYXRhIjoiICAgICAgIDEgXG4yODM0MTEuMiBcbiJ9 -->
+<pre><code>       1 
+283411.2 </code></pre>
 <!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
