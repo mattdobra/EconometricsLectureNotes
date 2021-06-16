@@ -35,6 +35,8 @@ library(jtools)
 library(wooldridge)
 library(AER)
 data(k401ksubs)
+data(SmokeBan)
+data(affairs)
 
 data(CPS1985)
 data(HousePrices)
@@ -165,15 +167,110 @@ reg1cmargins <- margins(reg1c)
 export_summs(reg1a, reg1bmargins, reg1cmargins)
 ```
 
-One drawback of `export_summs()` is that the statistical significance stars don't match those of `stargazer` (and therefore are not those standard in economics), though this can be manually changed by adding a `stars` option. I will also add a couple options to aid with readability: naming the models, and changing the number format to add a couple of decimal places so we aren't looking at a table full of zeroes!
+One drawback of `export_summs()` is that the statistical significance stars don't match those of `stargazer` (and therefore are not those standard in economics), though this can be manually changed by adding a `stars` option. Another issue is that it does not identify the number of observations in the model correctly.  Finally, I will also add a couple options to aid with readability: naming the models, and changing the number format to add a couple of decimal places so we aren't looking at a table full of zeroes!
 
 ```{r, warning = FALSE}
-reg1bmargins <- margins(reg1b)
-reg1cmargins <- margins(reg1c)
 export_summs(reg1a, reg1bmargins, reg1cmargins, 
              number_format = "%.4f",
              stars = c(`***` = 0.01, `**` = 0.05, `*` = 0.1),
              model.names = c("OLS", "Logit", "Probit"))
+```
+Here we see that the estimated marginal effects of the logit and probit model are very similar to each other.   It is also of note that there is no intercept term reported for the logit or probit; this is expected because it is impossible to have a marginal change in the constant!  The estimated marginal effects are also quite a bit smaller than the OLS estimates; are they more accurate?  One way to compare probits/logits to OLS is by using the **Akiake Information Criterion (AIC)** with the `AIC()` command--lower scores are better.  A good rule of thumb for information criteria is that a difference of 10 is a big difference.  
+
+
+```{r}
+AIC(reg1a)
+AIC(reg1b)
+AIC(reg1c)
 
 ```
-Here we see that the estimated marginal effects of the Logit and Probit model are very similar to each other.  They are also a fair bit smaller than the OLS estimates, and are probably a more accurate representation of the data.
+The probit and logit have very similar values for AIC, and they are significantly lower than that of the regression model, indicating that either model is significantly better than the OLS estimates.
+
+# More examples using probit and logit
+
+As the probit and logit models are a) generally a better fit than the linear probability model, and b) mostly a matter of preference, we will continue the rest of this notebook with probit models.  
+
+As with OLS regressions, we can include multiple independent variables (though it's usually not a good idea to include interaction effects), non-linear terms, dummy variables, and so forth.  Let's estimate a probit with a quadratic term for income and `pira`, a dummy variable that is equal to 1 if the individual sa an IRA:
+
+\begin{equation}
+Probability\:of\:401k\:Participation_{i} = \alpha + \beta_1 \cdot income_i + \beta_2 \cdot income_i^2 + \beta_3 \cdot pira_i
+\end{equation}
+
+The following code will estimate this regression and display it with the probit from up above: 
+
+```{r, message = FALSE, warning = FALSE}
+reg1d <- glm(p401k ~ inc + I(inc^2) + pira, data = k401ksubs, family = binomial(link = "probit"))
+reg1dmargins <- margins(reg1d)
+export_summs(reg1cmargins, reg1dmargins,  
+             number_format = "%.4f",
+             stars = c(`***` = 0.01, `**` = 0.05, `*` = 0.1))
+
+```
+The estimated $\hat{\beta}=0.0515$ on the $pira$ dummy variable is relatively straightforward to interpret; all else equal, the probability than an individual with a value of $pira=1$ has a 401k is 5.15 percentage points higher than an individaual with a value of $pira=0$. 
+
+The presentation of the income variable may be a bit of a surprise, however; wasn't there a squared term in the original model?  If we look at the original regression results (i.e. before we transformed them into marginal effects), we can see that the model was indeed estimated with a squared term!
+
+```{r, warning = FALSE}
+export_summs(reg1d, 
+             number_format = "%.4f",
+             stars = c(`***` = 0.01, `**` = 0.05, `*` = 0.1))
+```
+
+Not only was it there, but it was significantly less than zero, suggesting diminishing returns to income!  So where did the squared term go in the report from the `margins()` command?  Because we specified the model using the `I()` function, R knew that the $inc$ and $inc^2$ terms in the model are the same variable, so the `margins()` command knows to combine the two when calculating the marginal effect.  
+
+Let's turn to a different data set, `SmokeBan` in the `AER` package.  We will use a probit model to predict whether or not is a smoker based on their age, gender, race, education, and whether or not there is a workplace smoking ban.  
+
+As before, the scripting workflow here is to:
+
+* store the results of a `glm()` in an object;
+* run that regression object through the `margins()` function, and save that as an object;
+* display the object created by `margins()` with `export_summs()`.
+
+```{r, message = FALSE, warning = FALSE}
+reg2a <- glm(smoker ~ ban + age + education + afam + hispanic + gender, data = SmokeBan, family = binomial(link = "probit"))
+reg2amargins <- margins(reg2a)
+export_summs(reg2amargins,  
+             number_format = "%.4f",
+             stars = c(`***` = 0.01, `**` = 0.05, `*` = 0.1))
+```
+
+This is another model in which there are a considerable number of dummy explanatory variables; as with OLS, we interpret them with respect to the omitted group.  For example, $\hat{\beta}=-0.0329$ for the female dummy indicates that females are 3.3 percentage points less likely to smoke than males.  It seems that the strongest predictor of smoking is education; we can see this nicely in graphic form with a stacked bar chart:
+
+```{r}
+SmokeBan %>% ggplot(aes(fill = smoker, x = education)) +
+    geom_bar(position = "fill") +
+    theme_classic()
+```
+Do smoking bans reduce smoking?  The estimated coefficient on smoking bans $\hat{\beta}=-0.0455$ suggests that perhaps they do, hough there may be questions of reverse causation here; perhaps non-smokers are more willing to work at non-smoking workplaces than are smokers.  
+
+Let's take another look at the affairs dataset.  We predict whether or not an individual had an estramarital affair with gender, whether or not they have kids, education level, length of marriage, and measures of religiosity and their rating of their marital happiness. 
+
+```{r}
+reg3a <- glm(affair ~ male + yrsmarr + kids + relig + educ + ratemarr, data = affairs, family = binomial(link = "probit"))
+reg3amargins <- margins(reg3a)
+export_summs(reg3amargins, 
+             number_format = "%.4f",
+             stars = c(`***` = 0.01, `**` = 0.05, `*` = 0.1))
+```
+As one might expect, happily married and highly religious individuals are less likely to have an affair than otherwise.  If we look more deeply at the data descriptions with `data(affairs)`, we see that the religiosity and marital happiness variables are coded as such:
+
+* relig: 5 = very relig., 4 = somewhat, 3 = slightly, 2 = not at all, 1 = anti
+* ratemarr: 5 = vry hap marr, 4 = hap than avg, 3 = avg, 2 = smewht unhap, 1 = vry unhap
+
+As these are coded as numbers, running the probit model with the variables as-is implies that the variables are somehow **measures**; our closer look, however, suggests that this data is actually **ordinal**, and therefore are **factors**, not numeric.  As such, it may make sense to ask R to treat these variables like factor variables instead of numbers, which we will do with the `as.numeric()` function.
+
+
+```{r, warning = FALSE}
+reg3b <- glm(affair ~ male + yrsmarr + kids + as.factor(relig) + educ + as.factor(ratemarr), data = affairs, family = binomial(link = "probit"))
+reg3bmargins <- margins(reg3b)
+export_summs(reg3amargins, reg3bmargins, 
+             number_format = "%.4f",
+             stars = c(`***` = 0.01, `**` = 0.05, `*` = 0.1),
+             model.names = c("Measured", "Factors"))
+```
+
+Above, the two models are displayed side-by-side.  If we inspect the $\hat{\beta}$ coefficients on both the religiosity and marriage happiness variables, we see that there may be a little more nuance revealed when treating them with the `as.factor()` command than simply treating them like measured variables.  For example, there does not seem to be a difference between $relig = 4$ and $relig = 5$, nor does there appear to be a difference between $ratemarr = 1$ and $ratemarr = 2$, and $relig = 3$ seems to be worse for affairs than $relig = 2$. So which model is better?  Sorting this question out is a good place to use the information criteria.  The two models are very similar in terms of AIC
+
+They have similar measures of AIC, but the **Bayesian Information Criterion (BIC)** is actually better for the model on the left by a pretty big margin: `r BIC(reg3a)` - `r BIC(reg3b)` = `r BIC(reg3a) - BIC(reg3b)` is considerably more than a difference of 10.  The AIC and BIC work a lot like Adjusted $R^2$ in regression in that they "penalize" you for having more independent variables than you need to model the data.  In this context, it means that even though the model on the right explains *more* of the variation in the dependent variable, it does so using a lot more information, and the information isn't adding enough to the predictive power of the model to justify its inclusion.
+
+
