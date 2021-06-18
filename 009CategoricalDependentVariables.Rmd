@@ -11,7 +11,7 @@ Until now, we have been limited to using numeric variables as our dependent vari
 * Did a customer make a purchase?
 * Was a patient cured?
 * Did a product break?
-* DId a politician vote for a specific bill?
+* Did a politician vote for a specific bill?
 
 As you might be starting to suspect, there are tons of interesting questions that can be answered with these types of models! 
 
@@ -25,12 +25,14 @@ install.packages("margins")
 install.packages("jtools")
 install.packages("broom")
 install.packages("huxtable")
+install.packages("mlogit")
 ```
 
 ```{r, warning=FALSE, message = FALSE}
 library(tidyverse)
 library(stargazer)
 library(margins)
+library(mlogit)
 library(jtools)
 library(wooldridge)
 library(AER)
@@ -167,7 +169,7 @@ reg1cmargins <- margins(reg1c)
 export_summs(reg1a, reg1bmargins, reg1cmargins)
 ```
 
-One drawback of `export_summs()` is that the statistical significance stars don't match those of `stargazer` (and therefore are not those standard in economics), though this can be manually changed by adding a `stars` option. Another issue is that it does not identify the number of observations in the model correctly.  Finally, I will also add a couple options to aid with readability: naming the models, and changing the number format to add a couple of decimal places so we aren't looking at a table full of zeroes!
+One drawback of `export_summs()` is that the statistical significance stars don't match those of `stargazer` (and therefore are not those standard in economics), though this can be manually changed by adding a `stars` option. Another issue is that it does not identify the number of observations in the model correctly.  Finally, I will also add a couple options to aid with readability: naming the models, and changing the number format to add a couple of decimal places so we aren't looking at a table full of zeroes.  With probit and logit it is very useful to know how to use the `number_format` option, since the phenomenon we are measuring is a probability.  
 
 ```{r, warning = FALSE}
 export_summs(reg1a, reg1bmargins, reg1cmargins, 
@@ -273,4 +275,61 @@ Above, the two models are displayed side-by-side.  If we inspect the $\hat{\beta
 
 They have similar measures of AIC, but the **Bayesian Information Criterion (BIC)** is actually better for the model on the left by a pretty big margin: `r BIC(reg3a)` - `r BIC(reg3b)` = `r BIC(reg3a) - BIC(reg3b)` is considerably more than a difference of 10.  The AIC and BIC work a lot like Adjusted $R^2$ in regression in that they "penalize" you for having more independent variables than you need to model the data.  In this context, it means that even though the model on the right explains *more* of the variation in the dependent variable, it does so using a lot more information, and the information isn't adding enough to the predictive power of the model to justify its inclusion.
 
+Let's work through one more probit example to see how we can estimate marginal effects for specific values of our independent variables.  This is especially important for calculating the marginal effects of interaction effects.  
 
+Let's use the `recid` data in the wooldridge package.  This data looks at prison recidivism, and the variable `cens` indicates whether or not an individual released from prison wound up back in prison ($cens = 0$) or did not ($cens = 1$) at some point in the next 6-7 years.  Let's suppose we believe that  recidivism is influenced by whether or not an individual was in the North Carolina prison work program, and that we suspect the effectiveness of the prison work program is somehow affected by years of education. We will model $cens$ as a function the interaction between the prisoner's years of education and whether or not the participated in the North Carolina prison work program and other control variables.  
+
+```{r}
+reg4a <- glm(cens ~ educ*workprg + age +I(age^2) + drugs + alcohol + black + tserved,
+             data = recid,
+             family = binomial(link = "probit"))
+export_summs(reg4a)
+```
+We see that all of our control variables are significant, but none of our variables of interest are.  Next, let's run the regression object through the `margins()` function to see some easier-to-interpet results:
+
+```{r, warning = FALSE}
+reg4amargins <- margins(reg4a)
+export_summs(reg4amargins,
+             number_format = "%.4f",
+             stars = c(`***` = 0.01, `**` = 0.05, `*` = 0.1))
+```
+Of note is that both the quadratic term on $age$ and the interaction effect are not presented here; again, this is to be expected because of the way that marginal effects are calculated.  
+
+Finally, to test our hypothesis that there is an interaction between the work program and education, we will use the `at` option in `margins()`.  Let's look at the marginal effects for $educ = 8$, $educ = 12$, and $educ = 16$:
+
+```{r, warning = FALSE}
+
+reg4amargins0 <- margins(reg4a, at = list(educ = 8))
+reg4amargins1 <- margins(reg4a, at = list(educ = 12))
+reg4amargins2 <- margins(reg4a, at = list(educ = 16))
+# reg4amargins2 <- margins(reg4a, at = list(educ = 16))
+export_summs(reg4amargins, reg4amargins0, reg4amargins1, reg4amargins2, 
+             number_format = "%.4f",
+             stars = c(`***` = 0.01, `**` = 0.05, `*` = 0.1),
+             model.names = c("AME", "Education = 8", "Education = 12", "Education = 16"))
+
+```
+As we can see, estimating the marginal effect at differing levels of education reveals that the North Carolina prison work program seems to have a negative and significant effect on individuals with low levels of education.  It might also be instructive to estimate the marginal effects for $workprg = 0$ and $workprg = 1$: 
+
+```{r, warning = FALSE}
+
+reg4amarginsnowork <- margins(reg4a, at = list(workprg = 0))
+reg4amarginswork <- margins(reg4a, at = list(workprg = 1))
+export_summs(reg4amargins, reg4amarginsnowork, reg4amarginswork, 
+             number_format = "%.4f",
+             stars = c(`***` = 0.01, `**` = 0.05, `*` = 0.1),
+             model.names = c("AME", "No Work Program", "Work Program"))
+```
+Looked at this way, we can see that education is not a good predictor of recidivism for individuals not in the work program, but it is for individuals in the work program.  
+
+### Data for further exploration
+
+* `AER:CreditCard` - model $card$, a binary variable denoting whether or not a credit card application was accepted.
+* `AER:HMDA` - model $deny$, looking in particular for discrimination against black borrowers (the $afam$ dummy). Does discrimination go away when controlling for all relevant factors?
+* `AER:PSID1976` - model $participation$ as a function of education, age, number of children, family income, etc.
+* `AER:ResumeNames` - model $call$, looking in particular for discrimination against individuals with "black names." This type of analysis is called an "audit study"
+* `wooldridge:card` - model $enroll$, a binary measuring whether or not a student enrolled at a college.
+
+# Multinomial Logit
+
+Using the `AER:TravelMode` data, we can estimate a multinomial logit using the `mlogit` package.
