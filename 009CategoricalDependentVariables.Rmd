@@ -17,7 +17,7 @@ As you might be starting to suspect, there are tons of interesting questions tha
 
 While not often utilized in economics, there are versions of probit and logit that are designed for **multinomial** (categorical variables with more than 2 outcomes) and **ordered** (multinomial variables whose levels can be ordered from worst to best, lowest to highest, etc.) dependent variables.  
 
-Let's begin by loading in some essential packages.  We have not yet used `margins` or `jtools` so you may need to install those now.  Additionally, `jtools` requires a couple more packages to be installed to do what we will be asking it to do, `broom` and `huxtable`:
+Let's begin by loading in some essential packages.  We have not yet used `margins`, `jtools`, `mlogit`, or `MASS`, so you may need to install those now.  Additionally, `jtools` requires a couple more packages to be installed to do what we will be asking it to do, `broom` and `huxtable`:
 
 
 ```{r, eval = FALSE}
@@ -26,6 +26,7 @@ install.packages("jtools")
 install.packages("broom")
 install.packages("huxtable")
 install.packages("mlogit")
+install.packages("MASS")
 ```
 
 ```{r, warning=FALSE, message = FALSE}
@@ -33,6 +34,7 @@ library(tidyverse)
 library(stargazer)
 library(margins)
 library(mlogit)
+library(MASS)
 library(jtools)
 library(wooldridge)
 library(AER)
@@ -329,7 +331,61 @@ Looked at this way, we can see that education is not a good predictor of recidiv
 * `AER:PSID1976` - model $participation$ as a function of education, age, number of children, family income, etc.
 * `AER:ResumeNames` - model $call$, looking in particular for discrimination against individuals with "black names." This type of analysis is called an "audit study"
 * `wooldridge:card` - model $enroll$, a binary measuring whether or not a student enrolled at a college.
+* `datasets:Titanic` - model $Survived$, and see if "women and children first" was really a thing!  To convert this `Titanic` into something usable by the `glm()` function, use the following code first:
+```{r}
+data(Titanic) 
+tempdata <- as.data.frame(Titanic)
+titaniclong <- tempdata[rep(1:nrow(tempdata), tempdata$Freq), -5]
 
-# Multinomial Logit
+```
 
-Using the `AER:TravelMode` data, we can estimate a multinomial logit using the `mlogit` package.
+
+# Ordered and Multinomial Probit
+
+If our dependent variable has more than 2 possible levels, then we need to use slightly the more advanced methods of *Ordered Probit* and/or *Multinomial Probit*.  If the levels of our dependent variable are ordered, we use *ordered probit*, and if they are unordered, we use *multinomial probit*.  Generally speaking, these two models are far more advanced than the probit models we saw above, so we will only briefly look at these models.
+
+Some applications of ordered probit might include:
+
+* Your dependent variable is a Likert scale (e.g. the responses are strongly disagree, disagree, ..., strongly agree).
+* You are modeling purchase decisions on a scale (e.g. does a visitor to Disney World stay at a value resort, moderate resort, or luxury resort?).
+* Sometimes all you have is ordered data even if numeric data in principal exists, such as education level, income level, etc.
+
+By contrast, muntinomial probit would be called for in situations where the response variable doesn't have a natural ordering:
+
+* You are modeling an unordered purchase decision, such as whether or not somebody purchased a Xbox Series X, PS5, or Nintendo Switch.
+* You are modeling individual preferences (e.g. you survey people and ask them their favorite fast food restaurant).
+
+Let's work through one example of an ordered probit.  A warning: interpreting the coefficients on these models is very tricky; we will focus on interpreting signs and significance, but interpreting magnitudes will be left as an advanced exercise for the interested student.
+
+The command for an ordered probit, `polr()`, is part of the `MASS` package, so if you haven't run `install.packages("MASS")` and/or `library(MASS)`, now is the time.  We will make use of the `housing` dataset contained within the `MASS` package.  
+
+```{r}
+data(housing)
+head(housing)
+```
+The variable $Sat$ measures housing satisfaction on an ordered scale, so an ordered probit model is appropriate here. Note that the unusual coding of the data requires us to use the `weights = Freq` option.  
+
+```{r, warning = FALSE, message = FALSE}
+reg5a <- polr(Sat ~ Infl + Type + Cont, weights = Freq, data = housing, method = "probit")
+summary(reg5a)
+```
+Essentially, the ordered probit model estimates the probability of each of the possible outcome values at the same time, and assigns a probability to each outcome.  Because the order of the dependent variable is from worst appraisal of housing satisfaction ($Sat = Low$) to the highest appraisal ($Sat = High$), we interpret negative coefficients as reducing somebody's appraisal of their housing satisfaction.  Since these independent variables are dummies, we interpret them as before, with reference to the omitted variable.  Finally, while there are no stars here, we can use t-values to get the same information about significance.  A good rule of thumb is that a t-value greater than 2 (or less than -2) indicates a statistically significant coefficient.  
+
+This model generates multiple predicted probabilities -- one for each of the possible values of the dependent variable.  Here, the ordered probit generates 3 such probabilities.  The predicted value for an observation, then, is the outcome with the highest probability of occurring. We can take a look at the predicted values for each observation with the following code:
+
+```{r}
+temphousing <- predict(reg5a, housing, type = "probs")
+temphousing <- as.data.frame(temphousing)
+temphousing <- temphousing %>% 
+    bind_cols(housing) %>% 
+    filter(Sat == "Low") %>% 
+    select(- c(Sat,Freq))
+tibble(temphousing)
+
+```
+
+# Wrapping Up
+
+Probit and logit models are a valuable addition to our econometric skillset as they allow us to extend our data skills into explaining categorical phenonema.  We have also looked briefly at the ordinal and multinomial versions of probit and logit; while the programming skills requried for these models is a bit beyond the scope of the class, I hope that you can see their potential usefulness.  
+
+Next, we turn to models for censored and count variables.

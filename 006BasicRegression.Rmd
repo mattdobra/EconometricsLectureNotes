@@ -190,7 +190,7 @@ We can use the `attributes()` command to see what is contained within this objec
 ```{r}
 attributes(reg1)
 ```
-To interpret the model, we need to take a deeper look at this regression object.  The Base R method is to use the `summary()` command, though I prefer `stargazer` because it's cleaner and the format looks like the way regressions get published in academic journals. 
+To interpret the model, we need to take a deeper look at this regression object.  The Base R method is to use the `summary()` command, though I prefer `stargazer` because it's cleaner and the format looks like the way regressions get published in academic journals. The `export_summs()` command in the `jtools` package is also very good and we will make use of it later, but it is slightly more complex to use.
 
 ```{r}
 summary(reg1)
@@ -230,11 +230,11 @@ tempdata %>%
     slice(1:10)
 ```
 
-Recall, wage is our dependent variable ($Y$), and education is our independent variable ($X$).  The preds variable records the values of $\hat{Y}$ for each level of education $X_i$ and the resids variable records how far from the predicted wage $\hat{Y}$ each of the actual wagee $Y_i$ is.
+Recall, wage is our dependent variable ($Y$), and education is our independent variable ($X$).  The preds variable records the values of $\hat{Y}$ for each level of education $X_i$ and the resids variable records how far from the predicted wage $\hat{Y}$ each of the actual wages $Y_i$ is.
 
 ### Look at the stars, look how they shine for you
 
-As an aside, Coldplay sucks. Rather than think about their excrementary music, let's look back at the `stargazer()` output so we can think happy thoughts again:
+As an aside, Coldplay sucks. Rather than dwell upon their excrementary music, let's look back at the `stargazer()` output so we can think happy thoughts again:
 
 ```{r, warning = FALSE}
 stargazer(reg1, type = "text")
