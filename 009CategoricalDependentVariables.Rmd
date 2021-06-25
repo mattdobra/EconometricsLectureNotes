@@ -33,7 +33,6 @@ install.packages("MASS")
 library(tidyverse)
 library(stargazer)
 library(margins)
-library(mlogit)
 library(MASS)
 library(jtools)
 library(wooldridge)
@@ -41,14 +40,7 @@ library(AER)
 data(k401ksubs)
 data(SmokeBan)
 data(affairs)
-
-data(CPS1985)
-data(HousePrices)
-data(diamonds)
-data(gpa2)
-data(TeachingRatings)
-data(CPS1988)
-
+data(recid)
 
 ```
 

@@ -1,0 +1,103 @@
+---
+title: "Methods for Censored and Count Data"
+output: html_notebook
+---
+
+# Overview
+
+We now turn to methods that are appropriate for dependent variables that are either **censored** or **count** data.  This will include the **Tobit**, **Heckman**, **Poisson**, and **Negative Binomial** models.
+
+As usual, we begin with loading in some essential packages.  We have not yet used `censReg`, so this may need to be installed prior to using it.  
+
+
+```{r, eval = FALSE}
+install.packages("censReg")
+```
+
+```{r, warning=FALSE, message = FALSE}
+library(tidyverse)
+library(stargazer)
+library(MASS)
+library(jtools)
+library(censReg)
+library(wooldridge)
+library(AER)
+
+data(charity)
+data(fringe)
+
+data(k401ksubs)
+data(SmokeBan)
+data(affairs)
+
+```
+
+# Censored Models
+
+We will look at two types of models to fit censored data: the **Tobit** model and the **Heckman** model.  Unlike Probit and Logit, these re not interchangeable, and which one you use depends on the type of censoring involved.  A censored variable is a variable that, for some reason, cannot take on a value below (left-censored) or above (right-censored) some value, or is missing for some observations. This might be due to "corner solutions" or top/bottom coding. For example:
+
+* If you are modeling demand for a sporting event, there is a maximum limit for how many tickets can be sold--the corner solution is the stadium capacity.
+* Corner solutions are often common when the dependent variable is a percentage, so obversations get bunched at 0% and/or 100%.
+* If you are trying to predict SAT scores, they are top-coded at 800 and bottom-coded at 200.  
+* Data may not exist for some observations in your data set, and you think that the reason the data does not exist can be modeled.  
+
+The first three such cases would call for a **Tobit** model, the last one would be a situation for a **Heckman** model.
+
+Let's illustrate the Tobit model using the `fringe` dataset in the `wooldridge` package.  The variable $annbens$ contains the dollar value of annual benefits for the 616 individuals in the data set.
+
+```{r}
+summary(fringe$annbens)
+```
+
+Here, we can see that the minimum is \$0 and the maximum is \$5129.1.  Let's think about this a little further: 
+
+* Does the maximum *have* to be \$5129.1?  Could it be higher? 
+* Does the minimum *have* to be \$0?  Could it be lower?  
+
+While it seems possible that somebody *could* have more than \$5129.1 in fringe benefits per year, how could somebody have negative valued fringe benefits?  This suggests that there is a good chance of \$0 being a "corner solution."  We can more closely at the data to see if this is in fact true.  Let's take a look at the $annbens$ variable graphically:
+
+```{r}
+fringe %>% ggplot(aes(x = annbens)) +
+    geom_histogram(binwidth = 100) +
+    theme_classic() +
+    scale_x_continuous(expand = c(0, 0)) +
+    scale_y_continuous(expand = c(0, 0)) 
+
+```
+There are two pretty big spikes - one at zero, and another around 1000.   But these spikes are different in nature.  The presence of the big spike at 0 is suggestive of a corner solution. This next command is a little tricky, but it will ask R to list the 10 most common values for the $annbens$ variable.
+
+
+```{r}
+sort(table(fringe$annbens),decreasing=TRUE)[1:10]
+```
+Not only is 0 the most common value, it is twice as likely as any other value for this variable! This is a pretty good indication that if we want to model $annbens$, we should probably use a Tobit model.  Intuitively, the Tobit model is kind of a hybrid of OLS regression and the probit model.  In fact, it gets its name as a pun of its inventor, Nobel Laureate economist James Tobin, and the probit model.  The math behind the probit is essentially estimating a probit on whether or not the dependent variable is censored or not, a linear regression on the data that is not censored, and combining them into one estimate.  
+
+A Tobit model is estimated with the `censReg()` function, which is part of the `censReg` package.  This function works a lot like the `lm()` and `glm()` commands we have been using, but we need to specify a couple extra options.  We need to tell the censReg function how the data is censored with the `left = 0` and `right = Inf` arguments.  The `Inf` is short for **infinite**, so this argument simply tells R that the data is not right-censored.  The `left = 0` tells R that the dependent variable is left censored at 0; were we dealing with right-censored data, we would use `left = -Inf` and set our right censoring with the `right` option. 
+
+```{r, warning = FALSE}
+reg1a <- censReg(annbens ~ tenure + annearn, left = 0, right = Inf, data = fringe)
+stargazer(reg1a, type = "text")
+```
+The model estimates the value of fringe benefits as a function of an individual's tenure with their current employer and annual earnings.  We interpret the coefficients in roughly the same way as an OLS coefficient.  The $logSigma$ term is a model parameter.  One use of $logSigma$ is to exponentiate it and compare it to the standard deviation of the dependent variable:
+
+```{r}
+sd(fringe$annbens)
+exp(reg1a$estimate[4])
+
+```
+The standard deviation of $annbens$ is larger than $e^{7.064}$, indicating that Tobit is likely the right class of models to use here.  
+The coefficients 
+
+
+```
+
+```{r}
+data(charity)
+charity %>% ggplot(aes(x = gift)) +
+    geom_histogram(binwidth = 5)
+
+```
+
+
+
+
