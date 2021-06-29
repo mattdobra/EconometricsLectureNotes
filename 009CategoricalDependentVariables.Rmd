@@ -376,6 +376,11 @@ tibble(temphousing)
 
 ```
 
+### Data for further exploration
+
+* The `fivethirtyeight` dataset `steak_survey` has an interesting ordinal variable, $steak\_prep$, which comes from a survey of how well done Americans like their steak.
+* The `comma_survey` in the `fivethirtyeight` dataset includes a variable called $care\_proper\_grammar$ that is a likert scale on how much people care about proper use of grammar.
+
 # Wrapping Up
 
 Probit and logit models are a valuable addition to our econometric skillset as they allow us to extend our data skills into explaining categorical phenonema.  We have also looked briefly at the ordinal and multinomial versions of probit and logit; while the programming skills requried for these models is a bit beyond the scope of the class, I hope that you can see their potential usefulness.  

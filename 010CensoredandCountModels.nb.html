@@ -218,27 +218,32 @@ pre code {
 <div id="overview" class="section level1">
 <h1>Overview</h1>
 <p>We now turn to methods that are appropriate for dependent variables that are either <strong>censored</strong> or <strong>count</strong> data. This will include the <strong>Tobit</strong>, <strong>Heckman</strong>, <strong>Poisson</strong>, and <strong>Negative Binomial</strong> models.</p>
-<p>As usual, we begin with loading in some essential packages. We have not yet used <code>censReg</code>, so this may need to be installed prior to using it.</p>
+<p>As usual, we begin with loading in some essential packages. We have not yet used <code>censReg</code>, <code>MASS</code>, or <code>sampleSelection</code>, so they may need to be installed prior to their use.</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiaW5zdGFsbC5wYWNrYWdlcyhcImNlbnNSZWdcIikifQ== -->
-<pre class="r"><code>install.packages(&quot;censReg&quot;)</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjpbImluc3RhbGwucGFja2FnZXMoXCJjZW5zUmVnXCIpIiwiaW5zdGFsbC5wYWNrYWdlcyhcInNhbXBsZVNlbGVjdGlvblwiKSJdfQ== -->
+<pre class="r"><code>install.packages(&quot;censReg&quot;)
+install.packages(&quot;sampleSelection&quot;)</code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeSh0aWR5dmVyc2UpXG5saWJyYXJ5KHN0YXJnYXplcilcbmxpYnJhcnkoTUFTUylcbmxpYnJhcnkoanRvb2xzKVxubGlicmFyeShjZW5zUmVnKVxubGlicmFyeSh3b29sZHJpZGdlKVxubGlicmFyeShBRVIpXG5cbmRhdGEoY2hhcml0eSlcbmRhdGEoZnJpbmdlKVxuXG5kYXRhKGs0MDFrc3VicylcbmRhdGEoU21va2VCYW4pXG5kYXRhKGFmZmFpcnMpXG5cbmBgYCJ9 -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeSh0aWR5dmVyc2UpXG5saWJyYXJ5KHN0YXJnYXplcilcbmxpYnJhcnkoTUFTUylcbmxpYnJhcnkoanRvb2xzKVxubGlicmFyeShjZW5zUmVnKVxubGlicmFyeShzYW1wbGVTZWxlY3Rpb24pXG5saWJyYXJ5KE1BU1MpXG5saWJyYXJ5KHdvb2xkcmlkZ2UpXG5saWJyYXJ5KEFFUilcbmxpYnJhcnkoZml2ZXRoaXJ0eWVpZ2h0KVxuXG5kYXRhKGNoYXJpdHkpXG5kYXRhKGZyaW5nZSlcbmRhdGEobXJveilcblxuZGF0YShrNDAxa3N1YnMpXG5kYXRhKFNtb2tlQmFuKVxuZGF0YShhZmZhaXJzKVxuXG5gYGAifQ== -->
 <pre class="r"><code>library(tidyverse)
 library(stargazer)
 library(MASS)
 library(jtools)
 library(censReg)
+library(sampleSelection)
+library(MASS)
 library(wooldridge)
 library(AER)
+library(fivethirtyeight)
 
 data(charity)
 data(fringe)
+data(mroz)
 
 data(k401ksubs)
 data(SmokeBan)
@@ -259,6 +264,8 @@ data(affairs)
 <li>Data may not exist for some observations in your data set, and you think that the reason the data does not exist can be modeled.</li>
 </ul>
 <p>The first three such cases would call for a <strong>Tobit</strong> model, the last one would be a situation for a <strong>Heckman</strong> model.</p>
+<div id="the-tobit-model" class="section level2">
+<h2>The Tobit model</h2>
 <p>Let’s illustrate the Tobit model using the <code>fringe</code> dataset in the <code>wooldridge</code> package. The variable <span class="math inline">\(annbens\)</span> contains the dollar value of annual benefits for the 616 individuals in the data set.</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
@@ -279,16 +286,16 @@ data(affairs)
 <p>While it seems possible that somebody <em>could</em> have more than $5129.1 in fringe benefits per year, how could somebody have negative valued fringe benefits? This suggests that there is a good chance of $0 being a “corner solution.” We can more closely at the data to see if this is in fact true. Let’s take a look at the <span class="math inline">\(annbens\)</span> variable graphically:</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZnJpbmdlICU+JSBnZ3Bsb3QoYWVzKHggPSBhbm5iZW5zKSkgK1xuICAgIGdlb21faGlzdG9ncmFtKGJpbndpZHRoID0gMTAwKSArXG4gICAgdGhlbWVfY2xhc3NpYygpICtcbiAgICBzY2FsZV94X2NvbnRpbnVvdXMoZXhwYW5kID0gYygwLCAwKSkgK1xuICAgIHNjYWxlX3lfY29udGludW91cyhleHBhbmQgPSBjKDAsIDApKSBcblxuYGBgIn0= -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZnJpbmdlICU+JSBnZ3Bsb3QoYWVzKHggPSBhbm5iZW5zKSkgK1xuICAgIGdlb21faGlzdG9ncmFtKGJpbndpZHRoID0gMTAwLCBjb2xvciA9IFwiIzAwNTczQ1wiLCBmaWxsID0gXCIjMDA1NzNDXCIpICtcbiAgICB0aGVtZV9jbGFzc2ljKCkgK1xuICAgIHNjYWxlX3hfY29udGludW91cyhleHBhbmQgPSBjKDAsIDApKSArXG4gICAgc2NhbGVfeV9jb250aW51b3VzKGV4cGFuZCA9IGMoMCwgMCkpIFxuXG5gYGAifQ== -->
 <pre class="r"><code>fringe %&gt;% ggplot(aes(x = annbens)) +
-    geom_histogram(binwidth = 100) +
+    geom_histogram(binwidth = 100, color = &quot;#00573C&quot;, fill = &quot;#00573C&quot;) +
     theme_classic() +
     scale_x_continuous(expand = c(0, 0)) +
     scale_y_continuous(expand = c(0, 0)) 
 </code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-plot-begin eyJoZWlnaHQiOjI4Ni4xNTU3LCJ3aWR0aCI6NDYzLCJzaXplX2JlaGF2aW9yIjowLCJjb25kaXRpb25zIjpbXX0= -->
-<p><img src="data:image/png;base64,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" /></p>
+<!-- rnb-plot-begin eyJoZWlnaHQiOjI4MS44Mjk0LCJ3aWR0aCI6NDU2LCJzaXplX2JlaGF2aW9yIjowLCJjb25kaXRpb25zIjpbXX0= -->
+<p><img src="data:image/png;base64,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" /></p>
 <!-- rnb-plot-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
@@ -309,7 +316,7 @@ data(affairs)
 <!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
-<p>Not only is 0 the most common value, it is twice as likely as any other value for this variable! This is a pretty good indication that if we want to model <span class="math inline">\(annbens\)</span>, we should probably use a Tobit model. Intuitively, the Tobit model is kind of a hybrid of OLS regression and the probit model. In fact, it gets its name as a pun of its inventor, Nobel Laureate economist James Tobin, and the probit model. The math behind the probit is essentially estimating a probit on whether or not the dependent variable is censored or not, a linear regression on the data that is not censored, and combining them into one estimate.</p>
+<p>Not only is 0 the most common value, it is twice as likely as any other value for this variable! This is a pretty good indication that if we want to model <span class="math inline">\(annbens\)</span>, we should probably use a Tobit model. Intuitively, the Tobit model is kind of a hybrid of OLS regression and the probit model. In fact, it gets its name as a combination of its inventor, Nobel Laureate economist James Tobin, and the probit model. The math behind the Tobit is essentially estimating a probit on whether or not the dependent variable is censored or not, a linear regression on the data that is not censored, and combining them into one estimate.</p>
 <p>A Tobit model is estimated with the <code>censReg()</code> function, which is part of the <code>censReg</code> package. This function works a lot like the <code>lm()</code> and <code>glm()</code> commands we have been using, but we need to specify a couple extra options. We need to tell the censReg function how the data is censored with the <code>left = 0</code> and <code>right = Inf</code> arguments. The <code>Inf</code> is short for <strong>infinite</strong>, so this argument simply tells R that the data is not right-censored. The <code>left = 0</code> tells R that the dependent variable is left censored at 0; were we dealing with right-censored data, we would use <code>left = -Inf</code> and set our right censoring with the <code>right</code> option.</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
@@ -364,30 +371,642 @@ Note:               *p&lt;0.1; **p&lt;0.05; ***p&lt;0.01</code></pre>
 <!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
-<p>The standard deviation of <span class="math inline">\(annbens\)</span> is larger than <span class="math inline">\(e^{7.064}\)</span>, indicating that Tobit is likely the right class of models to use here.<br />
-The coefficients</p>
-<pre><code>
-
-&lt;!-- rnb-text-end --&gt;
-
-
-&lt;!-- rnb-chunk-begin --&gt;
-
-
-&lt;!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZGF0YShjaGFyaXR5KVxuY2hhcml0eSAlPiUgZ2dwbG90KGFlcyh4ID0gZ2lmdCkpICtcbiAgICBnZW9tX2hpc3RvZ3JhbShiaW53aWR0aCA9IDUpXG5cbmBgYCJ9 --&gt;
-
-```r
-data(charity)
+<p>The standard deviation of <span class="math inline">\(annbens\)</span> is larger than <span class="math inline">\(e^{7.064}\)</span>, indicating that Tobit is likely the right class of models to use here.</p>
+<p>The <code>charity</code> data in the <code>wooldridge</code> package has a variable, <span class="math inline">\(\mathit{gift}\)</span>, that is clearly left censored at zero. In this dataset, <span class="math inline">\(\mathit{gift}\)</span> measures the amount of money donated by 4268 potential donors. As the histogram shows, this is a case where there are a ton of zeroes:</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuXG5jaGFyaXR5ICU+JSBnZ3Bsb3QoYWVzKHggPSBnaWZ0KSkgK1xuICAgIGdlb21faGlzdG9ncmFtKGJpbndpZHRoID0gNSwgY29sb3IgPSBcIiMwMDU3M0NcIiwgZmlsbCA9IFwiIzAwNTczQ1wiKSArXG4gICAgdGhlbWVfY2xhc3NpYygpICtcbiAgICBzY2FsZV94X2NvbnRpbnVvdXMoZXhwYW5kID0gYygwLCAwKSkgK1xuICAgIHNjYWxlX3lfY29udGludW91cyhleHBhbmQgPSBjKDAsIDApKSBcblxuYGBgIn0= -->
+<pre class="r"><code>
 charity %&gt;% ggplot(aes(x = gift)) +
-    geom_histogram(binwidth = 5)
+    geom_histogram(binwidth = 5, color = &quot;#00573C&quot;, fill = &quot;#00573C&quot;) +
+    theme_classic() +
+    scale_x_continuous(expand = c(0, 0)) +
+    scale_y_continuous(expand = c(0, 0)) 
 </code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-plot-begin eyJoZWlnaHQiOjI4MS44Mjk0LCJ3aWR0aCI6NDU2LCJzaXplX2JlaGF2aW9yIjowLCJjb25kaXRpb25zIjpbXX0= -->
+<p><img src="data:image/png;base64,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" /></p>
+<!-- rnb-plot-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>Of the 4268 observations in the dataset, over half are zero! Here are the 10 most common gift sizes in the data:</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc29ydCh0YWJsZShjaGFyaXR5JGdpZnQpLGRlY3JlYXNpbmc9VFJVRSlbMToxMF1cbmBgYCJ9 -->
+<pre class="r"><code>sort(table(charity$gift),decreasing=TRUE)[1:10]</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG4gICAwICAgMTAgICAyNSAgICA1ICAgMTUgICAyMCAgIDUwICAgMzAgICAgMiAgMTAwIFxuMjU2MSAgNzAyICAzODcgIDE1OCAgMTUyICAgODYgICA4NiAgIDM2ICAgMjUgICAyNSBcbiJ9 -->
+<pre><code>
+   0   10   25    5   15   20   50   30    2  100 
+2561  702  387  158  152   86   86   36   25   25 </code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>With this many left censored observations, Tobit is probably going to be a good model to use.</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucmVnMmEgPC0gY2Vuc1JlZyhnaWZ0IH4gbWFpbHN5ZWFyICsgYXZnZ2lmdCwgbGVmdCA9IDAsIHJpZ2h0ID0gSW5mLCBkYXRhID0gY2hhcml0eSlcbnN0YXJnYXplcihyZWcyYSwgdHlwZSA9IFwidGV4dFwiKVxuYGBgIn0= -->
+<pre class="r"><code>reg2a &lt;- censReg(gift ~ mailsyear + avggift, left = 0, right = Inf, data = charity)
+stargazer(reg2a, type = &quot;text&quot;)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG49PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PVxuICAgICAgICAgICAgICAgICAgICAgICAgRGVwZW5kZW50IHZhcmlhYmxlOiAgICBcbiAgICAgICAgICAgICAgICAgICAgLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgZ2lmdCAgICAgICAgICAgIFxuLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS1cbm1haWxzeWVhciAgICAgICAgICAgICAgICAgICAgNi42MTgqKiogICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAoMC43ODIpICAgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbmF2Z2dpZnQgICAgICAgICAgICAgICAgICAgICAgMC4wMjIqKiogICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAoMC4wMDYpICAgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbmxvZ1NpZ21hICAgICAgICAgICAgICAgICAgICAgMy4zNjcqKiogICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAoMC4wMTkpICAgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbkNvbnN0YW50ICAgICAgICAgICAgICAgICAgICAtMjIuNjU4KioqICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAoMS43ODYpICAgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXG5PYnNlcnZhdGlvbnMgICAgICAgICAgICAgICAgICAgNCwyNjggICAgICAgICAgIFxuTG9nIExpa2VsaWhvb2QgICAgICAgICAgICAgIC05LDYyNi4xNzIgICAgICAgICBcbkFrYWlrZSBJbmYuIENyaXQuICAgICAgICAgICAxOSwyNjAuMzQwICAgICAgICAgXG5CYXllc2lhbiBJbmYuIENyaXQuICAgICAgICAgMTksMjg1Ljc4MCAgICAgICAgIFxuPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT1cbk5vdGU6ICAgICAgICAgICAgICAgKnA8MC4xOyAqKnA8MC4wNTsgKioqcDwwLjAxXG4ifQ== -->
+<pre><code>
+===============================================
+                        Dependent variable:    
+                    ---------------------------
+                               gift            
+-----------------------------------------------
+mailsyear                    6.618***          
+                              (0.782)          
+                                               
+avggift                      0.022***          
+                              (0.006)          
+                                               
+logSigma                     3.367***          
+                              (0.019)          
+                                               
+Constant                    -22.658***         
+                              (1.786)          
+                                               
+-----------------------------------------------
+Observations                   4,268           
+Log Likelihood              -9,626.172         
+Akaike Inf. Crit.           19,260.340         
+Bayesian Inf. Crit.         19,285.780         
+===============================================
+Note:               *p&lt;0.1; **p&lt;0.05; ***p&lt;0.01</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>The big difference between the <span class="math inline">\(logSigma\)</span> term to the standard deviation of <span class="math inline">\(\mathit{gift}\)</span> is suggestive that the Tobit model is the right approach:</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc2QoY2hhcml0eSRnaWZ0KVxuYGBgIn0= -->
+<pre class="r"><code>sd(charity$gift)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiWzFdIDE1LjA2MjU2XG4ifQ== -->
+<pre><code>[1] 15.06256</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZXhwKHJlZzJhJGVzdGltYXRlWzNdKVxuYGBgIn0= -->
+<pre class="r"><code>exp(reg2a$estimate[3])</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiIGF2Z2dpZnQgXG4xLjAyMjc1MyBcbiJ9 -->
+<pre><code> avggift 
+1.022753 </code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>Let’s push our analysis a bit further by estimating the same model with an OLS regression using the <code>lm()</code> command. We can compare these models side-by-side with stargazer:</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucmVnMmIgPC0gbG0oZ2lmdCB+IG1haWxzeWVhciArIGF2Z2dpZnQsIGRhdGEgPSBjaGFyaXR5KVxuc3RhcmdhemVyKHJlZzJhLCByZWIyYiwgdHlwZSA9IFwidGV4dFwiKVxuYGBgIn0= -->
+<pre class="r"><code>reg2b &lt;- lm(gift ~ mailsyear + avggift, data = charity)
+stargazer(reg2a, reb2b, type = &quot;text&quot;)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG49PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgRGVwZW5kZW50IHZhcmlhYmxlOiAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgIC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGdpZnQgICAgICAgICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICBjZW5zb3JlZCAgICAgICAgICAgIE9MUyAgICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgIHJlZ3Jlc3Npb24gICAgICAgICAgICAgICAgICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICgxKSAgICAgICAgICAgICAgICgyKSAgICAgICAgICAgXG4tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXG5tYWlsc3llYXIgICAgICAgICAgICA2LjYxOCoqKiAgICAgICAgICAyLjYwMioqKiAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAoMC43ODIpICAgICAgICAgICAoMC4zNDIpICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG5hdmdnaWZ0ICAgICAgICAgICAgICAwLjAyMioqKiAgICAgICAgICAwLjAxOSoqKiAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAoMC4wMDYpICAgICAgICAgICAoMC4wMDMpICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG5sb2dTaWdtYSAgICAgICAgICAgICAzLjM2NyoqKiAgICAgICAgICAgICAgICAgICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAoMC4wMTkpICAgICAgICAgICAgICAgICAgICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG5Db25zdGFudCAgICAgICAgICAgIC0yMi42NTgqKiogICAgICAgICAxLjc2OSoqICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAoMS43ODYpICAgICAgICAgICAoMC43MzcpICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG4tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXG5PYnNlcnZhdGlvbnMgICAgICAgICAgNCwyNjggICAgICAgICAgICAgNCwyNjggICAgICAgICAgXG5SMiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgMC4wMjMgICAgICAgICAgXG5BZGp1c3RlZCBSMiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgMC4wMjMgICAgICAgICAgXG5Mb2cgTGlrZWxpaG9vZCAgICAgIC05LDYyNi4xNzIgICAgICAgICAgICAgICAgICAgICAgICAgXG5Ba2Fpa2UgSW5mLiBDcml0LiAgIDE5LDI2MC4zNDAgICAgICAgICAgICAgICAgICAgICAgICAgXG5CYXllc2lhbiBJbmYuIENyaXQuIDE5LDI4NS43ODAgICAgICAgICAgICAgICAgICAgICAgICAgXG5SZXNpZHVhbCBTdGQuIEVycm9yICAgICAgICAgICAgICAgMTQuODg5IChkZiA9IDQyNjUpICAgXG5GIFN0YXRpc3RpYyAgICAgICAgICAgICAgICAgICAgNTEuMDY2KioqIChkZiA9IDI7IDQyNjUpXG49PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09XG5Ob3RlOiAgICAgICAgICAgICAgICAgICAgICAgKnA8MC4xOyAqKnA8MC4wNTsgKioqcDwwLjAxXG4ifQ== -->
+<pre><code>
+=======================================================
+                            Dependent variable:        
+                    -----------------------------------
+                                   gift                
+                     censored            OLS           
+                    regression                         
+                       (1)               (2)           
+-------------------------------------------------------
+mailsyear            6.618***          2.602***        
+                     (0.782)           (0.342)         
+                                                       
+avggift              0.022***          0.019***        
+                     (0.006)           (0.003)         
+                                                       
+logSigma             3.367***                          
+                     (0.019)                           
+                                                       
+Constant            -22.658***         1.769**         
+                     (1.786)           (0.737)         
+                                                       
+-------------------------------------------------------
+Observations          4,268             4,268          
+R2                                      0.023          
+Adjusted R2                             0.023          
+Log Likelihood      -9,626.172                         
+Akaike Inf. Crit.   19,260.340                         
+Bayesian Inf. Crit. 19,285.780                         
+Residual Std. Error               14.889 (df = 4265)   
+F Statistic                    51.066*** (df = 2; 4265)
+=======================================================
+Note:                       *p&lt;0.1; **p&lt;0.05; ***p&lt;0.01</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>The coefficients on these models are <em>very</em> different; the AIC and BIC are useful tools for comparing models of different types like this. We can obtain these measures with the <code>AIC()</code> and <code>BIC()</code> commands, respectively.</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuQUlDKHJlZzJiKVxuYGBgIn0= -->
+<pre class="r"><code>AIC(reg2b)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiWzFdIDM1MTY5LjVcbiJ9 -->
+<pre><code>[1] 35169.5</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuQklDKHJlZzJiKVxuYGBgIn0= -->
+<pre class="r"><code>BIC(reg2b)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiWzFdIDM1MTk0Ljk0XG4ifQ== -->
+<pre><code>[1] 35194.94</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>As lower values of AIC and BIC indicate better models, it is clear that the Tobit model outperforms the OLS model by a fairly large margin.</p>
+<div id="data-for-further-exploration" class="section level3">
+<h3>Data for further exploration</h3>
+<ul>
+<li><code>wooldridge:mroz</code> - the reported age of the interviewed women, <span class="math inline">\(repwage\)</span>, is left censored at zero, though this might be better modeled with a Heckman model.</li>
+<li><code>wooldridge:jtrain2</code> and <code>wooldridge:jtrain3</code> might also be amenable to Heckman regression.</li>
+</ul>
+</div>
+</div>
+<div id="the-heckman-model" class="section level2">
+<h2>The Heckman model</h2>
+<p>The Heckman model (sometimes called the Heckman Selection model) shares many similarities with the Tobit model. Like the Tobit model, the Heckman model is named for an Economics Nobel Laureate: James Heckman. At its core, it is the same combination of estimating a probit on whether or not the dependent variable is censored or not and a linear regression on the data that is not censored. There are two key difference here. First, in the Heckman model, the data are not “piled-up” at some value (typically on the left), they are truly unobserved. The second difference is that we have some theory or explanation as to why some are observed and some are not.</p>
+<p>Let’s look at some wage data, where this model is commonly used. The <code>mroz</code> data in the <code>wooldridge</code> package looks at the wages of married women in the mid 1970s, and contains a the <span class="math inline">\(repwage\)</span> variable, which is the reported wage of the women in the data set. If we look at at the variable more closely, we see that over half of the women have a wage of 0, indicating that they are out of the labor force.</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuP21yb3pcbnN1bW1hcnkobXJveiRyZXB3YWdlKVxuYGBgIn0= -->
+<pre class="r"><code>?mroz
+summary(mroz$repwage)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiICAgTWluLiAxc3QgUXUuICBNZWRpYW4gICAgTWVhbiAzcmQgUXUuICAgIE1heC4gXG4gICAwLjAwICAgIDAuMDAgICAgMC4wMCAgICAxLjg1ICAgIDMuNTggICAgOS45OCBcbiJ9 -->
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+   0.00    0.00    0.00    1.85    3.58    9.98 </code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>While they report their wage as $0, this is not a case of these women working for free, but rather, they have opted out of the labor force. In a sense, then, we actually don’t now what their wage is/ought to be. Thus, wages are “unobserved,” which is the first thing we need to estimate a Heckman model. The second thing we need is something that influences whether or not we observe their data that is not correlated with the data itself. We will use the <span class="math inline">\(kidslt6\)</span> variable for this – we would suspect that having more pre-school aged kids make someone less likely to work, but shouldn’t necessarily reduce their wages should they choose to work.</p>
+<p>The <code>selection()</code> command is a bit tricky, as we need to specify two models, one for the probit model to see if wages are observed or not, and a second for the regression model to actually predict wages. We also need to edit our dataset a bit to put some <code>NA</code> values in for the zeroes.</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubXJvejIgPC0gbXJvelxubXJvejIkcmVwd2FnZVttcm96MiRyZXB3YWdlID09IDBdIDwtIE5BXG5gYGAifQ== -->
+<pre class="r"><code>mroz2 &lt;- mroz
+mroz2$repwage[mroz2$repwage == 0] &lt;- NA</code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
+<p>Now that the missing values are coded as <code>NA</code> we specify the selection model as:</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucmVnM2EgPC0gc2VsZWN0aW9uKCFpcy5uYShyZXB3YWdlKSB+IGtpZHNsdDYgKyBlZHVjICsgY2l0eSArIGV4cGVyLCByZXB3YWdlIH4gZWR1YyArIGNpdHkgKyBleHBlciwgZGF0YSA9IG1yb3oyKVxuYGBgIn0= -->
+<pre class="r"><code>reg3a &lt;- selection(!is.na(repwage) ~ kidslt6 + educ + city + exper, repwage ~ educ + city + exper, data = mroz2)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>The first equation models whether or not the <span class="math inline">\(repwage\)</span> variable is missing or not using the<code>!is.na()</code> command – <code>is.na(repwage)</code> returns a yes/no on if <span class="math inline">\(repwage\)</span> is missing (<code>NA</code>), and the <code>!</code> in front of it serves as a “not” function. This is modeled as a function of the number of children, education, experience, and a city dummy. The second equation models <span class="math inline">\(repwage\)</span> as a function of education, experience, and the city dummy. It is essential in a Heckman model that at least one of the variables in the selection equation is not in the OLS model.</p>
+<p>If we use the <code>summary()</code> command, we can see both the first and second stages of the model:</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc3VtbWFyeShyZWczYSlcbmBgYCJ9 -->
+<pre class="r"><code>summary(reg3a)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS1cblRvYml0IDIgbW9kZWwgKHNhbXBsZSBzZWxlY3Rpb24gbW9kZWwpXG5NYXhpbXVtIExpa2VsaWhvb2QgZXN0aW1hdGlvblxuTmV3dG9uLVJhcGhzb24gbWF4aW1pc2F0aW9uLCA2IGl0ZXJhdGlvbnNcblJldHVybiBjb2RlIDg6IHN1Y2Nlc3NpdmUgZnVuY3Rpb24gdmFsdWVzIHdpdGhpbiByZWxhdGl2ZSB0b2xlcmFuY2UgbGltaXQgKHJlbHRvbClcbkxvZy1MaWtlbGlob29kOiAtMTA3NC45NDIgXG43NTMgb2JzZXJ2YXRpb25zICg0MTcgY2Vuc29yZWQgYW5kIDMzNiBvYnNlcnZlZClcbjExIGZyZWUgcGFyYW1ldGVycyAoZGYgPSA3NDIpXG5Qcm9iaXQgc2VsZWN0aW9uIGVxdWF0aW9uOlxuICAgICAgICAgICAgIEVzdGltYXRlIFN0ZC4gRXJyb3IgdCB2YWx1ZSBQcig+fHR8KSAgICBcbihJbnRlcmNlcHQpIC0yLjAxODA1OSAgIDAuMjc4MDQ2ICAtNy4yNTggOS45M2UtMTMgKioqXG5raWRzbHQ2ICAgICAtMC4xNDkxNTkgICAwLjA2Mzk0NyAgLTIuMzMzICAgMC4wMTk5ICogIFxuZWR1YyAgICAgICAgIDAuMTE0NTE5ICAgMC4wMjE2NzYgICA1LjI4MyAxLjY3ZS0wNyAqKipcbmNpdHkgICAgICAgICAwLjAxNDE2MyAgIDAuMDk1MzUzICAgMC4xNDkgICAwLjg4MjAgICAgXG5leHBlciAgICAgICAgMC4wNDU1NDkgICAwLjAwNTY1NCAgIDguMDU1IDMuMTZlLTE1ICoqKlxuT3V0Y29tZSBlcXVhdGlvbjpcbiAgICAgICAgICAgIEVzdGltYXRlIFN0ZC4gRXJyb3IgdCB2YWx1ZSBQcig+fHR8KSAgICBcbihJbnRlcmNlcHQpIC00Ljg1NDIwICAgIDAuNjU1MTQgIC03LjQwOSAzLjQ2ZS0xMyAqKipcbmVkdWMgICAgICAgICAwLjM5OTI2ICAgIDAuMDQ5MzggICA4LjA4NSAyLjUzZS0xNSAqKipcbmNpdHkgICAgICAgICAwLjU0MTk5ICAgIDAuMjI3NDkgICAyLjM4MyAgIDAuMDE3NCAqICBcbmV4cGVyICAgICAgICAwLjEyOTE2ICAgIDAuMDE0MzYgICA4Ljk5MiAgPCAyZS0xNiAqKipcbiAgIEVycm9yIHRlcm1zOlxuICAgICAgRXN0aW1hdGUgU3RkLiBFcnJvciB0IHZhbHVlIFByKD58dHwpICAgIFxuc2lnbWEgIDIuNDMxOTQgICAgMC4xMzY0NiAgIDE3LjgyICAgPDJlLTE2ICoqKlxucmhvICAgIDAuOTcwMDQgICAgMC4wMTI4NCAgIDc1LjU3ICAgPDJlLTE2ICoqKlxuLS0tXG5TaWduaWYuIGNvZGVzOiAgMCDigJgqKirigJkgMC4wMDEg4oCYKirigJkgMC4wMSDigJgq4oCZIDAuMDUg4oCYLuKAmSAwLjEg4oCYIOKAmSAxXG4tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLVxuIn0= -->
+<pre><code>--------------------------------------------
+Tobit 2 model (sample selection model)
+Maximum Likelihood estimation
+Newton-Raphson maximisation, 6 iterations
+Return code 8: successive function values within relative tolerance limit (reltol)
+Log-Likelihood: -1074.942 
+753 observations (417 censored and 336 observed)
+11 free parameters (df = 742)
+Probit selection equation:
+             Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept) -2.018059   0.278046  -7.258 9.93e-13 ***
+kidslt6     -0.149159   0.063947  -2.333   0.0199 *  
+educ         0.114519   0.021676   5.283 1.67e-07 ***
+city         0.014163   0.095353   0.149   0.8820    
+exper        0.045549   0.005654   8.055 3.16e-15 ***
+Outcome equation:
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept) -4.85420    0.65514  -7.409 3.46e-13 ***
+educ         0.39926    0.04938   8.085 2.53e-15 ***
+city         0.54199    0.22749   2.383   0.0174 *  
+exper        0.12916    0.01436   8.992  &lt; 2e-16 ***
+   Error terms:
+      Estimate Std. Error t value Pr(&gt;|t|)    
+sigma  2.43194    0.13646   17.82   &lt;2e-16 ***
+rho    0.97004    0.01284   75.57   &lt;2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+--------------------------------------------</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>The selection model is in the top table, the regression on the observed data is in the bottom table. The <span class="math inline">\(kidslt6\)</span> variable is significant at the 2% level in the selection equation; the negative coefficient indicates the expected result that women with young children are less likely to have an observed wage.</p>
+<p>Let’s compare these estimates with a Tobit model and an OLS regression:</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucmVnM2IgPC0gY2Vuc1JlZyhyZXB3YWdlIH4ga2lkc2x0NiArIGVkdWMgKyBjaXR5ICsgZXhwZXIsIGRhdGEgPSBtcm96KVxucmVnM2MgPC0gbG0ocmVwd2FnZSB+IGtpZHNsdDYgKyBlZHVjICsgY2l0eSArIGV4cGVyLCBkYXRhID0gbXJveilcbnN0YXJnYXplcihyZWczYSwgcmVnM2IsIHJlZzNjLCB0eXBlID0gXCJ0ZXh0XCIpXG5gYGAifQ== -->
+<pre class="r"><code>reg3b &lt;- censReg(repwage ~ kidslt6 + educ + city + exper, data = mroz)
+reg3c &lt;- lm(repwage ~ kidslt6 + educ + city + exper, data = mroz)
+stargazer(reg3a, reg3b, reg3c, type = &quot;text&quot;)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG49PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PVxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgRGVwZW5kZW50IHZhcmlhYmxlOiAgICAgICAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICByZXB3YWdlICAgICAgICAgICAgICAgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICBzZWxlY3Rpb24gICAgICBjZW5zb3JlZCAgICAgICAgICAgIE9MUyAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICByZWdyZXNzaW9uICAgICAgICAgICAgICAgICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICgxKSAgICAgICAgICAgKDIpICAgICAgICAgICAgICAgKDMpICAgICAgICAgIFxuLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS1cbmtpZHNsdDYgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAtMS4zNzYqKiogICAgICAgICAtMC40NjkqKiogICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICgwLjM3OSkgICAgICAgICAgICgwLjE1NykgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbmVkdWMgICAgICAgICAgICAgICAgICAgIDAuMzk5KioqICAgICAgMC40NzIqKiogICAgICAgICAwLjI2OCoqKiAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAoMC4wNDkpICAgICAgICgwLjA3NykgICAgICAgICAgICgwLjAzNikgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbmNpdHkgICAgICAgICAgICAgICAgICAgIDAuNTQyKiogICAgICAgIDAuMjQxICAgICAgICAgICAgIDAuMTk5ICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAoMC4yMjcpICAgICAgICgwLjM2MikgICAgICAgICAgICgwLjE2OSkgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbmV4cGVyICAgICAgICAgICAgICAgICAgIDAuMTI5KioqICAgICAgMC4xODYqKiogICAgICAgICAwLjA5MSoqKiAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAoMC4wMTQpICAgICAgICgwLjAyMikgICAgICAgICAgICgwLjAxMCkgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbmxvZ1NpZ21hICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgMS40MDgqKiogICAgICAgICAgICAgICAgICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICgwLjA0NCkgICAgICAgICAgICAgICAgICAgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbkNvbnN0YW50ICAgICAgICAgICAgICAgLTQuODU0KioqICAgICAtNy44MDQqKiogICAgICAgICAtMi40MjYqKiogICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAoMC42NTUpICAgICAgICgxLjAxOCkgICAgICAgICAgICgwLjQ0NSkgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXG5PYnNlcnZhdGlvbnMgICAgICAgICAgICAgIDc1MyAgICAgICAgICAgNzUzICAgICAgICAgICAgICAgNzUzICAgICAgICAgIFxuUjIgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgMC4xODkgICAgICAgICBcbkFkanVzdGVkIFIyICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDAuMTg0ICAgICAgICAgXG5Mb2cgTGlrZWxpaG9vZCAgICAgICAgIC0xLDA3NC45NDIgICAgLTEsMjA1LjAwNCAgICAgICAgICAgICAgICAgICAgICAgIFxuQWthaWtlIEluZi4gQ3JpdC4gICAgICAgICAgICAgICAgICAgIDIsNDIyLjAwOCAgICAgICAgICAgICAgICAgICAgICAgICBcbkJheWVzaWFuIEluZi4gQ3JpdC4gICAgICAgICAgICAgICAgICAyLDQ0OS43NTMgICAgICAgICAgICAgICAgICAgICAgICAgXG5yaG8gICAgICAgICAgICAgICAgIDAuOTcwKioqICgwLjAxMykgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxuUmVzaWR1YWwgU3RkLiBFcnJvciAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgMi4xODUgKGRmID0gNzQ4KSAgICBcbkYgU3RhdGlzdGljICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDQzLjQ4OSoqKiAoZGYgPSA0OyA3NDgpXG49PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PVxuTm90ZTogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAqcDwwLjE7ICoqcDwwLjA1OyAqKipwPDAuMDFcbiJ9 -->
+<pre><code>
+=======================================================================
+                                    Dependent variable:                
+                    ---------------------------------------------------
+                                          repwage                      
+                       selection      censored            OLS          
+                                     regression                        
+                          (1)           (2)               (3)          
+-----------------------------------------------------------------------
+kidslt6                              -1.376***         -0.469***       
+                                      (0.379)           (0.157)        
+                                                                       
+educ                    0.399***      0.472***         0.268***        
+                        (0.049)       (0.077)           (0.036)        
+                                                                       
+city                    0.542**        0.241             0.199         
+                        (0.227)       (0.362)           (0.169)        
+                                                                       
+exper                   0.129***      0.186***         0.091***        
+                        (0.014)       (0.022)           (0.010)        
+                                                                       
+logSigma                              1.408***                         
+                                      (0.044)                          
+                                                                       
+Constant               -4.854***     -7.804***         -2.426***       
+                        (0.655)       (1.018)           (0.445)        
+                                                                       
+-----------------------------------------------------------------------
+Observations              753           753               753          
+R2                                                       0.189         
+Adjusted R2                                              0.184         
+Log Likelihood         -1,074.942    -1,205.004                        
+Akaike Inf. Crit.                    2,422.008                         
+Bayesian Inf. Crit.                  2,449.753                         
+rho                 0.970*** (0.013)                                   
+Residual Std. Error                                2.185 (df = 748)    
+F Statistic                                     43.489*** (df = 4; 748)
+=======================================================================
+Note:                                       *p&lt;0.1; **p&lt;0.05; ***p&lt;0.01</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>We can get the AIC and BIC from the Heckman and LM models with the <code>AIC()</code> and <code>BIC()</code> functions:</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuQUlDKHJlZzNhKVxuYGBgIn0= -->
+<pre class="r"><code>AIC(reg3a)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiJ2xvZyBMaWsuJyAyMTcxLjg4NSAoZGY9MTEpXG4ifQ== -->
+<pre><code>&#39;log Lik.&#39; 2171.885 (df=11)</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuQUlDKHJlZzNjKVxuYGBgIn0= -->
+<pre class="r"><code>AIC(reg3c)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiWzFdIDMzMjEuMzU3XG4ifQ== -->
+<pre><code>[1] 3321.357</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuQklDKHJlZzNhKVxuYGBgIn0= -->
+<pre class="r"><code>BIC(reg3a)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiWzFdIDIyMjIuNzQ5XG4ifQ== -->
+<pre><code>[1] 2222.749</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuQklDKHJlZzNjKVxuYGBgIn0= -->
+<pre class="r"><code>BIC(reg3c)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiWzFdIDMzNDkuMTAyXG4ifQ== -->
+<pre><code>[1] 3349.102</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>The Heckman model seems to be substantially better here than the Tobit model, and both are a ton better than OLS for this data.</p>
+<div id="data-for-further-exploration-1" class="section level3">
+<h3>Data for further exploration</h3>
+<ul>
+<li>Either of the data in the Tobit section of these notes – <code>wooldridge:charity</code> or <code>wooldridge:fringe</code> – could be looked at using the Heckman model.</li>
+<li><code>wooldridge:jtrain2</code> and <code>wooldridge:jtrain3</code> might also be amenable to Heckman regression.</li>
+</ul>
+</div>
+</div>
+</div>
+<div id="count-models" class="section level1">
+<h1>Count Models</h1>
+<p>The last type of data we will look at in this notebook is count data; dependent variables that can only take on whole number values. For example:</p>
+<ul>
+<li>The number of children an individual has</li>
+<li>The number of doctor’s visits a person makes in a year</li>
+</ul>
+<p>Typically we only use count models in cases where the counts are relatively low numbers – a decent ballpark number is that the mean of the dependent variable should be under 10 – We would not use a count model if our dependent variable was the number of McDonalds hamburgers sold annually at each restaurant or the number of puppies born each month by state, even though hamburgers and puppies are fundamentally countable. The two primary models used for count data are the <strong>Poisson</strong> and the <strong>Negative Binomial</strong> models. The poisson model is a bit easier to estimate, so we will begin there.</p>
+<p>We have used the binary measure from the <code>affairs</code> dataset in the <code>wooldridge</code> package before; let’s now turn to the <span class="math inline">\(\mathit{naffairs}\)</span> variable, a count variable that measures the number of affairs an individual had in the past year. First, let’s look at a graph and some summary statistics of <span class="math inline">\(\mathit{naffairs}\)</span>:</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc3VtbWFyeShhZmZhaXJzJG5hZmZhaXJzKVxuYGBgIn0= -->
+<pre class="r"><code>summary(affairs$naffairs)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiICAgTWluLiAxc3QgUXUuICBNZWRpYW4gICAgTWVhbiAzcmQgUXUuICAgIE1heC4gXG4gIDAuMDAwICAgMC4wMDAgICAwLjAwMCAgIDEuNDU2ICAgMC4wMDAgIDEyLjAwMCBcbiJ9 -->
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  0.000   0.000   0.000   1.456   0.000  12.000 </code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudGFibGUoYWZmYWlycyRuYWZmYWlycylcbmBgYCJ9 -->
+<pre class="r"><code>table(affairs$naffairs)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG4gIDAgICAxICAgMiAgIDMgICA3ICAxMiBcbjQ1MSAgMzQgIDE3ICAxOSAgNDIgIDM4IFxuIn0= -->
+<pre><code>
+  0   1   2   3   7  12 
+451  34  17  19  42  38 </code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYWZmYWlycyAlPiUgIGdncGxvdChhZXMoeCA9IG5hZmZhaXJzKSkgK1xuICAgIGdlb21faGlzdG9ncmFtKGJpbndpZHRoID0gMSwgZmlsbCA9IFwiZGFya2JsdWVcIikgK1xuICAgIHRoZW1lX2NsYXNzaWMoKSArXG4gICAgc2NhbGVfeF9jb250aW51b3VzKGV4cGFuZCA9IGMoMCwgMCksIGJyZWFrcyA9IDA6MTIpICtcbiAgICBzY2FsZV95X2NvbnRpbnVvdXMoZXhwYW5kID0gYygwLCAwKSkgXG5gYGAifQ== -->
+<pre class="r"><code>affairs %&gt;%  ggplot(aes(x = naffairs)) +
+    geom_histogram(binwidth = 1, fill = &quot;darkblue&quot;) +
+    theme_classic() +
+    scale_x_continuous(expand = c(0, 0), breaks = 0:12) +
+    scale_y_continuous(expand = c(0, 0)) </code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-plot-begin eyJoZWlnaHQiOjI4MS44Mjk0LCJ3aWR0aCI6NDU2LCJzaXplX2JlaGF2aW9yIjowLCJjb25kaXRpb25zIjpbXX0= -->
+<p><img src="data:image/png;base64,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" /></p>
+<!-- rnb-plot-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuTkFcbmBgYCJ9 -->
+<pre class="r"><code>NA</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>The mean is 1.5, and the both the table and histogram show that the <span class="math inline">\(\mathit{affairs}\)</span> variable is indeed a count variable. This suggests that a poisson model is likely indicated. We estimate the poisson model with the <code>glm()</code> function and set use the <code>family = poisson()</code> option.</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucmVnNGEgPC0gZ2xtKG5hZmZhaXJzIH4gbWFsZSArIHlyc21hcnIgKyBraWRzICsgcmVsaWcgKyBlZHVjICsgcmF0ZW1hcnIsIGRhdGEgPSBhZmZhaXJzLCBmYW1pbHkgPSBwb2lzc29uKCkpXG5zdGFyZ2F6ZXIocmVnNGEsIHR5cGUgPSBcInRleHRcIilcbmBgYCJ9 -->
+<pre class="r"><code>reg4a &lt;- glm(naffairs ~ male + yrsmarr + kids + relig + educ + ratemarr, data = affairs, family = poisson())
+stargazer(reg4a, type = &quot;text&quot;)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG49PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT1cbiAgICAgICAgICAgICAgICAgICAgICBEZXBlbmRlbnQgdmFyaWFibGU6ICAgIFxuICAgICAgICAgICAgICAgICAgLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXG4gICAgICAgICAgICAgICAgICAgICAgICAgICBuYWZmYWlycyAgICAgICAgICBcbi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLVxubWFsZSAgICAgICAgICAgICAgICAgICAgICAgICAwLjA1MiAgICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgKDAuMDc0KSAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxueXJzbWFyciAgICAgICAgICAgICAgICAgICAgMC4wNzcqKiogICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgKDAuMDA4KSAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxua2lkcyAgICAgICAgICAgICAgICAgICAgICAgIC0wLjAxOSAgICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgKDAuMTAzKSAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxucmVsaWcgICAgICAgICAgICAgICAgICAgICAgLTAuMzYxKioqICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgKDAuMDMxKSAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxuZWR1YyAgICAgICAgICAgICAgICAgICAgICAgICAwLjAxNiAgICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgKDAuMDE1KSAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxucmF0ZW1hcnIgICAgICAgICAgICAgICAgICAgLTAuNDEwKioqICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgKDAuMDI4KSAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxuQ29uc3RhbnQgICAgICAgICAgICAgICAgICAgMS45MTQqKiogICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgKDAuMjY1KSAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxuLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXG5PYnNlcnZhdGlvbnMgICAgICAgICAgICAgICAgICA2MDEgICAgICAgICAgICBcbkxvZyBMaWtlbGlob29kICAgICAgICAgICAgLTEsNDQ2LjQxNiAgICAgICAgIFxuQWthaWtlIEluZi4gQ3JpdC4gICAgICAgICAgMiw5MDYuODMyICAgICAgICAgXG49PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT1cbk5vdGU6ICAgICAgICAgICAgICpwPDAuMTsgKipwPDAuMDU7ICoqKnA8MC4wMVxuIn0= -->
+<pre><code>
+=============================================
+                      Dependent variable:    
+                  ---------------------------
+                           naffairs          
+---------------------------------------------
+male                         0.052           
+                            (0.074)          
+                                             
+yrsmarr                    0.077***          
+                            (0.008)          
+                                             
+kids                        -0.019           
+                            (0.103)          
+                                             
+relig                      -0.361***         
+                            (0.031)          
+                                             
+educ                         0.016           
+                            (0.015)          
+                                             
+ratemarr                   -0.410***         
+                            (0.028)          
+                                             
+Constant                   1.914***          
+                            (0.265)          
+                                             
+---------------------------------------------
+Observations                  601            
+Log Likelihood            -1,446.416         
+Akaike Inf. Crit.          2,906.832         
+=============================================
+Note:             *p&lt;0.1; **p&lt;0.05; ***p&lt;0.01</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>For the sake of comparison, we can look at these results side-by-side with an OLS estimated with the same data; Poisson estimates can be interpreted in the same way as OLS estimates:</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucmVnNGIgPC0gbG0obmFmZmFpcnMgfiBtYWxlICsgeXJzbWFyciArIGtpZHMgKyByZWxpZyArIGVkdWMgKyByYXRlbWFyciwgZGF0YSA9IGFmZmFpcnMpXG5zdGFyZ2F6ZXIocmVnNGIsIHJlZzRhLCB0eXBlID0gXCJ0ZXh0XCIpICBcbmBgYCJ9 -->
+<pre class="r"><code>reg4b &lt;- lm(naffairs ~ male + yrsmarr + kids + relig + educ + ratemarr, data = affairs)
+stargazer(reg4b, reg4a, type = &quot;text&quot;)  </code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG49PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT1cbiAgICAgICAgICAgICAgICAgICAgICAgICAgIERlcGVuZGVudCB2YXJpYWJsZTogICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBuYWZmYWlycyAgICAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIE9MUyAgICAgICAgICAgIFBvaXNzb24gIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgKDEpICAgICAgICAgICAgICAoMikgICAgXG4tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS1cbm1hbGUgICAgICAgICAgICAgICAgICAgICAgICAgMC4wMzIgICAgICAgICAgICAwLjA1MiAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICgwLjI3OCkgICAgICAgICAgKDAuMDc0KSAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbnlyc21hcnIgICAgICAgICAgICAgICAgICAgIDAuMTA3KioqICAgICAgICAgIDAuMDc3KioqIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICgwLjAyOSkgICAgICAgICAgKDAuMDA4KSAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbmtpZHMgICAgICAgICAgICAgICAgICAgICAgICAtMC4xNzIgICAgICAgICAgICAtMC4wMTkgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICgwLjM0NSkgICAgICAgICAgKDAuMTAzKSAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbnJlbGlnICAgICAgICAgICAgICAgICAgICAgIC0wLjQ5NCoqKiAgICAgICAgLTAuMzYxKioqIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICgwLjExMikgICAgICAgICAgKDAuMDMxKSAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbmVkdWMgICAgICAgICAgICAgICAgICAgICAgICAgMC4wMDkgICAgICAgICAgICAwLjAxNiAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICgwLjA1OCkgICAgICAgICAgKDAuMDE1KSAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbnJhdGVtYXJyICAgICAgICAgICAgICAgICAgIC0wLjcwOCoqKiAgICAgICAgLTAuNDEwKioqIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICgwLjEyMCkgICAgICAgICAgKDAuMDI4KSAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbkNvbnN0YW50ICAgICAgICAgICAgICAgICAgIDQuODY0KioqICAgICAgICAgIDEuOTE0KioqIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICgxLjA2MCkgICAgICAgICAgKDAuMjY1KSAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLVxuT2JzZXJ2YXRpb25zICAgICAgICAgICAgICAgICAgNjAxICAgICAgICAgICAgICA2MDEgICAgXG5SMiAgICAgICAgICAgICAgICAgICAgICAgICAgIDAuMTIzICAgICAgICAgICAgICAgICAgICBcbkFkanVzdGVkIFIyICAgICAgICAgICAgICAgICAgMC4xMTQgICAgICAgICAgICAgICAgICAgIFxuTG9nIExpa2VsaWhvb2QgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAtMSw0NDYuNDE2XG5Ba2Fpa2UgSW5mLiBDcml0LiAgICAgICAgICAgICAgICAgICAgICAgICAgIDIsOTA2LjgzMiBcblJlc2lkdWFsIFN0ZC4gRXJyb3IgICAgMy4xMDUgKGRmID0gNTk0KSAgICAgICAgICAgICAgIFxuRiBTdGF0aXN0aWMgICAgICAgICAxMy44NTIqKiogKGRmID0gNjsgNTk0KSAgICAgICAgICAgXG49PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT1cbk5vdGU6ICAgICAgICAgICAgICAgICAgICAgICpwPDAuMTsgKipwPDAuMDU7ICoqKnA8MC4wMVxuIn0= -->
+<pre><code>
+======================================================
+                           Dependent variable:        
+                    ----------------------------------
+                                 naffairs             
+                              OLS            Poisson  
+                              (1)              (2)    
+------------------------------------------------------
+male                         0.032            0.052   
+                            (0.278)          (0.074)  
+                                                      
+yrsmarr                    0.107***          0.077*** 
+                            (0.029)          (0.008)  
+                                                      
+kids                        -0.172            -0.019  
+                            (0.345)          (0.103)  
+                                                      
+relig                      -0.494***        -0.361*** 
+                            (0.112)          (0.031)  
+                                                      
+educ                         0.009            0.016   
+                            (0.058)          (0.015)  
+                                                      
+ratemarr                   -0.708***        -0.410*** 
+                            (0.120)          (0.028)  
+                                                      
+Constant                   4.864***          1.914*** 
+                            (1.060)          (0.265)  
+                                                      
+------------------------------------------------------
+Observations                  601              601    
+R2                           0.123                    
+Adjusted R2                  0.114                    
+Log Likelihood                              -1,446.416
+Akaike Inf. Crit.                           2,906.832 
+Residual Std. Error    3.105 (df = 594)               
+F Statistic         13.852*** (df = 6; 594)           
+======================================================
+Note:                      *p&lt;0.1; **p&lt;0.05; ***p&lt;0.01</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>Again, as a means of comparing models we look at the AIC:</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuQUlDKHJlZzRiKVxuYGBgIn0= -->
+<pre class="r"><code>AIC(reg4b)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiWzFdIDMwNzYuNDk4XG4ifQ== -->
+<pre><code>[1] 3076.498</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>THe AIC is quite a bit lower for the poisson than for the OLS estimate, indicating a better fit.</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc3VtbWFyeShyZWc0YSlcbmBgYCJ9 -->
+<pre class="r"><code>summary(reg4a)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG5DYWxsOlxuZ2xtKGZvcm11bGEgPSBuYWZmYWlycyB+IG1hbGUgKyB5cnNtYXJyICsga2lkcyArIHJlbGlnICsgZWR1YyArIFxuICAgIHJhdGVtYXJyLCBmYW1pbHkgPSBwb2lzc29uKCksIGRhdGEgPSBhZmZhaXJzKVxuXG5EZXZpYW5jZSBSZXNpZHVhbHM6IFxuICAgIE1pbiAgICAgICAxUSAgIE1lZGlhbiAgICAgICAzUSAgICAgIE1heCAgXG4tNC4xMTU5ICAtMS41ODk3ICAtMS4xNDc0ICAtMC43Mjk4ICAgNy4zNjQyICBcblxuQ29lZmZpY2llbnRzOlxuICAgICAgICAgICAgIEVzdGltYXRlIFN0ZC4gRXJyb3IgeiB2YWx1ZSBQcig+fHp8KSAgICBcbihJbnRlcmNlcHQpICAxLjkxNDA2NyAgIDAuMjY1MzQ5ICAgNy4yMTMgNS40NmUtMTMgKioqXG5tYWxlICAgICAgICAgMC4wNTE5NDIgICAwLjA3NDE2MyAgIDAuNzAwICAgIDAuNDg0ICAgIFxueXJzbWFyciAgICAgIDAuMDc2NjAyICAgMC4wMDc4MjQgICA5Ljc5MSAgPCAyZS0xNiAqKipcbmtpZHMgICAgICAgIC0wLjAxODk0OCAgIDAuMTAyNTUzICAtMC4xODUgICAgMC44NTMgICAgXG5yZWxpZyAgICAgICAtMC4zNjA5MzggICAwLjAzMDg5MyAtMTEuNjgzICA8IDJlLTE2ICoqKlxuZWR1YyAgICAgICAgIDAuMDE2MDE1ICAgMC4wMTQ3NzkgICAxLjA4NCAgICAwLjI3OSAgICBcbnJhdGVtYXJyICAgIC0wLjQwOTg5NyAgIDAuMDI3ODg2IC0xNC42OTkgIDwgMmUtMTYgKioqXG4tLS1cblNpZ25pZi4gY29kZXM6ICAwIOKAmCoqKuKAmSAwLjAwMSDigJgqKuKAmSAwLjAxIOKAmCrigJkgMC4wNSDigJgu4oCZIDAuMSDigJgg4oCZIDFcblxuKERpc3BlcnNpb24gcGFyYW1ldGVyIGZvciBwb2lzc29uIGZhbWlseSB0YWtlbiB0byBiZSAxKVxuXG4gICAgTnVsbCBkZXZpYW5jZTogMjkyNS41ICBvbiA2MDAgIGRlZ3JlZXMgb2YgZnJlZWRvbVxuUmVzaWR1YWwgZGV2aWFuY2U6IDIzOTguOCAgb24gNTk0ICBkZWdyZWVzIG9mIGZyZWVkb21cbkFJQzogMjkwNi44XG5cbk51bWJlciBvZiBGaXNoZXIgU2NvcmluZyBpdGVyYXRpb25zOiA3XG4ifQ== -->
+<pre><code>
+Call:
+glm(formula = naffairs ~ male + yrsmarr + kids + relig + educ + 
+    ratemarr, family = poisson(), data = affairs)
+
+Deviance Residuals: 
+    Min       1Q   Median       3Q      Max  
+-4.1159  -1.5897  -1.1474  -0.7298   7.3642  
+
+Coefficients:
+             Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)  1.914067   0.265349   7.213 5.46e-13 ***
+male         0.051942   0.074163   0.700    0.484    
+yrsmarr      0.076602   0.007824   9.791  &lt; 2e-16 ***
+kids        -0.018948   0.102553  -0.185    0.853    
+relig       -0.360938   0.030893 -11.683  &lt; 2e-16 ***
+educ         0.016015   0.014779   1.084    0.279    
+ratemarr    -0.409897   0.027886 -14.699  &lt; 2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for poisson family taken to be 1)
+
+    Null deviance: 2925.5  on 600  degrees of freedom
+Residual deviance: 2398.8  on 594  degrees of freedom
+AIC: 2906.8
+
+Number of Fisher Scoring iterations: 7</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>Looking at the <code>summary()</code> of the poisson object shows us that the poisson model assumes the “(d)ispersion parameter for poisson family taken to be 1.” The <code>AER</code> package has a command called <code>dispersiontest()</code> which allows us to see if the dispersion paramener is in fact 1:</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZGlzcGVyc2lvbnRlc3QocmVnNGEpXG5gYGAifQ== -->
+<pre class="r"><code>dispersiontest(reg4a)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG5cdE92ZXJkaXNwZXJzaW9uIHRlc3RcblxuZGF0YTogIHJlZzRhXG56ID0gNi40NDc1LCBwLXZhbHVlID0gNS42ODdlLTExXG5hbHRlcm5hdGl2ZSBoeXBvdGhlc2lzOiB0cnVlIGRpc3BlcnNpb24gaXMgZ3JlYXRlciB0aGFuIDFcbnNhbXBsZSBlc3RpbWF0ZXM6XG5kaXNwZXJzaW9uIFxuICA2LjUzODE5OSBcbiJ9 -->
+<pre><code>
+    Overdispersion test
+
+data:  reg4a
+z = 6.4475, p-value = 5.687e-11
+alternative hypothesis: true dispersion is greater than 1
+sample estimates:
+dispersion 
+  6.538199 </code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>The dispersion paramenter very clearly is not equal to 1; the model is <strong>overdispersed</strong>, which is just a fancy way of saying that the dependent variable has more variation than the poisson model would like it to have. The dispersion is 6.54, which is significantly different from 1. Poisson models are almost always overdispersed, and the alternatives are either the <strong>Zero Inflated Poisson (ZIP)</strong> or the <strong>Negative Binomial</strong>. We will discuss the <strong>Negative Binomial</strong>, but the ZIP model will be left for the interested student to investigate further.</p>
+<p>The <strong>Negative Binomial</strong> model, often referred to asa “Negbin” model, is estimated with the <code>glm.nb()</code> function in the <code>MASS</code> package.</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucmVnNGMgPC0gZ2xtLm5iKG5hZmZhaXJzIH4gbWFsZSArIHlyc21hcnIgKyBraWRzICsgcmVsaWcgKyBlZHVjICsgcmF0ZW1hcnIsIGRhdGEgPSBhZmZhaXJzKVxuc3RhcmdhemVyKHJlZzRjLCB0eXBlID0gXCJ0ZXh0XCIpXG5gYGAifQ== -->
+<pre class="r"><code>reg4c &lt;- glm.nb(naffairs ~ male + yrsmarr + kids + relig + educ + ratemarr, data = affairs)
+stargazer(reg4c, type = &quot;text&quot;)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG49PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT1cbiAgICAgICAgICAgICAgICAgICAgICBEZXBlbmRlbnQgdmFyaWFibGU6ICAgIFxuICAgICAgICAgICAgICAgICAgLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXG4gICAgICAgICAgICAgICAgICAgICAgICAgICBuYWZmYWlycyAgICAgICAgICBcbi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLVxubWFsZSAgICAgICAgICAgICAgICAgICAgICAgICAwLjA1NSAgICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgKDAuMjU3KSAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxueXJzbWFyciAgICAgICAgICAgICAgICAgICAgMC4wODMqKiogICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgKDAuMDI3KSAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxua2lkcyAgICAgICAgICAgICAgICAgICAgICAgICAwLjA3NyAgICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgKDAuMzI0KSAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxucmVsaWcgICAgICAgICAgICAgICAgICAgICAgLTAuNDM5KioqICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgKDAuMTA0KSAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxuZWR1YyAgICAgICAgICAgICAgICAgICAgICAgIC0wLjAwMyAgICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgKDAuMDUzKSAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxucmF0ZW1hcnIgICAgICAgICAgICAgICAgICAgLTAuNDE3KioqICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgKDAuMTA5KSAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxuQ29uc3RhbnQgICAgICAgICAgICAgICAgICAgIDIuMzQzKiogICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgKDAuOTY4KSAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxuLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXG5PYnNlcnZhdGlvbnMgICAgICAgICAgICAgICAgICA2MDEgICAgICAgICAgICBcbkxvZyBMaWtlbGlob29kICAgICAgICAgICAgIC03MjkuNTUzICAgICAgICAgIFxudGhldGEgICAgICAgICAgICAgICAgICAwLjE0MioqKiAoMC4wMTYpICAgICAgXG5Ba2Fpa2UgSW5mLiBDcml0LiAgICAgICAgICAxLDQ3My4xMDcgICAgICAgICBcbj09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PVxuTm90ZTogICAgICAgICAgICAgKnA8MC4xOyAqKnA8MC4wNTsgKioqcDwwLjAxXG4ifQ== -->
+<pre><code>
+=============================================
+                      Dependent variable:    
+                  ---------------------------
+                           naffairs          
+---------------------------------------------
+male                         0.055           
+                            (0.257)          
+                                             
+yrsmarr                    0.083***          
+                            (0.027)          
+                                             
+kids                         0.077           
+                            (0.324)          
+                                             
+relig                      -0.439***         
+                            (0.104)          
+                                             
+educ                        -0.003           
+                            (0.053)          
+                                             
+ratemarr                   -0.417***         
+                            (0.109)          
+                                             
+Constant                    2.343**          
+                            (0.968)          
+                                             
+---------------------------------------------
+Observations                  601            
+Log Likelihood             -729.553          
+theta                  0.142*** (0.016)      
+Akaike Inf. Crit.          1,473.107         
+=============================================
+Note:             *p&lt;0.1; **p&lt;0.05; ***p&lt;0.01</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>Again, we can look at all 3 models together.</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc3RhcmdhemVyKHJlZzRhLCByZWc0YywgcmVnNGIsIHR5cGUgPSBcInRleHRcIilcbmBgYCJ9 -->
+<pre class="r"><code>stargazer(reg4a, reg4c, reg4b, type = &quot;text&quot;)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG49PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PVxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgRGVwZW5kZW50IHZhcmlhYmxlOiAgICAgICAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIG5hZmZhaXJzICAgICAgICAgICAgICAgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgUG9pc3NvbiAgICAgICBuZWdhdGl2ZSAgICAgICAgICAgICAgIE9MUyAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgYmlub21pYWwgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICgxKSAgICAgICAgICAgKDIpICAgICAgICAgICAgICAgICAgKDMpICAgICAgICAgIFxuLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS1cbm1hbGUgICAgICAgICAgICAgICAgICAwLjA1MiAgICAgICAgIDAuMDU1ICAgICAgICAgICAgICAgIDAuMDMyICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAoMC4wNzQpICAgICAgICgwLjI1NykgICAgICAgICAgICAgICgwLjI3OCkgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbnlyc21hcnIgICAgICAgICAgICAgIDAuMDc3KioqICAgICAgMC4wODMqKiogICAgICAgICAgICAwLjEwNyoqKiAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAoMC4wMDgpICAgICAgICgwLjAyNykgICAgICAgICAgICAgICgwLjAyOSkgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbmtpZHMgICAgICAgICAgICAgICAgICAtMC4wMTkgICAgICAgIDAuMDc3ICAgICAgICAgICAgICAgLTAuMTcyICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAoMC4xMDMpICAgICAgICgwLjMyNCkgICAgICAgICAgICAgICgwLjM0NSkgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbnJlbGlnICAgICAgICAgICAgICAgLTAuMzYxKioqICAgICAtMC40MzkqKiogICAgICAgICAgICAtMC40OTQqKiogICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAoMC4wMzEpICAgICAgICgwLjEwNCkgICAgICAgICAgICAgICgwLjExMikgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbmVkdWMgICAgICAgICAgICAgICAgICAwLjAxNiAgICAgICAgIC0wLjAwMyAgICAgICAgICAgICAgIDAuMDA5ICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAoMC4wMTUpICAgICAgICgwLjA1MykgICAgICAgICAgICAgICgwLjA1OCkgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbnJhdGVtYXJyICAgICAgICAgICAgLTAuNDEwKioqICAgICAtMC40MTcqKiogICAgICAgICAgICAtMC43MDgqKiogICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAoMC4wMjgpICAgICAgICgwLjEwOSkgICAgICAgICAgICAgICgwLjEyMCkgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbkNvbnN0YW50ICAgICAgICAgICAgIDEuOTE0KioqICAgICAgMi4zNDMqKiAgICAgICAgICAgICA0Ljg2NCoqKiAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAoMC4yNjUpICAgICAgICgwLjk2OCkgICAgICAgICAgICAgICgxLjA2MCkgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXG5PYnNlcnZhdGlvbnMgICAgICAgICAgIDYwMSAgICAgICAgICAgNjAxICAgICAgICAgICAgICAgICAgNjAxICAgICAgICAgIFxuUjIgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgMC4xMjMgICAgICAgICBcbkFkanVzdGVkIFIyICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDAuMTE0ICAgICAgICAgXG5Mb2cgTGlrZWxpaG9vZCAgICAgIC0xLDQ0Ni40MTYgICAgIC03MjkuNTUzICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxudGhldGEgICAgICAgICAgICAgICAgICAgICAgICAgIDAuMTQyKioqICgwLjAxNikgICAgICAgICAgICAgICAgICAgICAgICBcbkFrYWlrZSBJbmYuIENyaXQuICAgMiw5MDYuODMyICAgICAxLDQ3My4xMDcgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG5SZXNpZHVhbCBTdGQuIEVycm9yICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAzLjEwNSAoZGYgPSA1OTQpICAgIFxuRiBTdGF0aXN0aWMgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgMTMuODUyKioqIChkZiA9IDY7IDU5NClcbj09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09XG5Ob3RlOiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICpwPDAuMTsgKipwPDAuMDU7ICoqKnA8MC4wMVxuIn0= -->
+<pre><code>
+=======================================================================
+                                    Dependent variable:                
+                    ---------------------------------------------------
+                                         naffairs                      
+                     Poisson       negative               OLS          
+                                   binomial                            
+                       (1)           (2)                  (3)          
+-----------------------------------------------------------------------
+male                  0.052         0.055                0.032         
+                     (0.074)       (0.257)              (0.278)        
+                                                                       
+yrsmarr              0.077***      0.083***            0.107***        
+                     (0.008)       (0.027)              (0.029)        
+                                                                       
+kids                  -0.019        0.077               -0.172         
+                     (0.103)       (0.324)              (0.345)        
+                                                                       
+relig               -0.361***     -0.439***            -0.494***       
+                     (0.031)       (0.104)              (0.112)        
+                                                                       
+educ                  0.016         -0.003               0.009         
+                     (0.015)       (0.053)              (0.058)        
+                                                                       
+ratemarr            -0.410***     -0.417***            -0.708***       
+                     (0.028)       (0.109)              (0.120)        
+                                                                       
+Constant             1.914***      2.343**             4.864***        
+                     (0.265)       (0.968)              (1.060)        
+                                                                       
+-----------------------------------------------------------------------
+Observations           601           601                  601          
+R2                                                       0.123         
+Adjusted R2                                              0.114         
+Log Likelihood      -1,446.416     -729.553                            
+theta                          0.142*** (0.016)                        
+Akaike Inf. Crit.   2,906.832     1,473.107                            
+Residual Std. Error                                3.105 (df = 594)    
+F Statistic                                     13.852*** (df = 6; 594)
+=======================================================================
+Note:                                       *p&lt;0.1; **p&lt;0.05; ***p&lt;0.01</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>The coefficients in the negbin model are similar to those in the poisson model, and the AIC is much better for the negbin than it is for the poisson, indicating it is the preferred model. It is my experience that negbin is almost always a better choice than poisson.</p>
+<div id="data-for-further-exploration-2" class="section level3">
+<h3>Data for further exploration</h3>
+<ul>
+<li>Some good datasets looking at hospital visitation rates include <code>AER:Medicaid1986</code>, <code>AER:DoctorVisits</code>, and <code>AER:NMES</code>.</li>
+<li>Can you predict student attendance in <code>wooldridge:attend</code>? This might be tricky – don’t include as independent variables anything that attendance might cause! Also, are the counts high enough that an <code>lm()</code> model is just as good?</li>
+<li>The <code>AER:EquationCitation</code> data might be a good place to do some basic bibliometrics.</li>
+</ul>
+</div>
+</div>
+<div id="wrapping-up" class="section level1">
+<h1>Wrapping Up</h1>
+<p>While models for censored and count variables are a little more niche than the OLS and probit/logit models we encountered earlier, there are some types of data for which they are indispensable; health economics and labor economics have notable examples of each, as we saw above.</p>
+<p>Next, we will move on to Panel regression, models where each observation is observed multiple times.</p>
 <!-- rnb-text-end -->
 </div>
 
-<div id="rmd-source-code">LS0tDQp0aXRsZTogIk1ldGhvZHMgZm9yIENlbnNvcmVkIGFuZCBDb3VudCBEYXRhIg0Kb3V0cHV0OiBodG1sX25vdGVib29rDQotLS0NCg0KIyBPdmVydmlldw0KDQpXZSBub3cgdHVybiB0byBtZXRob2RzIHRoYXQgYXJlIGFwcHJvcHJpYXRlIGZvciBkZXBlbmRlbnQgdmFyaWFibGVzIHRoYXQgYXJlIGVpdGhlciAqKmNlbnNvcmVkKiogb3IgKipjb3VudCoqIGRhdGEuICBUaGlzIHdpbGwgaW5jbHVkZSB0aGUgKipUb2JpdCoqLCAqKkhlY2ttYW4qKiwgKipQb2lzc29uKiosIGFuZCAqKk5lZ2F0aXZlIEJpbm9taWFsKiogbW9kZWxzLg0KDQpBcyB1c3VhbCwgd2UgYmVnaW4gd2l0aCBsb2FkaW5nIGluIHNvbWUgZXNzZW50aWFsIHBhY2thZ2VzLiAgV2UgaGF2ZSBub3QgeWV0IHVzZWQgYGNlbnNSZWdgLCBzbyB0aGlzIG1heSBuZWVkIHRvIGJlIGluc3RhbGxlZCBwcmlvciB0byB1c2luZyBpdC4gIA0KDQoNCmBgYHtyLCBldmFsID0gRkFMU0V9DQppbnN0YWxsLnBhY2thZ2VzKCJjZW5zUmVnIikNCmBgYA0KDQpgYGB7ciwgd2FybmluZz1GQUxTRSwgbWVzc2FnZSA9IEZBTFNFfQ0KbGlicmFyeSh0aWR5dmVyc2UpDQpsaWJyYXJ5KHN0YXJnYXplcikNCmxpYnJhcnkoTUFTUykNCmxpYnJhcnkoanRvb2xzKQ0KbGlicmFyeShjZW5zUmVnKQ0KbGlicmFyeSh3b29sZHJpZGdlKQ0KbGlicmFyeShBRVIpDQoNCmRhdGEoY2hhcml0eSkNCmRhdGEoZnJpbmdlKQ0KDQpkYXRhKGs0MDFrc3VicykNCmRhdGEoU21va2VCYW4pDQpkYXRhKGFmZmFpcnMpDQoNCmBgYA0KDQojIENlbnNvcmVkIE1vZGVscw0KDQpXZSB3aWxsIGxvb2sgYXQgdHdvIHR5cGVzIG9mIG1vZGVscyB0byBmaXQgY2Vuc29yZWQgZGF0YTogdGhlICoqVG9iaXQqKiBtb2RlbCBhbmQgdGhlICoqSGVja21hbioqIG1vZGVsLiAgVW5saWtlIFByb2JpdCBhbmQgTG9naXQsIHRoZXNlIHJlIG5vdCBpbnRlcmNoYW5nZWFibGUsIGFuZCB3aGljaCBvbmUgeW91IHVzZSBkZXBlbmRzIG9uIHRoZSB0eXBlIG9mIGNlbnNvcmluZyBpbnZvbHZlZC4gIEEgY2Vuc29yZWQgdmFyaWFibGUgaXMgYSB2YXJpYWJsZSB0aGF0LCBmb3Igc29tZSByZWFzb24sIGNhbm5vdCB0YWtlIG9uIGEgdmFsdWUgYmVsb3cgKGxlZnQtY2Vuc29yZWQpIG9yIGFib3ZlIChyaWdodC1jZW5zb3JlZCkgc29tZSB2YWx1ZSwgb3IgaXMgbWlzc2luZyBmb3Igc29tZSBvYnNlcnZhdGlvbnMuIFRoaXMgbWlnaHQgYmUgZHVlIHRvICJjb3JuZXIgc29sdXRpb25zIiBvciB0b3AvYm90dG9tIGNvZGluZy4gRm9yIGV4YW1wbGU6DQoNCiogSWYgeW91IGFyZSBtb2RlbGluZyBkZW1hbmQgZm9yIGEgc3BvcnRpbmcgZXZlbnQsIHRoZXJlIGlzIGEgbWF4aW11bSBsaW1pdCBmb3IgaG93IG1hbnkgdGlja2V0cyBjYW4gYmUgc29sZC0tdGhlIGNvcm5lciBzb2x1dGlvbiBpcyB0aGUgc3RhZGl1bSBjYXBhY2l0eS4NCiogQ29ybmVyIHNvbHV0aW9ucyBhcmUgb2Z0ZW4gY29tbW9uIHdoZW4gdGhlIGRlcGVuZGVudCB2YXJpYWJsZSBpcyBhIHBlcmNlbnRhZ2UsIHNvIG9idmVyc2F0aW9ucyBnZXQgYnVuY2hlZCBhdCAwJSBhbmQvb3IgMTAwJS4NCiogSWYgeW91IGFyZSB0cnlpbmcgdG8gcHJlZGljdCBTQVQgc2NvcmVzLCB0aGV5IGFyZSB0b3AtY29kZWQgYXQgODAwIGFuZCBib3R0b20tY29kZWQgYXQgMjAwLiAgDQoqIERhdGEgbWF5IG5vdCBleGlzdCBmb3Igc29tZSBvYnNlcnZhdGlvbnMgaW4geW91ciBkYXRhIHNldCwgYW5kIHlvdSB0aGluayB0aGF0IHRoZSByZWFzb24gdGhlIGRhdGEgZG9lcyBub3QgZXhpc3QgY2FuIGJlIG1vZGVsZWQuICANCg0KVGhlIGZpcnN0IHRocmVlIHN1Y2ggY2FzZXMgd291bGQgY2FsbCBmb3IgYSAqKlRvYml0KiogbW9kZWwsIHRoZSBsYXN0IG9uZSB3b3VsZCBiZSBhIHNpdHVhdGlvbiBmb3IgYSAqKkhlY2ttYW4qKiBtb2RlbC4NCg0KTGV0J3MgaWxsdXN0cmF0ZSB0aGUgVG9iaXQgbW9kZWwgdXNpbmcgdGhlIGBmcmluZ2VgIGRhdGFzZXQgaW4gdGhlIGB3b29sZHJpZGdlYCBwYWNrYWdlLiAgVGhlIHZhcmlhYmxlICRhbm5iZW5zJCBjb250YWlucyB0aGUgZG9sbGFyIHZhbHVlIG9mIGFubnVhbCBiZW5lZml0cyBmb3IgdGhlIDYxNiBpbmRpdmlkdWFscyBpbiB0aGUgZGF0YSBzZXQuDQoNCmBgYHtyfQ0Kc3VtbWFyeShmcmluZ2UkYW5uYmVucykNCmBgYA0KDQpIZXJlLCB3ZSBjYW4gc2VlIHRoYXQgdGhlIG1pbmltdW0gaXMgXCQwIGFuZCB0aGUgbWF4aW11bSBpcyBcJDUxMjkuMS4gIExldCdzIHRoaW5rIGFib3V0IHRoaXMgYSBsaXR0bGUgZnVydGhlcjogDQoNCiogRG9lcyB0aGUgbWF4aW11bSAqaGF2ZSogdG8gYmUgXCQ1MTI5LjE/ICBDb3VsZCBpdCBiZSBoaWdoZXI/IA0KKiBEb2VzIHRoZSBtaW5pbXVtICpoYXZlKiB0byBiZSBcJDA/ICBDb3VsZCBpdCBiZSBsb3dlcj8gIA0KDQpXaGlsZSBpdCBzZWVtcyBwb3NzaWJsZSB0aGF0IHNvbWVib2R5ICpjb3VsZCogaGF2ZSBtb3JlIHRoYW4gXCQ1MTI5LjEgaW4gZnJpbmdlIGJlbmVmaXRzIHBlciB5ZWFyLCBob3cgY291bGQgc29tZWJvZHkgaGF2ZSBuZWdhdGl2ZSB2YWx1ZWQgZnJpbmdlIGJlbmVmaXRzPyAgVGhpcyBzdWdnZXN0cyB0aGF0IHRoZXJlIGlzIGEgZ29vZCBjaGFuY2Ugb2YgXCQwIGJlaW5nIGEgImNvcm5lciBzb2x1dGlvbi4iICBXZSBjYW4gbW9yZSBjbG9zZWx5IGF0IHRoZSBkYXRhIHRvIHNlZSBpZiB0aGlzIGlzIGluIGZhY3QgdHJ1ZS4gIExldCdzIHRha2UgYSBsb29rIGF0IHRoZSAkYW5uYmVucyQgdmFyaWFibGUgZ3JhcGhpY2FsbHk6DQoNCmBgYHtyfQ0KZnJpbmdlICU+JSBnZ3Bsb3QoYWVzKHggPSBhbm5iZW5zKSkgKw0KICAgIGdlb21faGlzdG9ncmFtKGJpbndpZHRoID0gMTAwKSArDQogICAgdGhlbWVfY2xhc3NpYygpICsNCiAgICBzY2FsZV94X2NvbnRpbnVvdXMoZXhwYW5kID0gYygwLCAwKSkgKw0KICAgIHNjYWxlX3lfY29udGludW91cyhleHBhbmQgPSBjKDAsIDApKSANCg0KYGBgDQpUaGVyZSBhcmUgdHdvIHByZXR0eSBiaWcgc3Bpa2VzIC0gb25lIGF0IHplcm8sIGFuZCBhbm90aGVyIGFyb3VuZCAxMDAwLiAgIEJ1dCB0aGVzZSBzcGlrZXMgYXJlIGRpZmZlcmVudCBpbiBuYXR1cmUuICBUaGUgcHJlc2VuY2Ugb2YgdGhlIGJpZyBzcGlrZSBhdCAwIGlzIHN1Z2dlc3RpdmUgb2YgYSBjb3JuZXIgc29sdXRpb24uIFRoaXMgbmV4dCBjb21tYW5kIGlzIGEgbGl0dGxlIHRyaWNreSwgYnV0IGl0IHdpbGwgYXNrIFIgdG8gbGlzdCB0aGUgMTAgbW9zdCBjb21tb24gdmFsdWVzIGZvciB0aGUgJGFubmJlbnMkIHZhcmlhYmxlLg0KDQoNCmBgYHtyfQ0Kc29ydCh0YWJsZShmcmluZ2UkYW5uYmVucyksZGVjcmVhc2luZz1UUlVFKVsxOjEwXQ0KYGBgDQpOb3Qgb25seSBpcyAwIHRoZSBtb3N0IGNvbW1vbiB2YWx1ZSwgaXQgaXMgdHdpY2UgYXMgbGlrZWx5IGFzIGFueSBvdGhlciB2YWx1ZSBmb3IgdGhpcyB2YXJpYWJsZSEgVGhpcyBpcyBhIHByZXR0eSBnb29kIGluZGljYXRpb24gdGhhdCBpZiB3ZSB3YW50IHRvIG1vZGVsICRhbm5iZW5zJCwgd2Ugc2hvdWxkIHByb2JhYmx5IHVzZSBhIFRvYml0IG1vZGVsLiAgSW50dWl0aXZlbHksIHRoZSBUb2JpdCBtb2RlbCBpcyBraW5kIG9mIGEgaHlicmlkIG9mIE9MUyByZWdyZXNzaW9uIGFuZCB0aGUgcHJvYml0IG1vZGVsLiAgSW4gZmFjdCwgaXQgZ2V0cyBpdHMgbmFtZSBhcyBhIHB1biBvZiBpdHMgaW52ZW50b3IsIE5vYmVsIExhdXJlYXRlIGVjb25vbWlzdCBKYW1lcyBUb2JpbiwgYW5kIHRoZSBwcm9iaXQgbW9kZWwuICBUaGUgbWF0aCBiZWhpbmQgdGhlIHByb2JpdCBpcyBlc3NlbnRpYWxseSBlc3RpbWF0aW5nIGEgcHJvYml0IG9uIHdoZXRoZXIgb3Igbm90IHRoZSBkZXBlbmRlbnQgdmFyaWFibGUgaXMgY2Vuc29yZWQgb3Igbm90LCBhIGxpbmVhciByZWdyZXNzaW9uIG9uIHRoZSBkYXRhIHRoYXQgaXMgbm90IGNlbnNvcmVkLCBhbmQgY29tYmluaW5nIHRoZW0gaW50byBvbmUgZXN0aW1hdGUuICANCg0KQSBUb2JpdCBtb2RlbCBpcyBlc3RpbWF0ZWQgd2l0aCB0aGUgYGNlbnNSZWcoKWAgZnVuY3Rpb24sIHdoaWNoIGlzIHBhcnQgb2YgdGhlIGBjZW5zUmVnYCBwYWNrYWdlLiAgVGhpcyBmdW5jdGlvbiB3b3JrcyBhIGxvdCBsaWtlIHRoZSBgbG0oKWAgYW5kIGBnbG0oKWAgY29tbWFuZHMgd2UgaGF2ZSBiZWVuIHVzaW5nLCBidXQgd2UgbmVlZCB0byBzcGVjaWZ5IGEgY291cGxlIGV4dHJhIG9wdGlvbnMuICBXZSBuZWVkIHRvIHRlbGwgdGhlIGNlbnNSZWcgZnVuY3Rpb24gaG93IHRoZSBkYXRhIGlzIGNlbnNvcmVkIHdpdGggdGhlIGBsZWZ0ID0gMGAgYW5kIGByaWdodCA9IEluZmAgYXJndW1lbnRzLiAgVGhlIGBJbmZgIGlzIHNob3J0IGZvciAqKmluZmluaXRlKiosIHNvIHRoaXMgYXJndW1lbnQgc2ltcGx5IHRlbGxzIFIgdGhhdCB0aGUgZGF0YSBpcyBub3QgcmlnaHQtY2Vuc29yZWQuICBUaGUgYGxlZnQgPSAwYCB0ZWxscyBSIHRoYXQgdGhlIGRlcGVuZGVudCB2YXJpYWJsZSBpcyBsZWZ0IGNlbnNvcmVkIGF0IDA7IHdlcmUgd2UgZGVhbGluZyB3aXRoIHJpZ2h0LWNlbnNvcmVkIGRhdGEsIHdlIHdvdWxkIHVzZSBgbGVmdCA9IC1JbmZgIGFuZCBzZXQgb3VyIHJpZ2h0IGNlbnNvcmluZyB3aXRoIHRoZSBgcmlnaHRgIG9wdGlvbi4gDQoNCmBgYHtyLCB3YXJuaW5nID0gRkFMU0V9DQpyZWcxYSA8LSBjZW5zUmVnKGFubmJlbnMgfiB0ZW51cmUgKyBhbm5lYXJuLCBsZWZ0ID0gMCwgcmlnaHQgPSBJbmYsIGRhdGEgPSBmcmluZ2UpDQpzdGFyZ2F6ZXIocmVnMWEsIHR5cGUgPSAidGV4dCIpDQpgYGANClRoZSBtb2RlbCBlc3RpbWF0ZXMgdGhlIHZhbHVlIG9mIGZyaW5nZSBiZW5lZml0cyBhcyBhIGZ1bmN0aW9uIG9mIGFuIGluZGl2aWR1YWwncyB0ZW51cmUgd2l0aCB0aGVpciBjdXJyZW50IGVtcGxveWVyIGFuZCBhbm51YWwgZWFybmluZ3MuICBXZSBpbnRlcnByZXQgdGhlIGNvZWZmaWNpZW50cyBpbiByb3VnaGx5IHRoZSBzYW1lIHdheSBhcyBhbiBPTFMgY29lZmZpY2llbnQuICBUaGUgJGxvZ1NpZ21hJCB0ZXJtIGlzIGEgbW9kZWwgcGFyYW1ldGVyLiAgT25lIHVzZSBvZiAkbG9nU2lnbWEkIGlzIHRvIGV4cG9uZW50aWF0ZSBpdCBhbmQgY29tcGFyZSBpdCB0byB0aGUgc3RhbmRhcmQgZGV2aWF0aW9uIG9mIHRoZSBkZXBlbmRlbnQgdmFyaWFibGU6DQoNCmBgYHtyfQ0Kc2QoZnJpbmdlJGFubmJlbnMpDQpleHAocmVnMWEkZXN0aW1hdGVbNF0pDQoNCmBgYA0KVGhlIHN0YW5kYXJkIGRldmlhdGlvbiBvZiAkYW5uYmVucyQgaXMgbGFyZ2VyIHRoYW4gJGVeezcuMDY0fSQsIGluZGljYXRpbmcgdGhhdCBUb2JpdCBpcyBsaWtlbHkgdGhlIHJpZ2h0IGNsYXNzIG9mIG1vZGVscyB0byB1c2UgaGVyZS4gIA0KVGhlIGNvZWZmaWNpZW50cyANCg0KDQpgYGANCg0KYGBge3J9DQpkYXRhKGNoYXJpdHkpDQpjaGFyaXR5ICU+JSBnZ3Bsb3QoYWVzKHggPSBnaWZ0KSkgKw0KICAgIGdlb21faGlzdG9ncmFtKGJpbndpZHRoID0gNSkNCg0KYGBgDQoNCg0KDQoNCg==</div>
+<div id="rmd-source-code">LS0tDQp0aXRsZTogIk1ldGhvZHMgZm9yIENlbnNvcmVkIGFuZCBDb3VudCBEYXRhIg0Kb3V0cHV0OiBodG1sX25vdGVib29rDQotLS0NCg0KIyBPdmVydmlldw0KDQpXZSBub3cgdHVybiB0byBtZXRob2RzIHRoYXQgYXJlIGFwcHJvcHJpYXRlIGZvciBkZXBlbmRlbnQgdmFyaWFibGVzIHRoYXQgYXJlIGVpdGhlciAqKmNlbnNvcmVkKiogb3IgKipjb3VudCoqIGRhdGEuICBUaGlzIHdpbGwgaW5jbHVkZSB0aGUgKipUb2JpdCoqLCAqKkhlY2ttYW4qKiwgKipQb2lzc29uKiosIGFuZCAqKk5lZ2F0aXZlIEJpbm9taWFsKiogbW9kZWxzLg0KDQpBcyB1c3VhbCwgd2UgYmVnaW4gd2l0aCBsb2FkaW5nIGluIHNvbWUgZXNzZW50aWFsIHBhY2thZ2VzLiAgV2UgaGF2ZSBub3QgeWV0IHVzZWQgYGNlbnNSZWdgLCBgTUFTU2AsIG9yIGBzYW1wbGVTZWxlY3Rpb25gLCBzbyB0aGV5IG1heSBuZWVkIHRvIGJlIGluc3RhbGxlZCBwcmlvciB0byB0aGVpciB1c2UuICANCg0KDQpgYGB7ciwgZXZhbCA9IEZBTFNFfQ0KaW5zdGFsbC5wYWNrYWdlcygiY2Vuc1JlZyIpDQppbnN0YWxsLnBhY2thZ2VzKCJzYW1wbGVTZWxlY3Rpb24iKQ0KYGBgDQoNCmBgYHtyLCB3YXJuaW5nPUZBTFNFLCBtZXNzYWdlID0gRkFMU0V9DQpsaWJyYXJ5KHRpZHl2ZXJzZSkNCmxpYnJhcnkoc3RhcmdhemVyKQ0KbGlicmFyeShNQVNTKQ0KbGlicmFyeShqdG9vbHMpDQpsaWJyYXJ5KGNlbnNSZWcpDQpsaWJyYXJ5KHNhbXBsZVNlbGVjdGlvbikNCmxpYnJhcnkoTUFTUykNCmxpYnJhcnkod29vbGRyaWRnZSkNCmxpYnJhcnkoQUVSKQ0KbGlicmFyeShmaXZldGhpcnR5ZWlnaHQpDQoNCmRhdGEoY2hhcml0eSkNCmRhdGEoZnJpbmdlKQ0KZGF0YShtcm96KQ0KDQpkYXRhKGs0MDFrc3VicykNCmRhdGEoU21va2VCYW4pDQpkYXRhKGFmZmFpcnMpDQoNCmBgYA0KDQojIENlbnNvcmVkIE1vZGVscw0KDQpXZSB3aWxsIGxvb2sgYXQgdHdvIHR5cGVzIG9mIG1vZGVscyB0byBmaXQgY2Vuc29yZWQgZGF0YTogdGhlICoqVG9iaXQqKiBtb2RlbCBhbmQgdGhlICoqSGVja21hbioqIG1vZGVsLiAgVW5saWtlIFByb2JpdCBhbmQgTG9naXQsIHRoZXNlIHJlIG5vdCBpbnRlcmNoYW5nZWFibGUsIGFuZCB3aGljaCBvbmUgeW91IHVzZSBkZXBlbmRzIG9uIHRoZSB0eXBlIG9mIGNlbnNvcmluZyBpbnZvbHZlZC4gIEEgY2Vuc29yZWQgdmFyaWFibGUgaXMgYSB2YXJpYWJsZSB0aGF0LCBmb3Igc29tZSByZWFzb24sIGNhbm5vdCB0YWtlIG9uIGEgdmFsdWUgYmVsb3cgKGxlZnQtY2Vuc29yZWQpIG9yIGFib3ZlIChyaWdodC1jZW5zb3JlZCkgc29tZSB2YWx1ZSwgb3IgaXMgbWlzc2luZyBmb3Igc29tZSBvYnNlcnZhdGlvbnMuIFRoaXMgbWlnaHQgYmUgZHVlIHRvICJjb3JuZXIgc29sdXRpb25zIiBvciB0b3AvYm90dG9tIGNvZGluZy4gRm9yIGV4YW1wbGU6DQoNCiogSWYgeW91IGFyZSBtb2RlbGluZyBkZW1hbmQgZm9yIGEgc3BvcnRpbmcgZXZlbnQsIHRoZXJlIGlzIGEgbWF4aW11bSBsaW1pdCBmb3IgaG93IG1hbnkgdGlja2V0cyBjYW4gYmUgc29sZC0tdGhlIGNvcm5lciBzb2x1dGlvbiBpcyB0aGUgc3RhZGl1bSBjYXBhY2l0eS4NCiogQ29ybmVyIHNvbHV0aW9ucyBhcmUgb2Z0ZW4gY29tbW9uIHdoZW4gdGhlIGRlcGVuZGVudCB2YXJpYWJsZSBpcyBhIHBlcmNlbnRhZ2UsIHNvIG9idmVyc2F0aW9ucyBnZXQgYnVuY2hlZCBhdCAwJSBhbmQvb3IgMTAwJS4NCiogSWYgeW91IGFyZSB0cnlpbmcgdG8gcHJlZGljdCBTQVQgc2NvcmVzLCB0aGV5IGFyZSB0b3AtY29kZWQgYXQgODAwIGFuZCBib3R0b20tY29kZWQgYXQgMjAwLiAgDQoqIERhdGEgbWF5IG5vdCBleGlzdCBmb3Igc29tZSBvYnNlcnZhdGlvbnMgaW4geW91ciBkYXRhIHNldCwgYW5kIHlvdSB0aGluayB0aGF0IHRoZSByZWFzb24gdGhlIGRhdGEgZG9lcyBub3QgZXhpc3QgY2FuIGJlIG1vZGVsZWQuICANCg0KVGhlIGZpcnN0IHRocmVlIHN1Y2ggY2FzZXMgd291bGQgY2FsbCBmb3IgYSAqKlRvYml0KiogbW9kZWwsIHRoZSBsYXN0IG9uZSB3b3VsZCBiZSBhIHNpdHVhdGlvbiBmb3IgYSAqKkhlY2ttYW4qKiBtb2RlbC4NCg0KIyMgVGhlIFRvYml0IG1vZGVsDQoNCkxldCdzIGlsbHVzdHJhdGUgdGhlIFRvYml0IG1vZGVsIHVzaW5nIHRoZSBgZnJpbmdlYCBkYXRhc2V0IGluIHRoZSBgd29vbGRyaWRnZWAgcGFja2FnZS4gIFRoZSB2YXJpYWJsZSAkYW5uYmVucyQgY29udGFpbnMgdGhlIGRvbGxhciB2YWx1ZSBvZiBhbm51YWwgYmVuZWZpdHMgZm9yIHRoZSA2MTYgaW5kaXZpZHVhbHMgaW4gdGhlIGRhdGEgc2V0Lg0KDQpgYGB7cn0NCnN1bW1hcnkoZnJpbmdlJGFubmJlbnMpDQpgYGANCg0KSGVyZSwgd2UgY2FuIHNlZSB0aGF0IHRoZSBtaW5pbXVtIGlzIFwkMCBhbmQgdGhlIG1heGltdW0gaXMgXCQ1MTI5LjEuICBMZXQncyB0aGluayBhYm91dCB0aGlzIGEgbGl0dGxlIGZ1cnRoZXI6IA0KDQoqIERvZXMgdGhlIG1heGltdW0gKmhhdmUqIHRvIGJlIFwkNTEyOS4xPyAgQ291bGQgaXQgYmUgaGlnaGVyPyANCiogRG9lcyB0aGUgbWluaW11bSAqaGF2ZSogdG8gYmUgXCQwPyAgQ291bGQgaXQgYmUgbG93ZXI/ICANCg0KV2hpbGUgaXQgc2VlbXMgcG9zc2libGUgdGhhdCBzb21lYm9keSAqY291bGQqIGhhdmUgbW9yZSB0aGFuIFwkNTEyOS4xIGluIGZyaW5nZSBiZW5lZml0cyBwZXIgeWVhciwgaG93IGNvdWxkIHNvbWVib2R5IGhhdmUgbmVnYXRpdmUgdmFsdWVkIGZyaW5nZSBiZW5lZml0cz8gIFRoaXMgc3VnZ2VzdHMgdGhhdCB0aGVyZSBpcyBhIGdvb2QgY2hhbmNlIG9mIFwkMCBiZWluZyBhICJjb3JuZXIgc29sdXRpb24uIiAgV2UgY2FuIG1vcmUgY2xvc2VseSBhdCB0aGUgZGF0YSB0byBzZWUgaWYgdGhpcyBpcyBpbiBmYWN0IHRydWUuICBMZXQncyB0YWtlIGEgbG9vayBhdCB0aGUgJGFubmJlbnMkIHZhcmlhYmxlIGdyYXBoaWNhbGx5Og0KDQpgYGB7cn0NCmZyaW5nZSAlPiUgZ2dwbG90KGFlcyh4ID0gYW5uYmVucykpICsNCiAgICBnZW9tX2hpc3RvZ3JhbShiaW53aWR0aCA9IDEwMCwgY29sb3IgPSAiIzAwNTczQyIsIGZpbGwgPSAiIzAwNTczQyIpICsNCiAgICB0aGVtZV9jbGFzc2ljKCkgKw0KICAgIHNjYWxlX3hfY29udGludW91cyhleHBhbmQgPSBjKDAsIDApKSArDQogICAgc2NhbGVfeV9jb250aW51b3VzKGV4cGFuZCA9IGMoMCwgMCkpIA0KDQpgYGANClRoZXJlIGFyZSB0d28gcHJldHR5IGJpZyBzcGlrZXMgLSBvbmUgYXQgemVybywgYW5kIGFub3RoZXIgYXJvdW5kIDEwMDAuICAgQnV0IHRoZXNlIHNwaWtlcyBhcmUgZGlmZmVyZW50IGluIG5hdHVyZS4gIFRoZSBwcmVzZW5jZSBvZiB0aGUgYmlnIHNwaWtlIGF0IDAgaXMgc3VnZ2VzdGl2ZSBvZiBhIGNvcm5lciBzb2x1dGlvbi4gVGhpcyBuZXh0IGNvbW1hbmQgaXMgYSBsaXR0bGUgdHJpY2t5LCBidXQgaXQgd2lsbCBhc2sgUiB0byBsaXN0IHRoZSAxMCBtb3N0IGNvbW1vbiB2YWx1ZXMgZm9yIHRoZSAkYW5uYmVucyQgdmFyaWFibGUuDQoNCg0KYGBge3J9DQpzb3J0KHRhYmxlKGZyaW5nZSRhbm5iZW5zKSxkZWNyZWFzaW5nPVRSVUUpWzE6MTBdDQpgYGANCk5vdCBvbmx5IGlzIDAgdGhlIG1vc3QgY29tbW9uIHZhbHVlLCBpdCBpcyB0d2ljZSBhcyBsaWtlbHkgYXMgYW55IG90aGVyIHZhbHVlIGZvciB0aGlzIHZhcmlhYmxlISBUaGlzIGlzIGEgcHJldHR5IGdvb2QgaW5kaWNhdGlvbiB0aGF0IGlmIHdlIHdhbnQgdG8gbW9kZWwgJGFubmJlbnMkLCB3ZSBzaG91bGQgcHJvYmFibHkgdXNlIGEgVG9iaXQgbW9kZWwuICBJbnR1aXRpdmVseSwgdGhlIFRvYml0IG1vZGVsIGlzIGtpbmQgb2YgYSBoeWJyaWQgb2YgT0xTIHJlZ3Jlc3Npb24gYW5kIHRoZSBwcm9iaXQgbW9kZWwuICBJbiBmYWN0LCBpdCBnZXRzIGl0cyBuYW1lIGFzIGEgY29tYmluYXRpb24gb2YgaXRzIGludmVudG9yLCBOb2JlbCBMYXVyZWF0ZSBlY29ub21pc3QgSmFtZXMgVG9iaW4sIGFuZCB0aGUgcHJvYml0IG1vZGVsLiAgVGhlIG1hdGggYmVoaW5kIHRoZSBUb2JpdCBpcyBlc3NlbnRpYWxseSBlc3RpbWF0aW5nIGEgcHJvYml0IG9uIHdoZXRoZXIgb3Igbm90IHRoZSBkZXBlbmRlbnQgdmFyaWFibGUgaXMgY2Vuc29yZWQgb3Igbm90LCBhIGxpbmVhciByZWdyZXNzaW9uIG9uIHRoZSBkYXRhIHRoYXQgaXMgbm90IGNlbnNvcmVkLCBhbmQgY29tYmluaW5nIHRoZW0gaW50byBvbmUgZXN0aW1hdGUuICANCg0KQSBUb2JpdCBtb2RlbCBpcyBlc3RpbWF0ZWQgd2l0aCB0aGUgYGNlbnNSZWcoKWAgZnVuY3Rpb24sIHdoaWNoIGlzIHBhcnQgb2YgdGhlIGBjZW5zUmVnYCBwYWNrYWdlLiAgVGhpcyBmdW5jdGlvbiB3b3JrcyBhIGxvdCBsaWtlIHRoZSBgbG0oKWAgYW5kIGBnbG0oKWAgY29tbWFuZHMgd2UgaGF2ZSBiZWVuIHVzaW5nLCBidXQgd2UgbmVlZCB0byBzcGVjaWZ5IGEgY291cGxlIGV4dHJhIG9wdGlvbnMuICBXZSBuZWVkIHRvIHRlbGwgdGhlIGNlbnNSZWcgZnVuY3Rpb24gaG93IHRoZSBkYXRhIGlzIGNlbnNvcmVkIHdpdGggdGhlIGBsZWZ0ID0gMGAgYW5kIGByaWdodCA9IEluZmAgYXJndW1lbnRzLiAgVGhlIGBJbmZgIGlzIHNob3J0IGZvciAqKmluZmluaXRlKiosIHNvIHRoaXMgYXJndW1lbnQgc2ltcGx5IHRlbGxzIFIgdGhhdCB0aGUgZGF0YSBpcyBub3QgcmlnaHQtY2Vuc29yZWQuICBUaGUgYGxlZnQgPSAwYCB0ZWxscyBSIHRoYXQgdGhlIGRlcGVuZGVudCB2YXJpYWJsZSBpcyBsZWZ0IGNlbnNvcmVkIGF0IDA7IHdlcmUgd2UgZGVhbGluZyB3aXRoIHJpZ2h0LWNlbnNvcmVkIGRhdGEsIHdlIHdvdWxkIHVzZSBgbGVmdCA9IC1JbmZgIGFuZCBzZXQgb3VyIHJpZ2h0IGNlbnNvcmluZyB3aXRoIHRoZSBgcmlnaHRgIG9wdGlvbi4gDQoNCmBgYHtyLCB3YXJuaW5nID0gRkFMU0V9DQpyZWcxYSA8LSBjZW5zUmVnKGFubmJlbnMgfiB0ZW51cmUgKyBhbm5lYXJuLCBsZWZ0ID0gMCwgcmlnaHQgPSBJbmYsIGRhdGEgPSBmcmluZ2UpDQpzdGFyZ2F6ZXIocmVnMWEsIHR5cGUgPSAidGV4dCIpDQpgYGANClRoZSBtb2RlbCBlc3RpbWF0ZXMgdGhlIHZhbHVlIG9mIGZyaW5nZSBiZW5lZml0cyBhcyBhIGZ1bmN0aW9uIG9mIGFuIGluZGl2aWR1YWwncyB0ZW51cmUgd2l0aCB0aGVpciBjdXJyZW50IGVtcGxveWVyIGFuZCBhbm51YWwgZWFybmluZ3MuICBXZSBpbnRlcnByZXQgdGhlIGNvZWZmaWNpZW50cyBpbiByb3VnaGx5IHRoZSBzYW1lIHdheSBhcyBhbiBPTFMgY29lZmZpY2llbnQuICBUaGUgJGxvZ1NpZ21hJCB0ZXJtIGlzIGEgbW9kZWwgcGFyYW1ldGVyLiAgT25lIHVzZSBvZiAkbG9nU2lnbWEkIGlzIHRvIGV4cG9uZW50aWF0ZSBpdCBhbmQgY29tcGFyZSBpdCB0byB0aGUgc3RhbmRhcmQgZGV2aWF0aW9uIG9mIHRoZSBkZXBlbmRlbnQgdmFyaWFibGU6DQoNCmBgYHtyfQ0Kc2QoZnJpbmdlJGFubmJlbnMpDQpleHAocmVnMWEkZXN0aW1hdGVbNF0pDQoNCmBgYA0KVGhlIHN0YW5kYXJkIGRldmlhdGlvbiBvZiAkYW5uYmVucyQgaXMgbGFyZ2VyIHRoYW4gJGVeezcuMDY0fSQsIGluZGljYXRpbmcgdGhhdCBUb2JpdCBpcyBsaWtlbHkgdGhlIHJpZ2h0IGNsYXNzIG9mIG1vZGVscyB0byB1c2UgaGVyZS4gIA0KDQpUaGUgYGNoYXJpdHlgIGRhdGEgaW4gdGhlIGB3b29sZHJpZGdlYCBwYWNrYWdlIGhhcyBhIHZhcmlhYmxlLCAkXG1hdGhpdHtnaWZ0fSQsIHRoYXQgaXMgY2xlYXJseSBsZWZ0IGNlbnNvcmVkIGF0IHplcm8uIEluIHRoaXMgZGF0YXNldCwgJFxtYXRoaXR7Z2lmdH0kIG1lYXN1cmVzIHRoZSBhbW91bnQgb2YgbW9uZXkgZG9uYXRlZCBieSA0MjY4IHBvdGVudGlhbCBkb25vcnMuICBBcyB0aGUgaGlzdG9ncmFtIHNob3dzLCB0aGlzIGlzIGEgY2FzZSB3aGVyZSB0aGVyZSBhcmUgYSB0b24gb2YgemVyb2VzOg0KDQpgYGB7cn0NCg0KY2hhcml0eSAlPiUgZ2dwbG90KGFlcyh4ID0gZ2lmdCkpICsNCiAgICBnZW9tX2hpc3RvZ3JhbShiaW53aWR0aCA9IDUsIGNvbG9yID0gIiMwMDU3M0MiLCBmaWxsID0gIiMwMDU3M0MiKSArDQogICAgdGhlbWVfY2xhc3NpYygpICsNCiAgICBzY2FsZV94X2NvbnRpbnVvdXMoZXhwYW5kID0gYygwLCAwKSkgKw0KICAgIHNjYWxlX3lfY29udGludW91cyhleHBhbmQgPSBjKDAsIDApKSANCg0KYGBgDQpPZiB0aGUgNDI2OCBvYnNlcnZhdGlvbnMgaW4gdGhlIGRhdGFzZXQsIG92ZXIgaGFsZiBhcmUgemVybyEgSGVyZSBhcmUgdGhlIDEwIG1vc3QgY29tbW9uIGdpZnQgc2l6ZXMgaW4gdGhlIGRhdGE6DQoNCmBgYHtyfQ0Kc29ydCh0YWJsZShjaGFyaXR5JGdpZnQpLGRlY3JlYXNpbmc9VFJVRSlbMToxMF0NCg0KYGBgDQpXaXRoIHRoaXMgbWFueSBsZWZ0IGNlbnNvcmVkIG9ic2VydmF0aW9ucywgVG9iaXQgaXMgcHJvYmFibHkgZ29pbmcgdG8gYmUgYSBnb29kIG1vZGVsIHRvIHVzZS4NCg0KYGBge3IsIHdhcm5pbmcgPSBGQUxTRX0NCnJlZzJhIDwtIGNlbnNSZWcoZ2lmdCB+IG1haWxzeWVhciArIGF2Z2dpZnQsIGxlZnQgPSAwLCByaWdodCA9IEluZiwgZGF0YSA9IGNoYXJpdHkpDQpzdGFyZ2F6ZXIocmVnMmEsIHR5cGUgPSAidGV4dCIpDQpgYGANCg0KVGhlIGJpZyBkaWZmZXJlbmNlIGJldHdlZW4gdGhlICRsb2dTaWdtYSQgdGVybSB0byB0aGUgc3RhbmRhcmQgZGV2aWF0aW9uIG9mICRcbWF0aGl0e2dpZnR9JCBpcyBzdWdnZXN0aXZlIHRoYXQgdGhlIFRvYml0IG1vZGVsIGlzIHRoZSByaWdodCBhcHByb2FjaDoNCg0KYGBge3J9DQpzZChjaGFyaXR5JGdpZnQpDQpleHAocmVnMmEkZXN0aW1hdGVbM10pDQpgYGANCkxldCdzIHB1c2ggb3VyIGFuYWx5c2lzIGEgYml0IGZ1cnRoZXIgYnkgZXN0aW1hdGluZyB0aGUgc2FtZSBtb2RlbCB3aXRoIGFuIE9MUyByZWdyZXNzaW9uIHVzaW5nIHRoZSBgbG0oKWAgY29tbWFuZC4gIFdlIGNhbiBjb21wYXJlIHRoZXNlIG1vZGVscyBzaWRlLWJ5LXNpZGUgd2l0aCBzdGFyZ2F6ZXI6DQoNCmBgYHtyLCB3YXJuaW5nID0gRkFMU0V9DQpyZWcyYiA8LSBsbShnaWZ0IH4gbWFpbHN5ZWFyICsgYXZnZ2lmdCwgZGF0YSA9IGNoYXJpdHkpDQpzdGFyZ2F6ZXIocmVnMmEsIHJlYjJiLCB0eXBlID0gInRleHQiKQ0KDQpgYGANClRoZSBjb2VmZmljaWVudHMgb24gdGhlc2UgbW9kZWxzIGFyZSAqdmVyeSogZGlmZmVyZW50OyB0aGUgQUlDIGFuZCBCSUMgYXJlIHVzZWZ1bCB0b29scyBmb3IgY29tcGFyaW5nIG1vZGVscyBvZiBkaWZmZXJlbnQgdHlwZXMgbGlrZSB0aGlzLiAgV2UgY2FuIG9idGFpbiB0aGVzZSBtZWFzdXJlcyB3aXRoIHRoZSBgQUlDKClgIGFuZCBgQklDKClgIGNvbW1hbmRzLCByZXNwZWN0aXZlbHkuDQoNCmBgYHtyfQ0KQUlDKHJlZzJiKQ0KQklDKHJlZzJiKQ0KYGBgDQpBcyBsb3dlciB2YWx1ZXMgb2YgQUlDIGFuZCBCSUMgaW5kaWNhdGUgYmV0dGVyIG1vZGVscywgaXQgaXMgY2xlYXIgdGhhdCB0aGUgVG9iaXQgbW9kZWwgb3V0cGVyZm9ybXMgdGhlIE9MUyBtb2RlbCBieSBhIGZhaXJseSBsYXJnZSBtYXJnaW4uDQoNCiMjIyBEYXRhIGZvciBmdXJ0aGVyIGV4cGxvcmF0aW9uDQoNCiogYHdvb2xkcmlkZ2U6bXJvemAgLSB0aGUgcmVwb3J0ZWQgYWdlIG9mIHRoZSBpbnRlcnZpZXdlZCB3b21lbiwgJHJlcHdhZ2UkLCBpcyBsZWZ0IGNlbnNvcmVkIGF0IHplcm8sIHRob3VnaCB0aGlzIG1pZ2h0IGJlIGJldHRlciBtb2RlbGVkIHdpdGggYSBIZWNrbWFuIG1vZGVsLg0KKiBgd29vbGRyaWRnZTpqdHJhaW4yYCBhbmQgYHdvb2xkcmlkZ2U6anRyYWluM2AgbWlnaHQgYWxzbyBiZSBhbWVuYWJsZSB0byBIZWNrbWFuIHJlZ3Jlc3Npb24uDQoNCiMjIFRoZSBIZWNrbWFuIG1vZGVsDQoNClRoZSBIZWNrbWFuIG1vZGVsIChzb21ldGltZXMgY2FsbGVkIHRoZSBIZWNrbWFuIFNlbGVjdGlvbiBtb2RlbCkgc2hhcmVzIG1hbnkgc2ltaWxhcml0aWVzIHdpdGggdGhlIFRvYml0IG1vZGVsLiBMaWtlIHRoZSBUb2JpdCBtb2RlbCwgdGhlIEhlY2ttYW4gbW9kZWwgaXMgbmFtZWQgZm9yIGFuIEVjb25vbWljcyBOb2JlbCBMYXVyZWF0ZTogSmFtZXMgSGVja21hbi4gQXQgaXRzIGNvcmUsIGl0IGlzIHRoZSBzYW1lIGNvbWJpbmF0aW9uIG9mIGVzdGltYXRpbmcgYSBwcm9iaXQgb24gd2hldGhlciBvciBub3QgdGhlIGRlcGVuZGVudCB2YXJpYWJsZSBpcyBjZW5zb3JlZCBvciBub3QgYW5kIGEgbGluZWFyIHJlZ3Jlc3Npb24gb24gdGhlIGRhdGEgdGhhdCBpcyBub3QgY2Vuc29yZWQuICBUaGVyZSBhcmUgdHdvIGtleSBkaWZmZXJlbmNlIGhlcmUuICBGaXJzdCwgaW4gdGhlIEhlY2ttYW4gbW9kZWwsIHRoZSBkYXRhIGFyZSBub3QgInBpbGVkLXVwIiBhdCBzb21lIHZhbHVlICh0eXBpY2FsbHkgb24gdGhlIGxlZnQpLCB0aGV5IGFyZSB0cnVseSB1bm9ic2VydmVkLiAgVGhlIHNlY29uZCBkaWZmZXJlbmNlIGlzIHRoYXQgd2UgaGF2ZSBzb21lIHRoZW9yeSBvciBleHBsYW5hdGlvbiBhcyB0byB3aHkgc29tZSBhcmUgb2JzZXJ2ZWQgYW5kIHNvbWUgYXJlIG5vdC4gIA0KDQpMZXQncyBsb29rIGF0IHNvbWUgd2FnZSBkYXRhLCB3aGVyZSB0aGlzIG1vZGVsIGlzIGNvbW1vbmx5IHVzZWQuICBUaGUgYG1yb3pgIGRhdGEgaW4gdGhlIGB3b29sZHJpZGdlYCBwYWNrYWdlIGxvb2tzIGF0IHRoZSB3YWdlcyBvZiBtYXJyaWVkIHdvbWVuIGluIHRoZSBtaWQgMTk3MHMsIGFuZCBjb250YWlucyBhIHRoZSAkcmVwd2FnZSQgdmFyaWFibGUsIHdoaWNoIGlzIHRoZSByZXBvcnRlZCB3YWdlIG9mIHRoZSB3b21lbiBpbiB0aGUgZGF0YSBzZXQuICBJZiB3ZSBsb29rIGF0IGF0IHRoZSB2YXJpYWJsZSBtb3JlIGNsb3NlbHksIHdlIHNlZSB0aGF0IG92ZXIgaGFsZiBvZiB0aGUgd29tZW4gaGF2ZSBhIHdhZ2Ugb2YgMCwgaW5kaWNhdGluZyB0aGF0IHRoZXkgYXJlIG91dCBvZiB0aGUgbGFib3IgZm9yY2UuIA0KDQpgYGB7cn0NCj9tcm96DQpzdW1tYXJ5KG1yb3okcmVwd2FnZSkNCg0KYGBgDQpXaGlsZSB0aGV5IHJlcG9ydCB0aGVpciB3YWdlIGFzIFwkMCwgdGhpcyBpcyBub3QgYSBjYXNlIG9mIHRoZXNlIHdvbWVuIHdvcmtpbmcgZm9yIGZyZWUsIGJ1dCByYXRoZXIsIHRoZXkgaGF2ZSBvcHRlZCBvdXQgb2YgdGhlIGxhYm9yIGZvcmNlLiAgSW4gYSBzZW5zZSwgdGhlbiwgd2UgYWN0dWFsbHkgZG9uJ3Qgbm93IHdoYXQgdGhlaXIgd2FnZSBpcy9vdWdodCB0byBiZS4gVGh1cywgd2FnZXMgYXJlICJ1bm9ic2VydmVkLCIgd2hpY2ggaXMgdGhlIGZpcnN0IHRoaW5nIHdlIG5lZWQgdG8gZXN0aW1hdGUgYSBIZWNrbWFuIG1vZGVsLiBUaGUgc2Vjb25kIHRoaW5nIHdlIG5lZWQgaXMgc29tZXRoaW5nIHRoYXQgaW5mbHVlbmNlcyB3aGV0aGVyIG9yIG5vdCB3ZSBvYnNlcnZlIHRoZWlyIGRhdGEgdGhhdCBpcyBub3QgY29ycmVsYXRlZCB3aXRoIHRoZSBkYXRhIGl0c2VsZi4gIFdlIHdpbGwgdXNlIHRoZSAka2lkc2x0NiQgdmFyaWFibGUgZm9yIHRoaXMgLS0gd2Ugd291bGQgc3VzcGVjdCB0aGF0IGhhdmluZyBtb3JlIHByZS1zY2hvb2wgYWdlZCBraWRzIG1ha2Ugc29tZW9uZSBsZXNzIGxpa2VseSB0byB3b3JrLCBidXQgc2hvdWxkbid0IG5lY2Vzc2FyaWx5IHJlZHVjZSB0aGVpciB3YWdlcyBzaG91bGQgdGhleSBjaG9vc2UgdG8gd29yay4NCg0KVGhlIGBzZWxlY3Rpb24oKWAgY29tbWFuZCBpcyBhIGJpdCB0cmlja3ksIGFzIHdlIG5lZWQgdG8gc3BlY2lmeSB0d28gbW9kZWxzLCBvbmUgZm9yIHRoZSBwcm9iaXQgbW9kZWwgdG8gc2VlIGlmIHdhZ2VzIGFyZSBvYnNlcnZlZCBvciBub3QsIGFuZCBhIHNlY29uZCBmb3IgdGhlIHJlZ3Jlc3Npb24gbW9kZWwgdG8gYWN0dWFsbHkgcHJlZGljdCB3YWdlcy4gIFdlIGFsc28gbmVlZCB0byBlZGl0IG91ciBkYXRhc2V0IGEgYml0IHRvIHB1dCBzb21lIGBOQWAgdmFsdWVzIGluIGZvciB0aGUgemVyb2VzLg0KDQpgYGB7cn0NCm1yb3oyIDwtIG1yb3oNCm1yb3oyJHJlcHdhZ2VbbXJvejIkcmVwd2FnZSA9PSAwXSA8LSBOQQ0KYGBgDQoNCk5vdyB0aGF0IHRoZSBtaXNzaW5nIHZhbHVlcyBhcmUgY29kZWQgYXMgYE5BYCB3ZSBzcGVjaWZ5IHRoZSBzZWxlY3Rpb24gbW9kZWwgYXM6DQoNCmBgYHtyfQ0KcmVnM2EgPC0gc2VsZWN0aW9uKCFpcy5uYShyZXB3YWdlKSB+IGtpZHNsdDYgKyBlZHVjICsgY2l0eSArIGV4cGVyLCByZXB3YWdlIH4gZWR1YyArIGNpdHkgKyBleHBlciwgZGF0YSA9IG1yb3oyKQ0KYGBgDQpUaGUgZmlyc3QgZXF1YXRpb24gbW9kZWxzIHdoZXRoZXIgb3Igbm90IHRoZSAkcmVwd2FnZSQgdmFyaWFibGUgaXMgbWlzc2luZyBvciBub3QgdXNpbmcgdGhlYCFpcy5uYSgpYCBjb21tYW5kIC0tIGBpcy5uYShyZXB3YWdlKWAgcmV0dXJucyBhIHllcy9ubyBvbiBpZiAkcmVwd2FnZSQgaXMgbWlzc2luZyAoYE5BYCksIGFuZCB0aGUgYCFgIGluIGZyb250IG9mIGl0IHNlcnZlcyBhcyBhICJub3QiIGZ1bmN0aW9uLiAgVGhpcyBpcyBtb2RlbGVkIGFzIGEgZnVuY3Rpb24gb2YgdGhlIG51bWJlciBvZiBjaGlsZHJlbiwgZWR1Y2F0aW9uLCBleHBlcmllbmNlLCBhbmQgYSBjaXR5IGR1bW15LiAgVGhlIHNlY29uZCBlcXVhdGlvbiBtb2RlbHMgJHJlcHdhZ2UkIGFzIGEgZnVuY3Rpb24gb2YgZWR1Y2F0aW9uLCBleHBlcmllbmNlLCBhbmQgdGhlIGNpdHkgZHVtbXkuICBJdCBpcyBlc3NlbnRpYWwgaW4gYSBIZWNrbWFuIG1vZGVsIHRoYXQgYXQgbGVhc3Qgb25lIG9mIHRoZSB2YXJpYWJsZXMgaW4gdGhlIHNlbGVjdGlvbiBlcXVhdGlvbiBpcyBub3QgaW4gdGhlIE9MUyBtb2RlbC4NCg0KSWYgd2UgdXNlIHRoZSBgc3VtbWFyeSgpYCBjb21tYW5kLCB3ZSBjYW4gc2VlIGJvdGggdGhlIGZpcnN0IGFuZCBzZWNvbmQgc3RhZ2VzIG9mIHRoZSBtb2RlbDoNCg0KYGBge3J9DQpzdW1tYXJ5KHJlZzNhKQ0KYGBgDQoNClRoZSBzZWxlY3Rpb24gbW9kZWwgaXMgaW4gdGhlIHRvcCB0YWJsZSwgdGhlIHJlZ3Jlc3Npb24gb24gdGhlIG9ic2VydmVkIGRhdGEgaXMgaW4gdGhlIGJvdHRvbSB0YWJsZS4gIFRoZSAka2lkc2x0NiQgdmFyaWFibGUgaXMgc2lnbmlmaWNhbnQgYXQgdGhlIDIlIGxldmVsIGluIHRoZSBzZWxlY3Rpb24gZXF1YXRpb247IHRoZSBuZWdhdGl2ZSBjb2VmZmljaWVudCBpbmRpY2F0ZXMgdGhlIGV4cGVjdGVkIHJlc3VsdCB0aGF0IHdvbWVuIHdpdGggeW91bmcgY2hpbGRyZW4gYXJlIGxlc3MgbGlrZWx5IHRvIGhhdmUgYW4gb2JzZXJ2ZWQgd2FnZS4gIA0KDQpMZXQncyBjb21wYXJlIHRoZXNlIGVzdGltYXRlcyB3aXRoIGEgVG9iaXQgbW9kZWwgYW5kIGFuIE9MUyByZWdyZXNzaW9uOg0KDQoNCmBgYHtyLCB3YXJuaW5nID0gRkFMU0V9DQpyZWczYiA8LSBjZW5zUmVnKHJlcHdhZ2UgfiBraWRzbHQ2ICsgZWR1YyArIGNpdHkgKyBleHBlciwgZGF0YSA9IG1yb3opDQpyZWczYyA8LSBsbShyZXB3YWdlIH4ga2lkc2x0NiArIGVkdWMgKyBjaXR5ICsgZXhwZXIsIGRhdGEgPSBtcm96KQ0Kc3RhcmdhemVyKHJlZzNhLCByZWczYiwgcmVnM2MsIHR5cGUgPSAidGV4dCIpDQoNCmBgYA0KV2UgY2FuIGdldCB0aGUgQUlDIGFuZCBCSUMgZnJvbSB0aGUgSGVja21hbiBhbmQgTE0gbW9kZWxzIHdpdGggdGhlIGBBSUMoKWAgYW5kIGBCSUMoKWAgZnVuY3Rpb25zOg0KDQpgYGB7cn0NCkFJQyhyZWczYSkNCkFJQyhyZWczYykNCkJJQyhyZWczYSkNCkJJQyhyZWczYykNCmBgYA0KVGhlIEhlY2ttYW4gbW9kZWwgc2VlbXMgdG8gYmUgc3Vic3RhbnRpYWxseSBiZXR0ZXIgaGVyZSB0aGFuIHRoZSBUb2JpdCBtb2RlbCwgYW5kIGJvdGggYXJlIGEgdG9uIGJldHRlciB0aGFuIE9MUyBmb3IgdGhpcyBkYXRhLg0KDQojIyMgRGF0YSBmb3IgZnVydGhlciBleHBsb3JhdGlvbg0KDQoqIEVpdGhlciBvZiB0aGUgZGF0YSBpbiB0aGUgVG9iaXQgc2VjdGlvbiBvZiB0aGVzZSBub3RlcyAtLSBgd29vbGRyaWRnZTpjaGFyaXR5YCBvciBgd29vbGRyaWRnZTpmcmluZ2VgIC0tIGNvdWxkIGJlIGxvb2tlZCBhdCB1c2luZyB0aGUgSGVja21hbiBtb2RlbC4NCiogYHdvb2xkcmlkZ2U6anRyYWluMmAgYW5kIGB3b29sZHJpZGdlOmp0cmFpbjNgIG1pZ2h0IGFsc28gYmUgYW1lbmFibGUgdG8gSGVja21hbiByZWdyZXNzaW9uLg0KDQojIENvdW50IE1vZGVscw0KDQpUaGUgbGFzdCB0eXBlIG9mIGRhdGEgd2Ugd2lsbCBsb29rIGF0IGluIHRoaXMgbm90ZWJvb2sgaXMgY291bnQgZGF0YTsgZGVwZW5kZW50IHZhcmlhYmxlcyB0aGF0IGNhbiBvbmx5IHRha2Ugb24gd2hvbGUgbnVtYmVyIHZhbHVlcy4gIEZvciBleGFtcGxlOg0KDQoqIFRoZSBudW1iZXIgb2YgY2hpbGRyZW4gYW4gaW5kaXZpZHVhbCBoYXMNCiogVGhlIG51bWJlciBvZiBkb2N0b3IncyB2aXNpdHMgYSBwZXJzb24gbWFrZXMgaW4gYSB5ZWFyDQoNClR5cGljYWxseSB3ZSBvbmx5IHVzZSBjb3VudCBtb2RlbHMgaW4gY2FzZXMgd2hlcmUgdGhlIGNvdW50cyBhcmUgcmVsYXRpdmVseSBsb3cgbnVtYmVycyAtLSBhIGRlY2VudCBiYWxscGFyayBudW1iZXIgaXMgdGhhdCB0aGUgbWVhbiBvZiB0aGUgZGVwZW5kZW50IHZhcmlhYmxlIHNob3VsZCBiZSB1bmRlciAxMCAtLSBXZSB3b3VsZCBub3QgdXNlIGEgY291bnQgbW9kZWwgaWYgb3VyIGRlcGVuZGVudCB2YXJpYWJsZSB3YXMgdGhlIG51bWJlciBvZiBNY0RvbmFsZHMgaGFtYnVyZ2VycyBzb2xkIGFubnVhbGx5IGF0IGVhY2ggcmVzdGF1cmFudCBvciB0aGUgbnVtYmVyIG9mIHB1cHBpZXMgYm9ybiBlYWNoIG1vbnRoIGJ5IHN0YXRlLCBldmVuIHRob3VnaCBoYW1idXJnZXJzIGFuZCBwdXBwaWVzIGFyZSBmdW5kYW1lbnRhbGx5IGNvdW50YWJsZS4gDQpUaGUgdHdvIHByaW1hcnkgbW9kZWxzIHVzZWQgZm9yIGNvdW50IGRhdGEgYXJlIHRoZSAqKlBvaXNzb24qKiBhbmQgdGhlICoqTmVnYXRpdmUgQmlub21pYWwqKiBtb2RlbHMuICBUaGUgcG9pc3NvbiBtb2RlbCBpcyBhIGJpdCBlYXNpZXIgdG8gZXN0aW1hdGUsIHNvIHdlIHdpbGwgYmVnaW4gdGhlcmUuDQoNCldlIGhhdmUgdXNlZCB0aGUgYmluYXJ5IG1lYXN1cmUgZnJvbSB0aGUgYGFmZmFpcnNgIGRhdGFzZXQgaW4gdGhlIGB3b29sZHJpZGdlYCBwYWNrYWdlIGJlZm9yZTsgbGV0J3Mgbm93IHR1cm4gdG8gdGhlICRcbWF0aGl0e25hZmZhaXJzfSQgdmFyaWFibGUsIGEgY291bnQgdmFyaWFibGUgdGhhdCBtZWFzdXJlcyB0aGUgbnVtYmVyIG9mIGFmZmFpcnMgYW4gaW5kaXZpZHVhbCBoYWQgaW4gdGhlIHBhc3QgeWVhci4gIEZpcnN0LCBsZXQncyBsb29rIGF0IGEgZ3JhcGggYW5kIHNvbWUgc3VtbWFyeSBzdGF0aXN0aWNzIG9mICRcbWF0aGl0e25hZmZhaXJzfSQ6DQoNCmBgYHtyfQ0Kc3VtbWFyeShhZmZhaXJzJG5hZmZhaXJzKQ0KdGFibGUoYWZmYWlycyRuYWZmYWlycykNCmFmZmFpcnMgJT4lICBnZ3Bsb3QoYWVzKHggPSBuYWZmYWlycykpICsNCiAgICBnZW9tX2hpc3RvZ3JhbShiaW53aWR0aCA9IDEsIGZpbGwgPSAiZGFya2JsdWUiKSArDQogICAgdGhlbWVfY2xhc3NpYygpICsNCiAgICBzY2FsZV94X2NvbnRpbnVvdXMoZXhwYW5kID0gYygwLCAwKSwgYnJlYWtzID0gMDoxMikgKw0KICAgIHNjYWxlX3lfY29udGludW91cyhleHBhbmQgPSBjKDAsIDApKSANCiAgICANCmBgYA0KVGhlIG1lYW4gaXMgMS41LCBhbmQgdGhlIGJvdGggdGhlIHRhYmxlIGFuZCBoaXN0b2dyYW0gc2hvdyB0aGF0IHRoZSAkXG1hdGhpdHthZmZhaXJzfSQgdmFyaWFibGUgaXMgaW5kZWVkIGEgY291bnQgdmFyaWFibGUuICBUaGlzIHN1Z2dlc3RzIHRoYXQgYSBwb2lzc29uIG1vZGVsIGlzIGxpa2VseSBpbmRpY2F0ZWQuICBXZSBlc3RpbWF0ZSB0aGUgcG9pc3NvbiBtb2RlbCB3aXRoIHRoZSBgZ2xtKClgIGZ1bmN0aW9uIGFuZCBzZXQgdXNlIHRoZSBgZmFtaWx5ID0gcG9pc3NvbigpYCBvcHRpb24uDQoNCmBgYHtyLCB3YXJuaW5nID0gRkFMU0V9DQpyZWc0YSA8LSBnbG0obmFmZmFpcnMgfiBtYWxlICsgeXJzbWFyciArIGtpZHMgKyByZWxpZyArIGVkdWMgKyByYXRlbWFyciwgZGF0YSA9IGFmZmFpcnMsIGZhbWlseSA9IHBvaXNzb24oKSkNCnN0YXJnYXplcihyZWc0YSwgdHlwZSA9ICJ0ZXh0IikNCg0KYGBgDQoNCg0KRm9yIHRoZSBzYWtlIG9mIGNvbXBhcmlzb24sIHdlIGNhbiBsb29rIGF0IHRoZXNlIHJlc3VsdHMgc2lkZS1ieS1zaWRlIHdpdGggYW4gT0xTIGVzdGltYXRlZCB3aXRoIHRoZSBzYW1lIGRhdGE7IFBvaXNzb24gZXN0aW1hdGVzIGNhbiBiZSBpbnRlcnByZXRlZCBpbiB0aGUgc2FtZSB3YXkgYXMgT0xTIGVzdGltYXRlczoNCg0KYGBge3IsIHdhcm5pbmcgPSBGQUxTRX0NCnJlZzRiIDwtIGxtKG5hZmZhaXJzIH4gbWFsZSArIHlyc21hcnIgKyBraWRzICsgcmVsaWcgKyBlZHVjICsgcmF0ZW1hcnIsIGRhdGEgPSBhZmZhaXJzKQ0Kc3RhcmdhemVyKHJlZzRiLCByZWc0YSwgdHlwZSA9ICJ0ZXh0IikgIA0KYGBgDQpBZ2FpbiwgYXMgYSBtZWFucyBvZiBjb21wYXJpbmcgbW9kZWxzIHdlIGxvb2sgYXQgdGhlIEFJQzogDQpgYGB7cn0NCkFJQyhyZWc0YikNCmBgYA0KVEhlIEFJQyBpcyBxdWl0ZSBhIGJpdCBsb3dlciBmb3IgdGhlIHBvaXNzb24gdGhhbiBmb3IgdGhlIE9MUyBlc3RpbWF0ZSwgaW5kaWNhdGluZyBhIGJldHRlciBmaXQuICANCg0KYGBge3J9DQpzdW1tYXJ5KHJlZzRhKQ0KYGBgDQoNCkxvb2tpbmcgYXQgdGhlIGBzdW1tYXJ5KClgIG9mIHRoZSBwb2lzc29uIG9iamVjdCBzaG93cyB1cyB0aGF0IHRoZSBwb2lzc29uIG1vZGVsIGFzc3VtZXMgdGhlICIoZClpc3BlcnNpb24gcGFyYW1ldGVyIGZvciBwb2lzc29uIGZhbWlseSB0YWtlbiB0byBiZSAxLiIgIFRoZSBgQUVSYCBwYWNrYWdlIGhhcyBhIGNvbW1hbmQgY2FsbGVkIGBkaXNwZXJzaW9udGVzdCgpYCB3aGljaCBhbGxvd3MgdXMgdG8gc2VlIGlmIHRoZSBkaXNwZXJzaW9uIHBhcmFtZW5lciBpcyBpbiBmYWN0IDE6DQoNCmBgYHtyfQ0KZGlzcGVyc2lvbnRlc3QocmVnNGEpDQpgYGANClRoZSBkaXNwZXJzaW9uIHBhcmFtZW50ZXIgdmVyeSBjbGVhcmx5IGlzIG5vdCBlcXVhbCB0byAxOyB0aGUgbW9kZWwgaXMgKipvdmVyZGlzcGVyc2VkKiosIHdoaWNoIGlzIGp1c3QgYSBmYW5jeSB3YXkgb2Ygc2F5aW5nIHRoYXQgdGhlIGRlcGVuZGVudCB2YXJpYWJsZSBoYXMgbW9yZSB2YXJpYXRpb24gdGhhbiB0aGUgcG9pc3NvbiBtb2RlbCB3b3VsZCBsaWtlIGl0IHRvIGhhdmUuICBUaGUgZGlzcGVyc2lvbiBpcyA2LjU0LCB3aGljaCBpcyBzaWduaWZpY2FudGx5IGRpZmZlcmVudCBmcm9tIDEuIFBvaXNzb24gbW9kZWxzIGFyZSBhbG1vc3QgYWx3YXlzIG92ZXJkaXNwZXJzZWQsIGFuZCB0aGUgYWx0ZXJuYXRpdmVzIGFyZSBlaXRoZXIgdGhlICoqWmVybyBJbmZsYXRlZCBQb2lzc29uIChaSVApKiogb3IgdGhlICoqTmVnYXRpdmUgQmlub21pYWwqKi4gIFdlIHdpbGwgZGlzY3VzcyB0aGUgKipOZWdhdGl2ZSBCaW5vbWlhbCoqLCBidXQgdGhlIFpJUCBtb2RlbCB3aWxsIGJlIGxlZnQgZm9yIHRoZSBpbnRlcmVzdGVkIHN0dWRlbnQgdG8gaW52ZXN0aWdhdGUgZnVydGhlci4NCg0KVGhlICoqTmVnYXRpdmUgQmlub21pYWwqKiBtb2RlbCwgb2Z0ZW4gcmVmZXJyZWQgdG8gYXNhICJOZWdiaW4iIG1vZGVsLCBpcyBlc3RpbWF0ZWQgd2l0aCB0aGUgYGdsbS5uYigpYCBmdW5jdGlvbiBpbiB0aGUgYE1BU1NgIHBhY2thZ2UuIA0KDQpgYGB7ciwgd2FybmluZyA9IEZBTFNFfQ0KcmVnNGMgPC0gZ2xtLm5iKG5hZmZhaXJzIH4gbWFsZSArIHlyc21hcnIgKyBraWRzICsgcmVsaWcgKyBlZHVjICsgcmF0ZW1hcnIsIGRhdGEgPSBhZmZhaXJzKQ0Kc3RhcmdhemVyKHJlZzRjLCB0eXBlID0gInRleHQiKQ0KYGBgDQoNCkFnYWluLCB3ZSBjYW4gbG9vayBhdCBhbGwgMyBtb2RlbHMgdG9nZXRoZXIuDQoNCmBgYHtyLCB3YXJuaW5nID0gRkFMU0V9DQpzdGFyZ2F6ZXIocmVnNGEsIHJlZzRjLCByZWc0YiwgdHlwZSA9ICJ0ZXh0IikNCmBgYA0KDQpUaGUgY29lZmZpY2llbnRzIGluIHRoZSBuZWdiaW4gbW9kZWwgYXJlIHNpbWlsYXIgdG8gdGhvc2UgaW4gdGhlIHBvaXNzb24gbW9kZWwsIGFuZCB0aGUgQUlDIGlzIG11Y2ggYmV0dGVyIGZvciB0aGUgbmVnYmluIHRoYW4gaXQgaXMgZm9yIHRoZSBwb2lzc29uLCBpbmRpY2F0aW5nIGl0IGlzIHRoZSBwcmVmZXJyZWQgbW9kZWwuICBJdCBpcyBteSBleHBlcmllbmNlIHRoYXQgbmVnYmluIGlzIGFsbW9zdCBhbHdheXMgYSBiZXR0ZXIgY2hvaWNlIHRoYW4gcG9pc3Nvbi4NCg0KIyMjIERhdGEgZm9yIGZ1cnRoZXIgZXhwbG9yYXRpb24NCg0KKiBTb21lIGdvb2QgZGF0YXNldHMgbG9va2luZyBhdCBob3NwaXRhbCB2aXNpdGF0aW9uIHJhdGVzIGluY2x1ZGUgYEFFUjpNZWRpY2FpZDE5ODZgLCBgQUVSOkRvY3RvclZpc2l0c2AsIGFuZCBgQUVSOk5NRVNgLg0KKiBDYW4geW91IHByZWRpY3Qgc3R1ZGVudCBhdHRlbmRhbmNlIGluICBgd29vbGRyaWRnZTphdHRlbmRgPyBUaGlzIG1pZ2h0IGJlIHRyaWNreSAtLSBkb24ndCBpbmNsdWRlIGFzIGluZGVwZW5kZW50IHZhcmlhYmxlcyBhbnl0aGluZyB0aGF0IGF0dGVuZGFuY2UgbWlnaHQgY2F1c2UhIEFsc28sIGFyZSB0aGUgY291bnRzIGhpZ2ggZW5vdWdoIHRoYXQgYW4gYGxtKClgIG1vZGVsIGlzIGp1c3QgYXMgZ29vZD8NCiogVGhlIGBBRVI6RXF1YXRpb25DaXRhdGlvbmAgZGF0YSBtaWdodCBiZSBhIGdvb2QgcGxhY2UgdG8gZG8gc29tZSBiYXNpYyBiaWJsaW9tZXRyaWNzLg0KDQojIFdyYXBwaW5nIFVwDQoNCldoaWxlIG1vZGVscyBmb3IgY2Vuc29yZWQgYW5kIGNvdW50IHZhcmlhYmxlcyBhcmUgYSBsaXR0bGUgbW9yZSBuaWNoZSB0aGFuIHRoZSBPTFMgYW5kIHByb2JpdC9sb2dpdCBtb2RlbHMgd2UgZW5jb3VudGVyZWQgZWFybGllciwgdGhlcmUgYXJlIHNvbWUgdHlwZXMgb2YgZGF0YSBmb3Igd2hpY2ggdGhleSBhcmUgaW5kaXNwZW5zYWJsZTsgaGVhbHRoIGVjb25vbWljcyBhbmQgbGFib3IgZWNvbm9taWNzIGhhdmUgbm90YWJsZSBleGFtcGxlcyBvZiBlYWNoLCBhcyB3ZSBzYXcgYWJvdmUuICANCg0KTmV4dCwgd2Ugd2lsbCBtb3ZlIG9uIHRvIFBhbmVsIHJlZ3Jlc3Npb24sIG1vZGVscyB3aGVyZSBlYWNoIG9ic2VydmF0aW9uIGlzIG9ic2VydmVkIG11bHRpcGxlIHRpbWVzLg0K</div>
 
 
 
