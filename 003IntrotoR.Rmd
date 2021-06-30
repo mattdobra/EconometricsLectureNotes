@@ -56,7 +56,7 @@ It is very useful to comment your scripts throughout, and also to put a comment 
 
 Base R is powerful, but what makes R the state-of-the-art programming language is the user written packages.
 
-Remember, you only need to `install` a package once.  This is done with the `install.packages()` function.  For example:
+Remember, you only need to install a package once.  This is done with the `install.packages()` function.  For example:
 
 ```{r, eval = FALSE}
 install.packages("tidyverse")
@@ -107,7 +107,7 @@ You will probably discover more useful tips as you go along.
 
 ## Types of script
 
-Let's talk about 2 script types here, basic scripts and *R Markdown* documents.  An R script is used to create (and recreate!) a series of commands in R.  An *R Markdown* document incorporates script elements into a high quality document that can be shared in a variety of formats.
+Let's talk about 2 script types here, basic scripts and **R Markdown** documents.  An R script is used to create (and recreate!) a series of commands in R.  An **R Markdown** document incorporates script elements into a high quality document that can be shared in a variety of formats.
 
 ### Basic scripts
 
@@ -133,12 +133,12 @@ install.packages("knitr")
 
 Some of the formatting code (especially the $\LaTeX$ stuff) in my notebooks is beyond the scope of what you will need; for the purposes of this class, you should be fine with very basic R Markdown formatting syntax: go to <http:\\rmarkdown.rstudio.com/lesson-1.html>, and read chapters 1-3.2 of ***R Markdown: The Definitive Guide*** by Yihui Xie <https://bookdown.org/yihui/rmarkdown/> to learn the basic (Pandoc) formatting syntax. 
 
-Working with Notebooks is fairly simple.  Create a new notebook with the top left button.  Change the title in the preamble (or modify it using YAML options--learn about these in the Xie book if you want).  Use basic Pandoc formatting to do stuff like headers, font formatting, etc. Create **code chunks** by clicking the **Insert Chunk** button on the toolbar or by pressing *Ctrl+Alt+I*, and write your R script in the code chunks.  It is also worth learning a couple useful options for your code chunks, here are 4 I suspect you might find useful:
+Working with Notebooks is fairly simple.  Create a new notebook with the top left button.  Change the title in the preamble (or modify it using YAML options--learn about these in the Xie book if you want).  Use basic Pandoc formatting to do stuff like headers, font formatting, etc. Create **code chunks** by clicking the **Insert Chunk** button on the toolbar or by pressing **Ctrl+Alt+I**, and write your R script in the code chunks.  It is also worth learning a couple useful options for your code chunks, here are 4 I suspect you might find useful:
 
 * `eval = FALSE` - Display the code in the finished document but don't execute it. 
-* `warning = FALSE` - If R spits out a warning, don't display the warning in the finished document.  Very useful with `stargazer()`
+* `warning = FALSE` - If R spits out a warning, don't display the warning in the finished document.  Very useful with `stargazer()`.
 * `echo = FALSE` - Execute the code and display the results, but don't put the code into the final document.  
-* `message = FALSE` - Don't display any messages R tells you as a result of running code.  Very useful with `ggplot()` when specifying `geom_smooth(method = lm)`
+* `message = FALSE` - Don't display any messages R tells you as a result of running code.  Very useful with `ggplot()` when specifying `geom_smooth(method = lm)`.
 
 When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).  The preview shows you a rendered HTML copy of the contents of the editor. *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed. 
 
@@ -158,7 +158,7 @@ If you want to see what q is, you can either:
 ```{r}
 print(q)
 ```
-or simply
+or simply:
 ```{r}
 q
 ```
@@ -190,12 +190,12 @@ You can remove all objects with this tricky but useful command:
 rm(list=ls())
 ```
 
-object names can include numbers, periods, or underscores, but must begin with a letter.
+Object names can include numbers, periods, or underscores, but must begin with a letter.
 ```{r}
 x.1 <- 44
 x_1 <- 55
 ```
-Any object you create should show up in your environment window. Let's clear our enviromnemt again:
+Any object you create should show up in your environment window. Let's clear our environment again:
 ```{r}
 rm(list=ls())
 ```
@@ -252,11 +252,12 @@ R reads b like a word, not a number.  Watch this though!
 ```{r}
 z+as.numeric(b)
 ```
-Note that b is still "1", but using as.numeric(b) told R to, one time only, treat b as though it were a number if possible.  Note that this won't work with a:
+Note that b is still "1", but using `as.numeric(b)` told R to, one time only, treat b as though it were a number if possible.  Note that this won't work with a:
 ```{r, error = TRUE}
 z+as.numeric(a)
 ```
 R is clearly displeased with us.
+
 We can assign objects with math too.
 ```{r}
 q <- z/y
@@ -267,7 +268,7 @@ One last useful tip for dealing with R.  If you are using the console, you can U
 
 ## Vectors 
 
-We can use the *concatenate* command `c()` to create a vector.
+We can use the **concatenate** command `c()` to create a vector.
 ```{r}
 num1 <- c(1,4,9,16,25)
 num2 <- c(1,3,6,10,15)
@@ -315,16 +316,19 @@ data(iris)
 ```
 Now the iris data is loaded into the environment.  
 
-There are also many packages that are full of data, especially in support of various textbooks. For example:
+There are also many packages that are full of data, especially in support of various textbooks. Here are a few we will make extensive use of throughout the semester: 
 ```{r, eval = FALSE}
 install.packages("wooldridge")
 install.packages("AER")
+install.packages("fivethirtyeight")
 ```
 ```{r}
 library(wooldridge)
 library(AER)
+library(fivethirtyeight)
 ```
-Will install a package with the data sets that accompany a couple textbooks.  Now, a `data()` call will list a lot more available databases!
+
+These lines installed three sets of data -- two that accompany popular econometrics textbooks, and one with a repository of data from the **fivethirtyeight** website.  Now, a `data()` call will list a lot more available databases!
 
 Let's load in the CPS1985 dataset from the AER package:
 ```{r}

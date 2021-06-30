@@ -37,10 +37,20 @@ library(MASS)
 library(jtools)
 library(wooldridge)
 library(AER)
+
 data(k401ksubs)
 data(SmokeBan)
 data(affairs)
 data(recid)
+data(steak_survey)
+data(comma_survey)
+data(card)
+data(CreditCard)
+data(HMDA)
+data(PSID1976)
+data(ResumeNames)
+data(card)
+data(Titanic)
 
 ```
 

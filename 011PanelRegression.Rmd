@@ -1,0 +1,38 @@
+---
+title: "Panel Regression"
+output: html_notebook
+---
+
+# Overview
+
+**Panel Regression** is a technique used for data that has both a *cross sectional* and a *time series* component.  In other words, data where each individual/country/company/etc. in the data set is observed at multiple points in time.  While there are panel versions of most of the models we have encountered thus far (e.g. logit/probit, Tobit, negbin, ...), we will focus only on the linear model.  
+
+As usual, we begin with loading in some essential packages. We will need the `plm` package, so install it if you have not done so already.  
+
+
+```{r, eval = FALSE}
+install.packages("plm")
+```
+
+```{r, warning=FALSE, message = FALSE}
+library(tidyverse)
+library(stargazer)
+library(plm)
+library(wooldridge)
+library(AER)
+library(fivethirtyeight)
+
+data(USSeatBelts)
+data(Fatalities)
+data(Municipalities)
+data(USAirlines)
+data(driving)
+data(airfare)
+data(murder)
+data(NaturalGas)
+data(HealthInsurance)
+data(wagepan)
+
+```
+
+# Censored Models

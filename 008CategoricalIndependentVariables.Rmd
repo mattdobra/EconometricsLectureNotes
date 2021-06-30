@@ -20,6 +20,12 @@ data(diamonds)
 data(gpa2)
 data(TeachingRatings)
 data(CPS1988)
+data(GrowthDJ)
+data(CollegeDistance)
+data(happiness)
+data(beauty)
+data(campus)
+data(twoyear)
 
 ```
 

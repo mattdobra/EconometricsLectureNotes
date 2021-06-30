@@ -19,21 +19,20 @@ install.packages("sampleSelection")
 library(tidyverse)
 library(stargazer)
 library(MASS)
-library(jtools)
 library(censReg)
 library(sampleSelection)
 library(MASS)
 library(wooldridge)
 library(AER)
-library(fivethirtyeight)
 
 data(charity)
 data(fringe)
 data(mroz)
-
-data(k401ksubs)
-data(SmokeBan)
 data(affairs)
+data(Medicaid1986)
+data(DoctorVisits)
+data(EquationCitations)
+data(NMES1988)
 
 ```
 
