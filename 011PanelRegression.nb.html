@@ -217,7 +217,7 @@ pre code {
 <!-- rnb-text-begin -->
 <div id="overview" class="section level1">
 <h1>Overview</h1>
-<p><strong>Panel Regression</strong> is a technique used for data that has both a <em>cross sectional</em> and a <em>time series</em> component. In other words, data where each individual/country/company/etc. in the data set is observed at multiple points in time. While there are panel versions of most of the models we have encountered thus far (e.g. logit/probit, Tobit, negbin, …), we will focus only on the linear model.</p>
+<p><strong>Panel Regression</strong> is a technique used for data that has both a <strong>cross- sectional</strong> and a <strong>time series</strong> component. In other words, data where each individual/country/company/etc. in the data set is observed at multiple points in time. While there are panel versions of most of the models we have encountered thus far (e.g. logit/probit, Tobit, negbin, …), we will focus only on the linear model.</p>
 <p>As usual, we begin with loading in some essential packages. We will need the <code>plm</code> package, so install it if you have not done so already.</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
@@ -228,7 +228,7 @@ pre code {
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeSh0aWR5dmVyc2UpXG5saWJyYXJ5KHN0YXJnYXplcilcbmxpYnJhcnkocGxtKVxubGlicmFyeSh3b29sZHJpZGdlKVxubGlicmFyeShBRVIpXG5saWJyYXJ5KGZpdmV0aGlydHllaWdodClcblxuZGF0YShVU1NlYXRCZWx0cylcbmRhdGEoRmF0YWxpdGllcylcbmRhdGEoTXVuaWNpcGFsaXRpZXMpXG5kYXRhKFVTQWlybGluZXMpXG5kYXRhKGRyaXZpbmcpXG5kYXRhKGFpcmZhcmUpXG5kYXRhKG11cmRlcilcbmRhdGEoTmF0dXJhbEdhcylcbmRhdGEoSGVhbHRoSW5zdXJhbmNlKVxuZGF0YSh3YWdlcGFuKVxuXG5gYGAifQ== -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeSh0aWR5dmVyc2UpXG5saWJyYXJ5KHN0YXJnYXplcilcbmxpYnJhcnkocGxtKVxubGlicmFyeSh3b29sZHJpZGdlKVxubGlicmFyeShBRVIpXG5saWJyYXJ5KGZpdmV0aGlydHllaWdodClcblxuZGF0YShVU1NlYXRCZWx0cylcbmRhdGEoRmF0YWxpdGllcylcbmRhdGEoTXVuaWNpcGFsaXRpZXMpXG5kYXRhKFVTQWlybGluZXMpXG5kYXRhKGRyaXZpbmcpXG5kYXRhKGFpcmZhcmUpXG5kYXRhKG11cmRlcilcbmRhdGEoTmF0dXJhbEdhcylcbmRhdGEod2FnZXBhbilcbmRhdGEoQ2lnYXJldHRlc1NXKVxuXG5gYGAifQ== -->
 <pre class="r"><code>library(tidyverse)
 library(stargazer)
 library(plm)
@@ -244,19 +244,629 @@ data(driving)
 data(airfare)
 data(murder)
 data(NaturalGas)
-data(HealthInsurance)
 data(wagepan)
+data(CigarettesSW)
 </code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 </div>
-<div id="censored-models" class="section level1">
-<h1>Censored Models</h1>
+<div id="panel-data" class="section level1">
+<h1>Panel Data</h1>
+<p>Thus far this semester, nearly every data set we have dealt with has <strong>cross-sectional</strong>; each subject is observed once, and typically all subjects are observed at the same time. By contrast, <strong>panel data</strong> (sometimes referred to as <strong>longitudinal data</strong>) includes multiple observations of the same set of subjects, made at different points in time. To see this distinction more clearly, let’s look at an example of a panel data set, the <code>airfare</code> data from the <code>wooldridge</code> package.</p>
+<p>This is a pretty huge data set, with 4596 observations over 14 variables. If we examine the description of the data using <code>?airfare</code>, we can see the features of this data set that make it panel data. First, the variable <span class="math inline">\(year\)</span> indicates that the data is collected in each of 4 years; 1997, 1998, 1999, and 2000. Second, the data has an individual identifier, in this case <span class="math inline">\(id\)</span>. If we take a deeper look at the data and see that we have an observation for each <span class="math inline">\(year \times id\)</span> combination, then we have a panel data set. To that end, let’s take a quick look at the variables we will be looking at from the first 20 lines of data:</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYWlyZmFyZSAlPiUgXG4gICAgc2VsZWN0KHllYXIsIGlkLCBmYXJlLCBkaXN0LCBwYXNzZW4sIGNvbmNlbikgJT4lIFxuICAgIHNsaWNlKDE6MTApXG5gYGAifQ== -->
+<pre class="r"><code>airfare %&gt;% 
+    select(year, id, fare, dist, passen, concen) %&gt;% 
+    slice(1:10)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-frame-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbImRhdGEuZnJhbWUiXSwibnJvdyI6MTAsIm5jb2wiOjYsInN1bW1hcnkiOnsiRGVzY3JpcHRpb24iOlsiZGZbLDZdIFsxMCB4IDZdIl19fSwicmRmIjoiSDRzSUFBQUFBQUFBQm5XU01VdkRRQlRITDJtVDBvQ2w0T2JrNUNBMFlNVXVDaFYwY1N2aTBFVXdKcW1OalplYXBLaTQxQTlRWnhmQnorQ2tJT0lIVU92aUI3Q0xVQ2R4dHZxLzY1MmFnTU9QZSsrZi83dDc3NUgxMWZxOFVUY0lJUm1TSlJySmFBaUp2bEtiS3krVUNjbXF5QlI4eWJQekVLNUo5aGxNQUpUbEhzQWo2SU9uLzNQcHgyVkoxQlFaZ2ZUdkN2YkJNV2dDRDBUZ0JPQWRjdlByVjR0Sk1wc3BOc2I4M0grR05qQ2NVZ096WUFyYUpiZ0h0K0FkZklJQzgxZUh6LzBMQk5XaDNydmpaM3VSN2F2NmR2cXh4YzVCNzRycmcvTzFaWGErdHE2NS8yV3BNczM5cFFMM0RXZTZURTh0V0tQV25zc0dLL0lsajhYc2tXdUZJbFk5UjZvTkszUmw3SGhSTEdLOWJVV1JTMlZtQjlSR2xud21Id1lIcG55SzdVSHQ4bDdZUHBMOTJENXVFLzFJMFhDczJESWJJZXFSalZJbHVhQWRld0ZGa2NyK0ZDMVZySVFwb2RpaHJCT25aRGM3dEZXcWxQLzhKa1MwcHdoTnh2cjRUZlZMM0tYSmFWMjY0MUc1RmMyM3RsMWZKQVdNekNjMjI2Rkg1YklNcUpFWkI3RWxmWVlkK0ZMaHc1SFJOelV5UVRBaUF3QUEifQ== -->
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":["year"],"name":[1],"type":["int"],"align":["right"]},{"label":["id"],"name":[2],"type":["int"],"align":["right"]},{"label":["fare"],"name":[3],"type":["int"],"align":["right"]},{"label":["dist"],"name":[4],"type":["int"],"align":["right"]},{"label":["passen"],"name":[5],"type":["int"],"align":["right"]},{"label":["concen"],"name":[6],"type":["dbl"],"align":["right"]}],"data":[{"1":"1997","2":"1","3":"106","4":"528","5":"152","6":"0.8386"},{"1":"1998","2":"1","3":"106","4":"528","5":"265","6":"0.8133"},{"1":"1999","2":"1","3":"113","4":"528","5":"336","6":"0.8262"},{"1":"2000","2":"1","3":"123","4":"528","5":"298","6":"0.8612"},{"1":"1997","2":"2","3":"104","4":"861","5":"282","6":"0.5798"},{"1":"1998","2":"2","3":"105","4":"861","5":"178","6":"0.5817"},{"1":"1999","2":"2","3":"115","4":"861","5":"204","6":"0.7319"},{"1":"2000","2":"2","3":"129","4":"861","5":"190","6":"0.5386"},{"1":"1997","2":"3","3":"207","4":"852","5":"241","6":"0.8180"},{"1":"1998","2":"3","3":"188","4":"852","5":"253","6":"0.8172"}],"options":{"columns":{"min":{},"max":[10],"total":[6]},"rows":{"min":[10],"max":[10],"total":[10]},"pages":{}}}
+  </script>
+</div>
+<!-- rnb-frame-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuTkFcbmBgYCJ9 -->
+<pre class="r"><code>NA</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>To see that this is panel data, look at the first two columns. Observations 1-4 are for <span class="math inline">\(id = 1\)</span> for each of the 4 possible values of <span class="math inline">\(year\)</span>, observations 5-8 are the same for <span class="math inline">\(id = 2\)</span>, and so forth. We also have 4 other variables we will look at:</p>
+<ul>
+<li><span class="math inline">\(fare\)</span> - the average ticket price</li>
+<li><span class="math inline">\(dist\)</span> - the distance of each air route</li>
+<li><span class="math inline">\(passen\)</span> - the average daily passengers on each route</li>
+<li><span class="math inline">\(concen\)</span> - a measure of the market share of the biggest carrier</li>
+</ul>
+<p>To begin using this data, we need to first transform it into a panel data set. This means explicitly telling R that <span class="math inline">\(id\)</span> and <span class="math inline">\(year\)</span> are the variables that define the <strong>cross-sectional</strong> and <strong>time series</strong> dimensions of our data. As we can see, R currently views them as numeric.</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc3VtbWFyeShhaXJmYXJlKVxuYGBgIn0= -->
+<pre class="r"><code>summary(airfare)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiICAgICAgeWVhciAgICAgICAgICAgIGlkICAgICAgICAgICAgZGlzdCAgICAgICAgICAgIHBhc3NlbiAgICAgIFxuIE1pbi4gICA6MTk5NyAgIE1pbi4gICA6ICAgMSAgIE1pbi4gICA6ICA5NS4wICAgTWluLiAgIDogICAyLjAgIFxuIDFzdCBRdS46MTk5OCAgIDFzdCBRdS46IDI4OCAgIDFzdCBRdS46IDUwNS4wICAgMXN0IFF1LjogMjE1LjAgIFxuIE1lZGlhbiA6MTk5OCAgIE1lZGlhbiA6IDU3NSAgIE1lZGlhbiA6IDg2MS4wICAgTWVkaWFuIDogMzU3LjAgIFxuIE1lYW4gICA6MTk5OCAgIE1lYW4gICA6IDU3NSAgIE1lYW4gICA6IDk4OS43ICAgTWVhbiAgIDogNjM2LjggIFxuIDNyZCBRdS46MTk5OSAgIDNyZCBRdS46IDg2MiAgIDNyZCBRdS46MTMwNC4wICAgM3JkIFF1LjogNzE3LjAgIFxuIE1heC4gICA6MjAwMCAgIE1heC4gICA6MTE0OSAgIE1heC4gICA6MjcyNC4wICAgTWF4LiAgIDo4NDk3LjAgIFxuICAgICAgZmFyZSAgICAgICAgICBibWt0c2hyICAgICAgICAgICBsZGlzdCAgICAgICAgICAgIHk5OCAgICAgIFxuIE1pbi4gICA6IDM3LjAgICBNaW4uICAgOjAuMTYwNSAgIE1pbi4gICA6NC41NTQgICBNaW4uICAgOjAuMDAgIFxuIDFzdCBRdS46MTIzLjAgICAxc3QgUXUuOjAuNDY1MCAgIDFzdCBRdS46Ni4yMjUgICAxc3QgUXUuOjAuMDAgIFxuIE1lZGlhbiA6MTY4LjAgICBNZWRpYW4gOjAuNjAzOSAgIE1lZGlhbiA6Ni43NTggICBNZWRpYW4gOjAuMDAgIFxuIE1lYW4gICA6MTc4LjggICBNZWFuICAgOjAuNjEwMSAgIE1lYW4gICA6Ni42OTYgICBNZWFuICAgOjAuMjUgIFxuIDNyZCBRdS46MjI1LjAgICAzcmQgUXUuOjAuNzUzMSAgIDNyZCBRdS46Ny4xNzMgICAzcmQgUXUuOjAuMjUgIFxuIE1heC4gICA6NTIyLjAgICBNYXguICAgOjEuMDAwMCAgIE1heC4gICA6Ny45MTAgICBNYXguICAgOjEuMDAgIFxuICAgICAgeTk5ICAgICAgICAgICAgeTAwICAgICAgICAgICBsZmFyZSAgICAgICAgICBsZGlzdHNxICAgICBcbiBNaW4uICAgOjAuMDAgICBNaW4uICAgOjAuMDAgICBNaW4uICAgOjMuNjExICAgTWluLiAgIDoyMC43NCAgXG4gMXN0IFF1LjowLjAwICAgMXN0IFF1LjowLjAwICAgMXN0IFF1Ljo0LjgxMiAgIDFzdCBRdS46MzguNzUgIFxuIE1lZGlhbiA6MC4wMCAgIE1lZGlhbiA6MC4wMCAgIE1lZGlhbiA6NS4xMjQgICBNZWRpYW4gOjQ1LjY3ICBcbiBNZWFuICAgOjAuMjUgICBNZWFuICAgOjAuMjUgICBNZWFuICAgOjUuMDk2ICAgTWVhbiAgIDo0NS4yOCAgXG4gM3JkIFF1LjowLjI1ICAgM3JkIFF1LjowLjI1ICAgM3JkIFF1Ljo1LjQxNiAgIDNyZCBRdS46NTEuNDUgIFxuIE1heC4gICA6MS4wMCAgIE1heC4gICA6MS4wMCAgIE1heC4gICA6Ni4yNTggICBNYXguICAgOjYyLjU3ICBcbiAgICAgY29uY2VuICAgICAgICAgIGxwYXNzZW4gICAgICBcbiBNaW4uICAgOjAuMTYwNSAgIE1pbi4gICA6MC42OTMxICBcbiAxc3QgUXUuOjAuNDY1MCAgIDFzdCBRdS46NS4zNzA2ICBcbiBNZWRpYW4gOjAuNjAzOSAgIE1lZGlhbiA6NS44Nzc3ICBcbiBNZWFuICAgOjAuNjEwMSAgIE1lYW4gICA6Ni4wMTcwICBcbiAzcmQgUXUuOjAuNzUzMSAgIDNyZCBRdS46Ni41NzUxICBcbiBNYXguICAgOjEuMDAwMCAgIE1heC4gICA6OS4wNDc1ICBcbiJ9 -->
+<pre><code>      year            id            dist            passen      
+ Min.   :1997   Min.   :   1   Min.   :  95.0   Min.   :   2.0  
+ 1st Qu.:1998   1st Qu.: 288   1st Qu.: 505.0   1st Qu.: 215.0  
+ Median :1998   Median : 575   Median : 861.0   Median : 357.0  
+ Mean   :1998   Mean   : 575   Mean   : 989.7   Mean   : 636.8  
+ 3rd Qu.:1999   3rd Qu.: 862   3rd Qu.:1304.0   3rd Qu.: 717.0  
+ Max.   :2000   Max.   :1149   Max.   :2724.0   Max.   :8497.0  
+      fare          bmktshr           ldist            y98      
+ Min.   : 37.0   Min.   :0.1605   Min.   :4.554   Min.   :0.00  
+ 1st Qu.:123.0   1st Qu.:0.4650   1st Qu.:6.225   1st Qu.:0.00  
+ Median :168.0   Median :0.6039   Median :6.758   Median :0.00  
+ Mean   :178.8   Mean   :0.6101   Mean   :6.696   Mean   :0.25  
+ 3rd Qu.:225.0   3rd Qu.:0.7531   3rd Qu.:7.173   3rd Qu.:0.25  
+ Max.   :522.0   Max.   :1.0000   Max.   :7.910   Max.   :1.00  
+      y99            y00           lfare          ldistsq     
+ Min.   :0.00   Min.   :0.00   Min.   :3.611   Min.   :20.74  
+ 1st Qu.:0.00   1st Qu.:0.00   1st Qu.:4.812   1st Qu.:38.75  
+ Median :0.00   Median :0.00   Median :5.124   Median :45.67  
+ Mean   :0.25   Mean   :0.25   Mean   :5.096   Mean   :45.28  
+ 3rd Qu.:0.25   3rd Qu.:0.25   3rd Qu.:5.416   3rd Qu.:51.45  
+ Max.   :1.00   Max.   :1.00   Max.   :6.258   Max.   :62.57  
+     concen          lpassen      
+ Min.   :0.1605   Min.   :0.6931  
+ 1st Qu.:0.4650   1st Qu.:5.3706  
+ Median :0.6039   Median :5.8777  
+ Mean   :0.6101   Mean   :6.0170  
+ 3rd Qu.:0.7531   3rd Qu.:6.5751  
+ Max.   :1.0000   Max.   :9.0475  </code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>We can use the <code>pdata.frame()</code> command in the <code>plm</code> package to set <span class="math inline">\(id\)</span> and <span class="math inline">\(year\)</span> as our <code>index</code> variables.</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYWlyZmFyZXBhbmVsIDwtIHBkYXRhLmZyYW1lKGFpcmZhcmUsIGluZGV4ID0gYyhcImlkXCIsXCJ5ZWFyXCIpKVxuYGBgIn0= -->
+<pre class="r"><code>airfarepanel &lt;- pdata.frame(airfare, index = c(&quot;id&quot;,&quot;year&quot;))</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>Now, when we look at how the <span class="math inline">\(id\)</span> and <span class="math inline">\(year\)</span> variables are stored in the <code>airfare</code> and <code>airfarepanel</code> objects, we see that R views them quite differently; essentially, it is treating them as factors.</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYWlyZmFyZSAlPiUgc2VsZWN0KGlkLCB5ZWFyKSAlPiUgXG4gICAgc3VtbWFyeSguKVxuYGBgIn0= -->
+<pre class="r"><code>airfare %&gt;% select(id, year) %&gt;% 
+    summary(.)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiICAgICAgIGlkICAgICAgICAgICAgeWVhciAgICAgXG4gTWluLiAgIDogICAxICAgTWluLiAgIDoxOTk3ICBcbiAxc3QgUXUuOiAyODggICAxc3QgUXUuOjE5OTggIFxuIE1lZGlhbiA6IDU3NSAgIE1lZGlhbiA6MTk5OCAgXG4gTWVhbiAgIDogNTc1ICAgTWVhbiAgIDoxOTk4ICBcbiAzcmQgUXUuOiA4NjIgICAzcmQgUXUuOjE5OTkgIFxuIE1heC4gICA6MTE0OSAgIE1heC4gICA6MjAwMCAgXG4ifQ== -->
+<pre><code>       id            year     
+ Min.   :   1   Min.   :1997  
+ 1st Qu.: 288   1st Qu.:1998  
+ Median : 575   Median :1998  
+ Mean   : 575   Mean   :1998  
+ 3rd Qu.: 862   3rd Qu.:1999  
+ Max.   :1149   Max.   :2000  </code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYWlyZmFyZXBhbmVsICU+JSBzZWxlY3QoaWQsIHllYXIpICU+JSBcbiAgICBzdW1tYXJ5KC4pXG5gYGAifQ== -->
+<pre class="r"><code>airfarepanel %&gt;% select(id, year) %&gt;% 
+    summary(.)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiICAgICAgIGlkICAgICAgICAgeWVhciAgICAgXG4gMSAgICAgIDogICA0ICAgMTk5NzoxMTQ5ICBcbiAyICAgICAgOiAgIDQgICAxOTk4OjExNDkgIFxuIDMgICAgICA6ICAgNCAgIDE5OTk6MTE0OSAgXG4gNCAgICAgIDogICA0ICAgMjAwMDoxMTQ5ICBcbiA1ICAgICAgOiAgIDQgICAgICAgICAgICAgIFxuIDYgICAgICA6ICAgNCAgICAgICAgICAgICAgXG4gKE90aGVyKTo0NTcyICAgICAgICAgICAgICBcbiJ9 -->
+<pre><code>       id         year     
+ 1      :   4   1997:1149  
+ 2      :   4   1998:1149  
+ 3      :   4   1999:1149  
+ 4      :   4   2000:1149  
+ 5      :   4              
+ 6      :   4              
+ (Other):4572              </code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>Before we estimate any models with our panel data, let us first estimate an OLS model with <code>lm()</code> on the <code>airfare</code> data. The model we are estimating is:</p>
+<p><span class="math display">\[\begin{equation}
+fare_{i} = \alpha +\beta_1 distance_{i} + \beta_2 concentration_i +\beta_3 passengers_i
+\end{equation}\]</span></p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucmVnMWEgPC0gbG0oZmFyZSB+IGRpc3QgKyBjb25jZW4gKyBwYXNzZW4sIGRhdGEgPSBhaXJmYXJlKVxuc3RhcmdhemVyKHJlZzFhLCB0eXBlID0gXCJ0ZXh0XCIpXG5gYGAifQ== -->
+<pre class="r"><code>reg1a &lt;- lm(fare ~ dist + concen + passen, data = airfare)
+stargazer(reg1a, type = &quot;text&quot;)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG4gICAgICAgICAgICAgICAgICAgICAgICBEZXBlbmRlbnQgdmFyaWFibGU6ICAgIFxuICAgICAgICAgICAgICAgICAgICAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS1cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBmYXJlICAgICAgICAgICAgXG4tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLVxuZGlzdCAgICAgICAgICAgICAgICAgICAgICAgICAwLjA4NyoqKiAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICgwLjAwMikgICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxuY29uY2VuICAgICAgICAgICAgICAgICAgICAgICA2OS40MzEqKiogICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICg1LjEyMykgICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxucGFzc2VuICAgICAgICAgICAgICAgICAgICAgICAtMC4wMDUqKiogICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICgwLjAwMSkgICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxuQ29uc3RhbnQgICAgICAgICAgICAgICAgICAgICA1Mi45OTUqKiogICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICg0LjQ4OCkgICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxuLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS1cbiAgICAgICAgICAgICAgICAgICAgMC40MTggICAgICAgICAgIFxuUmVzaWR1YWwgU3RkLiBFcnJvciAgICAgNTcuMTMwIChkZiA9IDQ1OTIpICAgICBcbkYgU3RhdGlzdGljICAgICAgICAgMSwxMDAuNzIyKioqIChkZiA9IDM7IDQ1OTIpXG49PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PVxuTm90ZTogICAgICAgICAgICAgICAqcDwwLjE7ICoqcDwwLjA1OyAqKipwPDAuMDFcbiJ9 -->
+<pre><code>
+                        Dependent variable:    
+                    ---------------------------
+                               fare            
+-----------------------------------------------
+dist                         0.087***          
+                              (0.002)          
+                                               
+concen                       69.431***         
+                              (5.123)          
+                                               
+passen                       -0.005***         
+                              (0.001)          
+                                               
+Constant                     52.995***         
+                              (4.488)          
+                                               
+-----------------------------------------------
+                    0.418           
+Residual Std. Error     57.130 (df = 4592)     
+F Statistic         1,100.722*** (df = 3; 4592)
+===============================================
+Note:               *p&lt;0.1; **p&lt;0.05; ***p&lt;0.01</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>Interpreting this regression, we see that distance and market share are positively correlated with fare and the number of passengers is negatively correlated with fare.</p>
+<div id="pooled-ols" class="section level2">
+<h2>Pooled OLS</h2>
+<p>We can estimate the same regression using our panel data set using the <code>plm()</code> (<strong>P</strong>anel <strong>L</strong>inear <strong>M</strong>odel ) command. Because we already spceified that the <code>airfarepanel</code> object is panel data, the <code>plm()</code> command only requires one more argument than the <code>lm()</code> command you should be used to by now, the <code>model =</code> argument. To estimate the same regression as a basic OLS model, we use the <code>model = &quot;pooling&quot;</code> option to estimate a <strong>pooled</strong> regression.</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucmVnMWIgPC0gcGxtKGZhcmUgfiBkaXN0ICsgY29uY2VuICsgcGFzc2VuICwgZGF0YSA9IGFpcmZhcmVwYW5lbCwgbW9kZWwgPSBcInBvb2xpbmdcIilcbnN0YXJnYXplcihyZWcxYSwgcmVnMWIsIGNvbHVtbi5sYWJlbHMgPSBjKFwiT0xTXCIsIFwiUG9vbGVkXCIpLCB0eXBlID0gXCJ0ZXh0XCIpXG5gYGAifQ== -->
+<pre class="r"><code>reg1b &lt;- plm(fare ~ dist + concen + passen , data = airfarepanel, model = &quot;pooling&quot;)
+stargazer(reg1a, reg1b, column.labels = c(&quot;OLS&quot;, &quot;Pooled&quot;), type = &quot;text&quot;)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBEZXBlbmRlbnQgdmFyaWFibGU6ICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgZmFyZSAgICAgICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgT0xTICAgICAgICAgICAgcGFuZWwgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgbGluZWFyICAgXG5Qb29sZWQgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAoMSkgICAgICAgICAgICAgKDIpICAgICBcbi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS1cbmRpc3QgICAgICAgICAgICAgICAgICAgICAgICAgICAgMC4wODcqKiogICAgICAgIDAuMDg3KioqICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgKDAuMDAyKSAgICAgICAgICgwLjAwMikgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbmNvbmNlbiAgICAgICAgICAgICAgICAgICAgICAgICA2OS40MzEqKiogICAgICAgNjkuNDMxKioqICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgKDUuMTIzKSAgICAgICAgICg1LjEyMykgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbnBhc3NlbiAgICAgICAgICAgICAgICAgICAgICAgICAtMC4wMDUqKiogICAgICAgLTAuMDA1KioqICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgKDAuMDAxKSAgICAgICAgICgwLjAwMSkgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbkNvbnN0YW50ICAgICAgICAgICAgICAgICAgICAgICA1Mi45OTUqKiogICAgICAgNTIuOTk1KioqICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgKDQuNDg4KSAgICAgICAgICg0LjQ4OCkgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS1cbk9ic2VydmF0aW9ucyAgICAgICAgICAgICAgICAgICAgIDQsNTk2ICAgICAgICAgICA0LDU5NiAgICBcblIyICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDAuNDE4ICAgICAgICAgICAwLjQxOCAgICBcbkFkanVzdGVkIFIyICAgICAgICAgICAgICAgICAgICAgIDAuNDE4ICAgICAgICAgICAwLjQxOCAgICBcblJlc2lkdWFsIFN0ZC4gRXJyb3IgICAgICAgIDU3LjEzMCAoZGYgPSA0NTkyKSAgICAgICAgICAgICBcbkYgU3RhdGlzdGljIChkZiA9IDM7IDQ1OTIpICAgIDEsMTAwLjcyMioqKiAgICAxLDEwMC43MjIqKipcbj09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT1cbk5vdGU6ICAgICAgICAgICAgICAgICAgICAgICAgICAqcDwwLjE7ICoqcDwwLjA1OyAqKipwPDAuMDFcbiJ9 -->
+<pre><code>
+                                 Dependent variable:      
+                           -------------------------------
+                                        fare              
+                                  OLS            panel    
+                                                 linear   
+Pooled   
+                                  (1)             (2)     
+----------------------------------------------------------
+dist                            0.087***        0.087***  
+                                (0.002)         (0.002)   
+                                                          
+concen                         69.431***       69.431***  
+                                (5.123)         (5.123)   
+                                                          
+passen                         -0.005***       -0.005***  
+                                (0.001)         (0.001)   
+                                                          
+Constant                       52.995***       52.995***  
+                                (4.488)         (4.488)   
+                                                          
+----------------------------------------------------------
+Observations                     4,596           4,596    
+R2                               0.418           0.418    
+Adjusted R2                      0.418           0.418    
+Residual Std. Error        57.130 (df = 4592)             
+F Statistic (df = 3; 4592)    1,100.722***    1,100.722***
+==========================================================
+Note:                          *p&lt;0.1; **p&lt;0.05; ***p&lt;0.01</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>A <strong>pooled</strong> regression is one that uses panel data, but doesn’t actually take into consideration the fact that we have the same subjects being observed over multiple time periods.</p>
+</div>
+<div id="between-estimator" class="section level2">
+<h2>Between estimator</h2>
+<p>One way to take into consideration the fact that we have multiple observations of each subject is to “collapse” the data into group averages and estimate a linear model using that data. This is called the <strong>between</strong> estimator. The <strong>between</strong> estimator is not commonly used in economics, but can be estimated using the <code>plm()</code> command as below:</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucmVnMWMgPC0gcGxtKGZhcmUgfiBkaXN0ICsgY29uY2VuICsgcGFzc2VuICwgZGF0YSA9IGFpcmZhcmVwYW5lbCwgbW9kZWwgPSBcImJldHdlZW5cIikgXG5zdGFyZ2F6ZXIocmVnMWIsIHJlZzFjLCBjb2x1bW4ubGFiZWxzID0gYyhcIlBvb2xlZFwiLCBcIkJldHdlZW5cIiksIHR5cGUgPSBcInRleHRcIilcbmBgYCJ9 -->
+<pre class="r"><code>reg1c &lt;- plm(fare ~ dist + concen + passen , data = airfarepanel, model = &quot;between&quot;) 
+stargazer(reg1b, reg1c, column.labels = c(&quot;Pooled&quot;, &quot;Between&quot;), type = &quot;text&quot;)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG49PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT1cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIERlcGVuZGVudCB2YXJpYWJsZTogICAgICAgICAgICAgICAgIFxuICAgICAgICAgICAgIC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgZmFyZSAgICAgICAgICAgICAgICAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgUG9vbGVkICAgICAgICAgICAgICAgICAgICAgQmV0d2VlbiAgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICgxKSAgICAgICAgICAgICAgICAgICAgICAgICgyKSAgICAgICAgICAgXG4tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS1cbmRpc3QgICAgICAgICAgICAgICAgICAwLjA4NyoqKiAgICAgICAgICAgICAgICAgICAwLjA4OSoqKiAgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAoMC4wMDIpICAgICAgICAgICAgICAgICAgICAoMC4wMDMpICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbmNvbmNlbiAgICAgICAgICAgICAgICA2OS40MzEqKiogICAgICAgICAgICAgICAgICA3Ny4yNDQqKiogICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAoNS4xMjMpICAgICAgICAgICAgICAgICAgICgxMC4zMDUpICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbnBhc3NlbiAgICAgICAgICAgICAgICAtMC4wMDUqKiogICAgICAgICAgICAgICAgICAgLTAuMDA0KiAgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAoMC4wMDEpICAgICAgICAgICAgICAgICAgICAoMC4wMDIpICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbkNvbnN0YW50ICAgICAgICAgICAgICA1Mi45OTUqKiogICAgICAgICAgICAgICAgICA0Ni4xODMqKiogICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAoNC40ODgpICAgICAgICAgICAgICAgICAgICAoOC45NTApICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLVxuT2JzZXJ2YXRpb25zICAgICAgICAgICAgNCw1OTYgICAgICAgICAgICAgICAgICAgICAgMSwxNDkgICAgICAgICAgXG5SMiAgICAgICAgICAgICAgICAgICAgICAwLjQxOCAgICAgICAgICAgICAgICAgICAgICAwLjQ0NCAgICAgICAgICBcbkFkanVzdGVkIFIyICAgICAgICAgICAgIDAuNDE4ICAgICAgICAgICAgICAgICAgICAgIDAuNDQzICAgICAgICAgIFxuRiBTdGF0aXN0aWMgIDEsMTAwLjcyMioqKiAoZGYgPSAzOyA0NTkyKSAzMDUuMTUyKioqIChkZiA9IDM7IDExNDUpXG49PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT1cbk5vdGU6ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICpwPDAuMTsgKipwPDAuMDU7ICoqKnA8MC4wMVxuIn0= -->
+<pre><code>
+==================================================================
+                              Dependent variable:                 
+             -----------------------------------------------------
+                                     fare                         
+                       Pooled                     Between         
+                         (1)                        (2)           
+------------------------------------------------------------------
+dist                  0.087***                   0.089***         
+                       (0.002)                    (0.003)         
+                                                                  
+concen                69.431***                  77.244***        
+                       (5.123)                   (10.305)         
+                                                                  
+passen                -0.005***                   -0.004*         
+                       (0.001)                    (0.002)         
+                                                                  
+Constant              52.995***                  46.183***        
+                       (4.488)                    (8.950)         
+                                                                  
+------------------------------------------------------------------
+Observations            4,596                      1,149          
+R2                      0.418                      0.444          
+Adjusted R2             0.418                      0.443          
+F Statistic  1,100.722*** (df = 3; 4592) 305.152*** (df = 3; 1145)
+==================================================================
+Note:                                  *p&lt;0.1; **p&lt;0.05; ***p&lt;0.01</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+<div id="fixed-effects" class="section level2">
+<h2>Fixed effects</h2>
+<p>The most “popular” panel model in economics is the <strong>Fixed Effects</strong>, or <strong>Within</strong>, estimator. The equation for this model looks like:</p>
+<p><span class="math display">\[\begin{equation}
+fare_{i} = \alpha + \upsilon_j+\beta_1 distance_{i} + \beta_2 concentration_i +\beta_3 passengers_i
+\end{equation}\]</span></p>
+<p>In this equation, <span class="math inline">\(\upsilon_j\)</span> is a separate constant term for each of the <span class="math inline">\(j\)</span> cross-sectional groups in your data; here, therefore, it is a different constant term for each air route.</p>
+<p>There are two ways to conceptualize the <strong>Fixed Effects</strong> model:</p>
+<ul>
+<li>The <strong>Fixed Effects</strong> model simply adds a whole lot of dummy variables, one for each of your cross-sectional groups. For this data, as there 1149 different routes, there would be 1149 dummies added to the regression.</li>
+<li>The <strong>Fixed Effects</strong> model calculates the within-group mean for each variable, calculates the difference between each observation and its within-group mean, and runs the regression using these differences. This is where it gets its alternate name of the <strong>Within</strong> model from.</li>
+</ul>
+<p>It turns out that both of these ways to conceptualize the fixed effects model are the same, even though they may not seem like it. The fixed effects estimator can be obtained using the <code>model = &quot;within&quot;</code> option in the <code>plm()</code> command:</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucmVnMWQgPC0gcGxtKGZhcmUgfiBkaXN0ICsgY29uY2VuICsgcGFzc2VuICwgZGF0YSA9IGFpcmZhcmUsIGluZGV4ID0gYyhcImlkXCIsXCJ5ZWFyXCIpLCBtb2RlbCA9IFwid2l0aGluXCIpIFxuc3RhcmdhemVyKHJlZzFiLCByZWcxYywgcmVnMWQsIGNvbHVtbi5sYWJlbHMgPSBjKFwiUG9vbGVkXCIsIFwiQmV0d2VlblwiLCBcIkZpeGVkXCIpLCB0eXBlID0gXCJ0ZXh0XCIpXG5gYGAifQ== -->
+<pre class="r"><code>reg1d &lt;- plm(fare ~ dist + concen + passen , data = airfare, index = c(&quot;id&quot;,&quot;year&quot;), model = &quot;within&quot;) 
+stargazer(reg1b, reg1c, reg1d, column.labels = c(&quot;Pooled&quot;, &quot;Between&quot;, &quot;Fixed&quot;), type = &quot;text&quot;)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgRGVwZW5kZW50IHZhcmlhYmxlOiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxuICAgICAgICAgICAgIC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS1cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgZmFyZSAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgIFBvb2xlZCAgICAgICAgICAgICAgICAgICAgIEJldHdlZW4gICAgICAgICAgICAgICAgICAgIEZpeGVkICAgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICgxKSAgICAgICAgICAgICAgICAgICAgICAgICgyKSAgICAgICAgICAgICAgICAgICAgICAgKDMpICAgICAgICAgICBcbi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXG5kaXN0ICAgICAgICAgICAgICAgICAgMC4wODcqKiogICAgICAgICAgICAgICAgICAgMC4wODkqKiogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAoMC4wMDIpICAgICAgICAgICAgICAgICAgICAoMC4wMDMpICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG5jb25jZW4gICAgICAgICAgICAgICAgNjkuNDMxKioqICAgICAgICAgICAgICAgICAgNzcuMjQ0KioqICAgICAgICAgICAgICAgICAgLTIuNzUyICAgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAoNS4xMjMpICAgICAgICAgICAgICAgICAgICgxMC4zMDUpICAgICAgICAgICAgICAgICAgICg1LjM3NSkgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG5wYXNzZW4gICAgICAgICAgICAgICAgLTAuMDA1KioqICAgICAgICAgICAgICAgICAgIC0wLjAwNCogICAgICAgICAgICAgICAgICAtMC4wNTEqKiogICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAoMC4wMDEpICAgICAgICAgICAgICAgICAgICAoMC4wMDIpICAgICAgICAgICAgICAgICAgICgwLjAwMykgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG5Db25zdGFudCAgICAgICAgICAgICAgNTIuOTk1KioqICAgICAgICAgICAgICAgICAgNDYuMTgzKioqICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxuICAgICAgICAgICAgICAgICAgICAgICAoNC40ODgpICAgICAgICAgICAgICAgICAgICAoOC45NTApICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG4tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLVxuT2JzZXJ2YXRpb25zICAgICAgICAgICAgNCw1OTYgICAgICAgICAgICAgICAgICAgICAgMSwxNDkgICAgICAgICAgICAgICAgICAgICA0LDU5NiAgICAgICAgICBcblIyICAgICAgICAgICAgICAgICAgICAgIDAuNDE4ICAgICAgICAgICAgICAgICAgICAgIDAuNDQ0ICAgICAgICAgICAgICAgICAgICAgMC4wOTIgICAgICAgICAgXG5BZGp1c3RlZCBSMiAgICAgICAgICAgICAwLjQxOCAgICAgICAgICAgICAgICAgICAgICAwLjQ0MyAgICAgICAgICAgICAgICAgICAgLTAuMjEyICAgICAgICAgIFxuRiBTdGF0aXN0aWMgIDEsMTAwLjcyMioqKiAoZGYgPSAzOyA0NTkyKSAzMDUuMTUyKioqIChkZiA9IDM7IDExNDUpIDE3My44ODAqKiogKGRmID0gMjsgMzQ0NSlcbj09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09XG5Ob3RlOiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICpwPDAuMTsgKipwPDAuMDU7ICoqKnA8MC4wMVxuIn0= -->
+<pre><code>
+                                           Dependent variable:                              
+             -------------------------------------------------------------------------------
+                                                  fare                                      
+                       Pooled                     Between                    Fixed          
+                         (1)                        (2)                       (3)           
+--------------------------------------------------------------------------------------------
+dist                  0.087***                   0.089***                                   
+                       (0.002)                    (0.003)                                   
+                                                                                            
+concen                69.431***                  77.244***                  -2.752          
+                       (5.123)                   (10.305)                   (5.375)         
+                                                                                            
+passen                -0.005***                   -0.004*                  -0.051***        
+                       (0.001)                    (0.002)                   (0.003)         
+                                                                                            
+Constant              52.995***                  46.183***                                  
+                       (4.488)                    (8.950)                                   
+                                                                                            
+--------------------------------------------------------------------------------------------
+Observations            4,596                      1,149                     4,596          
+R2                      0.418                      0.444                     0.092          
+Adjusted R2             0.418                      0.443                    -0.212          
+F Statistic  1,100.722*** (df = 3; 4592) 305.152*** (df = 3; 1145) 173.880*** (df = 2; 3445)
+============================================================================================
+Note:                                                            *p&lt;0.1; **p&lt;0.05; ***p&lt;0.01</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>While the between and pooled estimators looked very similar, the fixed effect model looks very different. The first thing we might note is that there is no estimate for the <span class="math inline">\(dist\)</span> variable. Recall the second conceptualiztion of the fixed effects method above, that it is calculating within-group variation and using that to estimate the model. However, <span class="math inline">\(dist\)</span> is time invariant within each route – the distances of the routes do not change from year to year. Since they do not change, the <span class="math inline">\(dist\)</span> variable is basically a column full of zeroes, and that can’t be included in a regression. One of the drawbacks of a fixed effect regression is that it is not very useful if one of your variables of interest is time invariant.</p>
+<p>The other thing we might note is that there is constant term, why not? Recall the first conceptualization of the fixed effect model above, that it is the same thing as running a regression with a whole slew of dummy variables. Typically, in such cases, we would omit one dummy variable, because having a full set of dummies would be collinear with the constant term. Instead, we could simply omit the constant term, which is what is going on here.</p>
+<p>We can also demonstrate the equivalence of the fixed effects model with a dummy variable model pretty easily. Let’s estimate the same model using <code>lm()</code> and adding <code>factor(id)</code> as one of our variables – <code>factor(id)</code> tells R to treat <span class="math inline">\(id\)</span> as a factor variable so it will make 1149 dummies and estimate that model. This is far more computationally intensive than the <code>plm()</code> command, and running the result through <code>stargazer</code> will ptobably be disasterous, so let’s just look at the <code>summary()</code> of the OLS regression and compare it to the fixed effects estimator above.</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucmVnMWUgPC0gbG0oZmFyZSB+IGRpc3QgKyBjb25jZW4gKyBwYXNzZW4gKyAgZmFjdG9yKGlkKSwgZGF0YSA9IGFpcmZhcmUgKVxuc3VtbWFyeShyZWcxZSlcbmBgYCJ9 -->
+<pre class="r"><code>reg1e &lt;- lm(fare ~ dist + concen + passen +  factor(id), data = airfare )
+summary(reg1e)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG5DYWxsOlxubG0oZm9ybXVsYSA9IGZhcmUgfiBkaXN0ICsgY29uY2VuICsgcGFzc2VuICsgZmFjdG9yKGlkKSwgZGF0YSA9IGFpcmZhcmUpXG5cblJlc2lkdWFsczpcbiAgICAgTWluICAgICAgIDFRICAgTWVkaWFuICAgICAgIDNRICAgICAgTWF4IFxuLTEwNi43MjYgICAtOC4yODMgXG5Db2VmZmljaWVudHM6ICgxIG5vdCBkZWZpbmVkIGJlY2F1c2Ugb2Ygc2luZ3VsYXJpdGllcylcbiAgICAgICAgICAgICAgICAgRXN0aW1hdGUgU3RkLiBFcnJvciB0IHZhbHVlIFByKD58dHwpICAgIFxuKEludGVyY2VwdCkgICAgIDUuNTM2ZSswMSAgMy4wMjNlKzAxICAgMS44MzEgMC4wNjcxMjUgLiAgXG5kaXN0ICAgICAgICAgICAgMS4zNzFlLTAxICA0LjE5MmUtMDIgICAzLjI3MCAwLjAwMTA4NyAqKiBcbmNvbmNlbiAgICAgICAgIC0yLjc1MmUrMDAgIDUuMzc1ZSswMCAgLTAuNTEyIDAuNjA4NzU3ICAgIFxucGFzc2VuICAgICAgICAgLTUuMTEzZS0wMiAgMi43NTllLTAzIC0xOC41MzMgIDwgMmUtMTYgKioqXG5mYWN0b3IoaWQpMiAgICAtNC43NTRlKzAxICAxLjM5MWUrMDEgIC0zLjQxNyAwLjAwMDY0MCAqKipcbmZhY3RvcihpZCkzICAgICA2LjAzMmUrMDEgIDEuMzY5ZSswMSAgIDQuNDA3IDEuMDhlLTA1ICoqKiAgLTMuMDI2IDAuMDAyNTAwICoqIFxuZmFjdG9yKGlkKTYgICAgIDkuODg3ZSswMSAgMS45NzBlKzAxICAgNS4wMTggNS40OWUtMDcgKioqXG5mYWN0b3IoaWQpNyAgICAtMS41NDZlKzAwICAyLjcwMWUrMDEgIC0wLjA1NyAwLjk1NDM3NyAgICBcbmZhY3RvcihpZCk4ICAgICAxLjkzM2UrMDEgIDEuMjQzZSswMSAgIDEuNTU0IDAuMTIwMTk2ICAgIFxuZmFjdG9yKGlkKTkgICAgLTEuMTc4ZSswMiAgNC4yODdlKzAxICAtMi43NDggMC4wMDYwMjEgKiogXG5mYWN0b3IoaWQpMTAgICAtNy45NzBlKzAxICA1LjUxNmUrMDEgIC0xLjQ0NSAwLjE0ODU2OSAgICBcbmZhY3RvcihpZCkxMSAgIC00LjgwN2UrMDAgIDIuMTUwZSswMSAgLTAuMjI0IDAuODIzMTEzICAgIFxuZmFjdG9yKGlkKTEyICAgIDIuODE2ZSswMSAgMS4yOTllKzAxICAgMi4xNjcgMC4wMzAyNzggKiAgXG5mYWN0b3IoaWQpMTMgICAgOS4zMTNlKzAxICAxLjg3MGUrMDEgICA0Ljk4MSA2LjY1ZS0wNyAqKipcbmZhY3RvcihpZCkxNCAgICA5Ljg3NWUtMDEgIDIuMzAwZSswMSAgIDAuMDQzIDAuOTY1NzU4ICAgIFxuZmFjdG9yKGlkKTE1ICAgIDcuNjY1ZSswMCAgMS4yMjNlKzAxICAgMC42MjcgMC41MzA5OTMgICAgXG5mYWN0b3IoaWQpMTYgICAtMy4xOThlKzAwICAxLjIwMWUrMDEgIC0wLjI2NiAwLjc5MDAxMiAgICBcbmZhY3RvcihpZCkxNyAgICAxLjYyNmUrMDEgIDEuNDc2ZSswMSAgIDEuMTAyIDAuMjcwNjI2ICAgIFxuZmFjdG9yKGlkKTE4ICAgIDEuNTAxZSswMSAgMS4yMDNlKzAxICAgMS4yNDggMC4yMTIyODggICAgXG5mYWN0b3IoaWQpMTkgICAgMS4zOTRlKzAxICAxLjcwNWUrMDEgICAwLjgxOCAwLjQxMzYxNyAgICBcbmZhY3RvcihpZCkyMCAgIC00LjAwN2UrMDEgIDQuODY1ZSswMSAgLTAuODI0IDAuNDEwMTY5ICAgIFxuZmFjdG9yKGlkKTIxICAgLTEuNjM5ZSswMSAgMS40NTBlKzAxICAtMS4xMzAgMC4yNTgzNTcgICAgXG5mYWN0b3IoaWQpMjIgICAtMS4xMjllKzAxICAxLjIyMmUrMDEgIC0wLjkyMyAwLjM1NTgzMCAgICBcbmZhY3RvcihpZCkyMyAgIC0xLjAwNmUrMDIgIDMuODA2ZSswMSAgLTIuNjQzIDAuMDA4MjUxICoqIFxuZmFjdG9yKGlkKTI0ICAgIDQuMTMwZSswMSAgMS45NzBlKzAxICAgMi4wOTYgMC4wMzYxNTUgKiAgXG5mYWN0b3IoaWQpMjUgICAtNC42NDNlKzAxICAyLjE0M2UrMDEgIC0yLjE2NiAwLjAzMDM1OSAqICBcbmZhY3RvcihpZCkyNiAgICA4LjA4NWUrMDAgIDEuNDYwZSswMSAgIDAuNTU0IDAuNTc5NzgwICAgIFxuZmFjdG9yKGlkKTI3ICAgIDEuOTMwZSswMSAgMS4yNDRlKzAxICAgMS41NTEgMC4xMjA4ODUgICAgXG5mYWN0b3IoaWQpMjggICAtNS4yMzZlLTAxICAxLjIyM2UrMDEgIC0wLjA0MyAwLjk2NTg1NCAgICBcbmZhY3RvcihpZCkyOSAgIC0yLjMxN2UrMDEgIDEuNDgwZSswMSAgLTEuNTY2IDAuMTE3Mzc5ICAgIFxuZmFjdG9yKGlkKTMwICAgLTEuNDc1ZSswMSAgMS40MTRlKzAxICAtMS4wNDMgMC4yOTY5OTIgICAgXG5mYWN0b3IoaWQpMzEgICAtNS4yMDBlKzAxICAyLjM3N2UrMDEgIC0yLjE4OCAwLjAyODc1MyAqICBcbmZhY3RvcihpZCkzMiAgIC0yLjY5NGUrMDEgIDEuNTcyZSswMSAgLTEuNzEzIDAuMDg2NzgyIC4gIFxuZmFjdG9yKGlkKTMzICAgLTYuNjE4ZSswMSAgNC4xODFlKzAxICAtMS41ODMgMC4xMTM1NzAgICAgXG5mYWN0b3IoaWQpMzQgICAgMS4zNTdlKzAyICAxLjIwNWUrMDEgIDExLjI2MiAgPCAyZS0xNiAqKipcbmZhY3RvcihpZCkzNSAgIC00LjQ5NGUrMDEgIDEuNDk4ZSswMSAgLTMuMDAwIDAuMDAyNzIyICoqIFxuZmFjdG9yKGlkKTM2ICAgIDEuNTEyZSswMSAgMS42NzRlKzAxICAgMC45MDMgMC4zNjY0NTggICAgXG5mYWN0b3IoaWQpMzcgICAgMS4xNzRlKzAxICAxLjk1OWUrMDEgICAwLjYwMCAwLjU0ODg3NSAgICBcbmZhY3RvcihpZCkzOCAgICAxLjk1NGUrMDAgIDEuMzY1ZSswMSAgIDAuMTQzIDAuODg2MTU2ICAgIFxuZmFjdG9yKGlkKTM5ICAgLTMuNDQ3ZSswMSAgMS4yMzBlKzAxICAtMi44MDIgMC4wMDUxMTAgKiogXG5mYWN0b3IoaWQpNDAgICAgNi45NjNlKzAxICAyLjY1OWUrMDEgICAyLjYxOSAwLjAwODg2MCAqKiBcbmZhY3RvcihpZCk0MSAgICA3LjU0OGUrMDEgIDEuMjk0ZSswMSAgIDUuODMzIDUuOTVlLTA5ICoqKlxuZmFjdG9yKGlkKTQyICAgIDguODU5ZSswMSAgMS4zMDdlKzAxICAgNi43NzggMS40M2UtMTEgKioqXG5mYWN0b3IoaWQpNDMgICAgNS43NDVlKzAxICAxLjU2OWUrMDEgICAzLjY2MSAwLjAwMDI1NSAqKipcbmZhY3RvcihpZCk0NCAgICA5Ljk3NGUrMDEgIDEuNjQ4ZSswMSAgIDYuMDUxIDEuNTllLTA5ICoqKlxuZmFjdG9yKGlkKTQ1ICAgIDEuMTE5ZSswMCAgMS4xOTllKzAxICAgMC4wOTMgMC45MjU2NTIgICAgXG5mYWN0b3IoaWQpNDYgICAgMS4xODRlKzAyICAyLjE3M2UrMDEgICA1LjQ1MCA1LjM5ZS0wOCAqKipcbmZhY3RvcihpZCk0NyAgICAxLjM4OGUrMDIgIDIuMjkzZSswMSAgIDYuMDU1IDEuNTZlLTA5ICoqKlxuZmFjdG9yKGlkKTQ4ICAgIDEuODMxZSswMiAgMS41MzBlKzAxICAxMS45NjggIDwgMmUtMTYgKioqXG5mYWN0b3IoaWQpNDkgICAgMS42MDNlKzAyICAxLjc5NWUrMDEgICA4LjkzMSAgPCAyZS0xNiAqKipcbmZhY3RvcihpZCk1MCAgICA3LjA1NWUrMDEgIDEuMzQwZSswMSAgIDUuMjY0IDEuNTBlLTA3ICoqKlxuZmFjdG9yKGlkKTUxICAgLTEuMzczZSswMCAgMi4zOTFlKzAxICAtMC4wNTcgMC45NTQxOTYgICAgXG5mYWN0b3IoaWQpNTIgICAgMS41NjRlKzAyICAyLjQxNWUrMDEgICA2LjQ3NiAxLjA3ZS0xMCAqKipcbmZhY3RvcihpZCk1MyAgICA5Ljk1NGUrMDEgIDEuNTgwZSswMSAgIDYuMzAxIDMuMzRlLTEwICoqKlxuZmFjdG9yKGlkKTU0ICAgIDEuMzQxZSswMiAgMS4zNTRlKzAxICAgOS45MDMgIDwgMmUtMTYgKioqXG5mYWN0b3IoaWQpNTUgICAgNC43NTdlKzAxICAxLjYyMGUrMDEgICAyLjkzNyAwLjAwMzMzNCAqKiBcbmZhY3RvcihpZCk1NiAgICA1LjU3MmUrMDEgIDIuNDM5ZSswMSAgIDIuMjg1IDAuMDIyMzgwICogIFxuZmFjdG9yKGlkKTU3ICAgIDUuNTYzZSswMSAgMS4zMDRlKzAxICAgNC4yNjYgMi4wNWUtMDUgKioqXG5mYWN0b3IoaWQpNTggICAtMi4xNDBlKzAxICAxLjIxMWUrMDEgIC0xLjc2NyAwLjA3NzI5OCAuICBcbmZhY3RvcihpZCk1OSAgICA3LjU0MGUrMDEgIDEuMzMyZSswMSAgIDUuNjU5IDEuNjVlLTA4ICoqKlxuZmFjdG9yKGlkKTYwICAgIDEuOTMxZSswMSAgMS40MDdlKzAxICAgMS4zNzMgMC4xNjk5NTMgICAgXG5mYWN0b3IoaWQpNjEgICAgNy40NTNlKzAxICAyLjAxNWUrMDEgICAzLjY5OSAwLjAwMDIxOSAqKipcbmZhY3RvcihpZCk2MiAgICA0LjUwM2UrMDEgIDEuMzg0ZSswMSAgIDMuMjU0IDAuMDAxMTQ5ICoqIFxuZmFjdG9yKGlkKTYzICAgIDUuOTI4ZSswMSAgMS4yMzdlKzAxICAgNC43OTMgMS43MWUtMDYgKioqXG5mYWN0b3IoaWQpNjQgICAgMS4yNDVlKzAyICAxLjYxOGUrMDEgICA3LjY5OCAxLjc5ZS0xNCAqKipcbmZhY3RvcihpZCk2NSAgICAxLjU3MWUrMDIgIDEuODk1ZSswMSAgIDguMjkyICA8IDJlLTE2ICoqKlxuZmFjdG9yKGlkKTY2ICAgIDYuMDU3ZSswMSAgMi4xNDhlKzAxICAgMi44MjAgMC4wMDQ4MjUgKiogXG5mYWN0b3IoaWQpNjcgICAgNC4wMTFlKzAxICAxLjIwMGUrMDEgICAzLjM0MiAwLjAwMDg0MiAqKipcbmZhY3RvcihpZCk2OCAgIC00LjE0M2UrMDEgIDQuNTc0ZSswMSAgLTAuOTA2IDAuMzY1MTQ3ICAgIFxuZmFjdG9yKGlkKTY5ICAgIDEuMTg5ZSswMiAgMi4wMjFlKzAxICAgNS44ODMgNC40MWUtMDkgKioqXG5mYWN0b3IoaWQpNzAgICAgMS4wMDhlKzAyICAxLjU1OGUrMDEgICA2LjQ2NyAxLjE0ZS0xMCAqKipcbmZhY3RvcihpZCk3MSAgICAzLjc5OWUrMDEgIDUuMzgyZSswMSAgIDAuNzA2IDAuNDgwMjc4ICAgIFxuZmFjdG9yKGlkKTcyICAgIDEuMzQ2ZSswMiAgMS45NjJlKzAxICAgNi44NjIgOC4wNGUtMTIgKioqXG5mYWN0b3IoaWQpNzMgICAgNS40NzFlKzAxICAxLjk0N2UrMDEgICAyLjgxMCAwLjAwNDk4MSAqKiBcbmZhY3RvcihpZCk3NCAgICA3LjA0OWUrMDEgIDEuMjk4ZSswMSAgIDUuNDMyIDUuOTVlLTA4ICoqKlxuZmFjdG9yKGlkKTc1ICAgIDcuODU2ZSswMSAgMS4yMDhlKzAxICAgNi41MDMgOS4wMmUtMTEgKioqXG5mYWN0b3IoaWQpNzYgICAgNi4zNjRlKzAxICAxLjUwMWUrMDEgICA0LjI0MCAyLjI5ZS0wNSAqKipcbmZhY3RvcihpZCk3NyAgICA2LjU0MWUrMDEgIDIuMDI0ZSswMSAgIDMuMjMxIDAuMDAxMjQ0ICoqIFxuZmFjdG9yKGlkKTc4ICAgIDEuODkyZSswMiAgMi4zMzNlKzAxICAgOC4xMDcgNy4xNmUtMTYgKioqXG5mYWN0b3IoaWQpNzkgICAgNS4yMjZlKzAxICAxLjY1MmUrMDEgICAzLjE2MyAwLjAwMTU3NCAqKiBcbmZhY3RvcihpZCk4MCAgICAzLjMzOWUrMDIgIDIuMDAwZSswMSAgMTYuNjk5ICA8IDJlLTE2ICoqKlxuZmFjdG9yKGlkKTgxICAgLTEuNTY4ZSswMSAgMS40MjJlKzAxICAtMS4xMDIgMC4yNzA0MjQgICAgXG5mYWN0b3IoaWQpODIgICAgMi4wODBlKzAxICAxLjQwNWUrMDEgICAxLjQ4MCAwLjEzODg1MSAgICBcbmZhY3RvcihpZCk4MyAgICA0LjkyMWUrMDEgIDEuMjI4ZSswMSAgIDQuMDA3IDYuMjllLTA1ICoqKlxuZmFjdG9yKGlkKTg0ICAgIDYuNzQ3ZSswMSAgMS4zMTNlKzAxICAgNS4xMzkgMi45MWUtMDcgKioqXG5mYWN0b3IoaWQpODUgICAtMy44MDFlKzAxICA1LjIxMGUrMDEgIC0wLjczMCAwLjQ2NTY0NCAgICBcbmZhY3RvcihpZCk4NiAgICAxLjA5OGUrMDIgIDEuNzY1ZSswMSAgIDYuMjE3IDUuNjZlLTEwICoqKlxuZmFjdG9yKGlkKTg3ICAgIDkuMzExZSswMSAgMS4yOTllKzAxICAgNy4xNjkgOS4yMmUtMTMgKioqXG5mYWN0b3IoaWQpODggICAgNC4yNTdlKzAxICAzLjkzMWUrMDEgICAxLjA4MyAwLjI3ODkyMiAgICBcbmZhY3RvcihpZCk4OSAgICAxLjAxOWUrMDIgIDEuMzk0ZSswMSAgIDcuMzEyIDMuMjVlLTEzICoqKlxuZmFjdG9yKGlkKTkwICAgLTMuNzMwZSswMSAgNi4zMjBlKzAxICAtMC41OTAgMC41NTUxMDYgICAgXG5mYWN0b3IoaWQpOTEgICAgOC45MjVlKzAxICAxLjQ4OGUrMDEgICA1Ljk5NyAyLjIyZS0wOSAqKipcbmZhY3RvcihpZCk5MiAgICA4LjMxMWUrMDEgIDEuODc1ZSswMSAgIDQuNDMyIDkuNjJlLTA2ICoqKlxuZmFjdG9yKGlkKTkzICAgIDguODM0ZSswMSAgMS40ODllKzAxICAgNS45MzQgMy4yNWUtMDkgKioqXG5mYWN0b3IoaWQpOTQgICAgNS43NDdlKzAxICAxLjIxOGUrMDEgICA0LjcxNyAyLjQ5ZS0wNiAqKipcbmZhY3RvcihpZCk5NSAgIC01LjE5N2UrMDEgIDUuOTk2ZSswMSAgLTAuODY3IDAuMzg2MTc0ICAgIFxuZmFjdG9yKGlkKTk2ICAgLTUuMTU2ZSswMCAgMy45NDVlKzAxICAtMC4xMzEgMC44OTYwMjIgICAgXG5mYWN0b3IoaWQpOTcgICAgNS4zNTllKzAxICAxLjQxNWUrMDEgICAzLjc4OCAwLjAwMDE1NCAqKipcbmZhY3RvcihpZCk5OCAgICAyLjM4MmUrMDAgIDUuMTY2ZSswMSAgIDAuMDQ2IDAuOTYzMjI3ICAgIFxuZmFjdG9yKGlkKTk5ICAgIDUuNTg0ZSswMSAgNi4xNzNlKzAxICAgMC45MDUgMC4zNjU3NzIgICAgXG5mYWN0b3IoaWQpMTAwICAgMy45NzFlKzAxICA2LjA4OWUrMDEgICAwLjY1MiAwLjUxNDM5NiAgICBcbmZhY3RvcihpZCkxMDEgICA1LjM2NmUrMDEgIDUuMjgyZSswMSAgIDEuMDE2IDAuMzA5NzE5ICAgIFxuZmFjdG9yKGlkKTEwMiAgIDIuNzUzZSswMSAgMi4zMzFlKzAxICAgMS4xODEgMC4yMzc2MjEgICAgXG5mYWN0b3IoaWQpMTAzICAtMS4yMDVlKzAxICA2LjM1OGUrMDEgIC0wLjE5MCAwLjg0OTY1NiAgICBcbmZhY3RvcihpZCkxMDQgICAxLjIzN2UrMDIgIDEuNDk1ZSswMSAgIDguMjczICA8IDJlLTE2ICoqKlxuZmFjdG9yKGlkKTEwNSAgIDUuMzI2ZSswMSAgMS4yNjhlKzAxICAgNC4xOTkgMi43NWUtMDUgKioqXG5mYWN0b3IoaWQpMTA2ICAgMS4wNjVlKzAyICAxLjc1MWUrMDEgICA2LjA4MSAxLjMyZS0wOSAqKipcbmZhY3RvcihpZCkxMDcgICA2LjkzMWUrMDEgIDEuMTk2ZSswMSAgIDUuNzk0IDcuNDhlLTA5ICoqKlxuZmFjdG9yKGlkKTEwOCAgIDEuNzcyZSswMSAgMi4xNTdlKzAxICAgMC44MjIgMC40MTEzNzIgICAgXG5mYWN0b3IoaWQpMTA5ICAgMS45MDdlKzAyICAxLjU2MWUrMDEgIDEyLjIxNyAgPCAyZS0xNiAqKipcbmZhY3RvcihpZCkxMTAgICA0LjMxNWUrMDEgIDEuMzQ4ZSswMSAgIDMuMjAwIDAuMDAxMzg1ICoqIFxuZmFjdG9yKGlkKTExMSAgIDguNjczZSswMSAgMi4xMjBlKzAxICAgNC4wOTIgNC4zOGUtMDUgKioqXG5mYWN0b3IoaWQpMTEyICAgMS4xMTRlKzAxICAxLjY5M2UrMDEgICAwLjY1OCAwLjUxMDY1OSAgICBcbmZhY3RvcihpZCkxMTMgICA4LjIxM2UrMDAgIDEuNDI2ZSswMSAgIDAuNTc2IDAuNTY0ODA4ICAgIFxuZmFjdG9yKGlkKTExNCAgLTYuMDQ3ZSswMSAgMS42OTJlKzAxICAtMy41NzUgMC4wMDAzNTUgKioqXG5mYWN0b3IoaWQpMTE1ICAtMy42NDllKzAxICAxLjUyNmUrMDEgIC0yLjM5MSAwLjAxNjgzOCAqICBcbmZhY3RvcihpZCkxMTYgIC00Ljk5MGUrMDEgIDEuMzcyZSswMSAgLTMuNjM2IDAuMDAwMjgxICoqKlxuZmFjdG9yKGlkKTExNyAgLTQuOTE2ZSswMSAgMi45NzhlKzAxICAtMS42NTEgMC4wOTg5MDkgLiAgXG5mYWN0b3IoaWQpMTE4ICAgMi45MzFlKzAxICA0LjM3MGUrMDEgICAwLjY3MSAwLjUwMjM1NSAgICBcbmZhY3RvcihpZCkxMTkgICA0Ljg4MGUrMDEgIDEuNjcyZSswMSAgIDIuOTE4IDAuMDAzNTQ3ICoqIFxuZmFjdG9yKGlkKTEyMCAgIDEuMDczZSswMiAgMi41MDZlKzAxICAgNC4yODIgMS45MGUtMDUgKioqXG5mYWN0b3IoaWQpMTIxICAgMS4wMTNlKzAyICAxLjI0M2UrMDEgICA4LjE0OSA1LjA4ZS0xNiAqKipcbmZhY3RvcihpZCkxMjIgICAxLjE2MGUrMDEgIDEuMzg1ZSswMSAgIDAuODM4IDAuNDAyMjE4ICAgIFxuZmFjdG9yKGlkKTEyMyAgLTEuMTU1ZSswMSAgMi4xMDBlKzAxICAtMC41NTAgMC41ODIzMjYgICAgXG5mYWN0b3IoaWQpMTI0ICAgNS4zMjZlKzAxICAyLjU3MmUrMDEgICAyLjA3MSAwLjAzODQyOSAqICBcbmZhY3RvcihpZCkxMjUgIC00LjQ2NmUrMDEgIDIuMDMxZSswMSAgLTIuMTk5IDAuMDI3OTU2ICogIFxuZmFjdG9yKGlkKTEyNiAgLTEuOTE2ZSswMSAgMi41ODFlKzAxICAtMC43NDIgMC40NTc5NTkgICAgXG5mYWN0b3IoaWQpMTI3ICAgNC44MDFlKzAwICAxLjkxNWUrMDEgICAwLjI1MSAwLjgwMjA2MCAgICBcbmZhY3RvcihpZCkxMjggICAxLjcwNWUrMDAgIDIuMDY1ZSswMSAgIDAuMDgzIDAuOTM0MjE1ICAgIFxuZmFjdG9yKGlkKTEyOSAgLTIuMjE4ZSswMSAgMS4yMjJlKzAxICAtMS44MTUgMC4wNjk1NTEgLiAgXG5mYWN0b3IoaWQpMTMwICAgMi40MDFlKzAxICAxLjU4MmUrMDEgICAxLjUxOCAwLjEyOTE3MiAgICBcbmZhY3RvcihpZCkxMzEgICA4LjY2OWUrMDEgIDMuNjI0ZSswMSAgIDIuMzkyIDAuMDE2Nzk0ICogIFxuZmFjdG9yKGlkKTEzMiAgLTIuMDc0ZSswMSAgMS43NTZlKzAxICAtMS4xODEgMC4yMzc2NzEgICAgXG5mYWN0b3IoaWQpMTMzICAtNi42MTJlKzAwICAxLjQwOGUrMDEgIC0wLjQ3MCAwLjYzODU4MSAgICBcbmZhY3RvcihpZCkxMzQgIC0zLjc5N2UrMDEgIDIuMzE1ZSswMSAgLTEuNjQxIDAuMTAwOTg0ICAgIFxuZmFjdG9yKGlkKTEzNSAgLTIuNTc2ZSswMSAgMy41OTdlKzAxICAtMC43MTYgMC40NzM5NDEgICAgXG5mYWN0b3IoaWQpMTM2ICAgMS42NDFlKzAxICAzLjQ3M2UrMDEgICAwLjQ3MyAwLjYzNjUzNCAgICBcbmZhY3RvcihpZCkxMzcgIC04LjQ3OWUrMDEgIDQuNjUyZSswMSAgLTEuODIyIDAuMDY4NDc1IC4gIFxuZmFjdG9yKGlkKTEzOCAgIDMuMDcyZSswMSAgMS4yMDllKzAxICAgMi41NDIgMC4wMTEwNjkgKiAgXG5mYWN0b3IoaWQpMTM5ICAgNS4yNTFlKzAxICAyLjg0N2UrMDEgICAxLjg0NCAwLjA2NTIzMSAuICBcbmZhY3RvcihpZCkxNDAgIC0yLjEzN2UrMDEgIDEuMTk0ZSswMSAgLTEuNzkwIDAuMDczNDkyIC4gIFxuZmFjdG9yKGlkKTE0MSAgIDcuNTY4ZSswMSAgMS44MTBlKzAxICAgNC4xODEgMi45OGUtMDUgKioqXG5mYWN0b3IoaWQpMTQyICAgMS41NzRlKzAyICAxLjgzNGUrMDEgICA4LjU4MSAgPCAyZS0xNiAqKipcbmZhY3RvcihpZCkxNDMgICAxLjA1NmUrMDIgIDEuNDAzZSswMSAgIDcuNTI4IDYuNTNlLTE0ICoqKlxuZmFjdG9yKGlkKTE0NCAgIDEuMzc0ZSswMiAgMS42MjJlKzAxICAgOC40NjggIDwgMmUtMTYgKioqXG5mYWN0b3IoaWQpMTQ1ICAgMy4yNDRlKzAxICAyLjAxN2UrMDEgICAxLjYwOCAwLjEwNzkxOSAgICBcbmZhY3RvcihpZCkxNDYgICA2LjM0NGUrMDEgIDEuOTIyZSswMSAgIDMuMzAxIDAuMDAwOTcyICoqKlxuZmFjdG9yKGlkKTE0NyAgIDguOTI0ZSswMSAgMi41MDBlKzAxICAgMy41NzAgMC4wMDAzNjIgKioqXG5mYWN0b3IoaWQpMTQ4ICAgMS4xNTdlKzAxICAzLjU1MWUrMDEgICAwLjMyNiAwLjc0NDUyOCAgICBcbmZhY3RvcihpZCkxNDkgICA1LjMwNGUrMDEgIDEuNjk3ZSswMSAgIDMuMTI1IDAuMDAxNzk0ICoqIFxuZmFjdG9yKGlkKTE1MCAgLTkuMTIzZSswMCAgMS41NDhlKzAxICAtMC41ODkgMC41NTU2NDAgICAgXG5mYWN0b3IoaWQpMTUxICAtMi41MjNlKzAxICAxLjUzNmUrMDEgIC0xLjY0MyAwLjEwMDUzMyAgICBcbmZhY3RvcihpZCkxNTIgICA0LjYyMmUrMDEgIDIuMDkzZSswMSAgIDIuMjA4IDAuMDI3MjkxICogIFxuZmFjdG9yKGlkKTE1MyAgIDQuNzYwZSswMCAgMi41NjZlKzAxICAgMC4xODYgMC44NTI4NDggICAgXG5mYWN0b3IoaWQpMTU0ICAgMi4wNTNlKzAxICAxLjQwOWUrMDEgICAxLjQ1NyAwLjE0NTI5NiAgICBcbmZhY3RvcihpZCkxNTUgIC0xLjI2M2UrMDEgIDEuMjA5ZSswMSAgLTEuMDQ1IDAuMjk1OTg0ICAgIFxuZmFjdG9yKGlkKTE1NiAgLTIuMTY1ZSswMSAgMS42NThlKzAxICAtMS4zMDYgMC4xOTE3NDkgICAgXG5mYWN0b3IoaWQpMTU3ICAtMS40MjRlKzAyICA2LjA0M2UrMDEgIC0yLjM1NiAwLjAxODUyOSAqICBcbmZhY3RvcihpZCkxNTggIC04LjcwMWUrMDEgIDYuOTU5ZSswMSAgLTEuMjUwIDAuMjExMjQxICAgIFxuZmFjdG9yKGlkKTE1OSAgLTEuMzMxZSswMSAgMS40NTZlKzAxICAtMC45MTQgMC4zNjA2ODYgICAgXG5mYWN0b3IoaWQpMTYwICAtMS43MDZlKzAxICAxLjU5OGUrMDEgIC0xLjA2NyAwLjI4NTg4OCAgICBcbmZhY3RvcihpZCkxNjEgICAxLjE3MWUrMDIgIDEuNTcxZSswMSAgIDcuNDU2IDEuMTJlLTEzICoqKlxuZmFjdG9yKGlkKTE2MiAgLTEuODU0ZSswMCAgMS4yODJlKzAxICAtMC4xNDUgMC44ODQ5NzYgICAgXG5mYWN0b3IoaWQpMTYzICAtMy43MjRlKzAxICAxLjc1M2UrMDEgIC0yLjEyNCAwLjAzMzc0MSAqICBcbmZhY3RvcihpZCkxNjQgICAxLjAwN2UrMDIgIDIuNDU2ZSswMSAgIDQuMTAxIDQuMjFlLTA1ICoqKlxuZmFjdG9yKGlkKTE2NSAgLTQuNzA0ZSswMSAgMi4zOTFlKzAxICAtMS45NjcgMC4wNDkyMTYgKiAgXG5mYWN0b3IoaWQpMTY2ICAtNC44MjNlKzAxICAxLjg2NmUrMDEgIC0yLjU4NSAwLjAwOTc4OCAqKiBcbmZhY3RvcihpZCkxNjcgIC0xLjY2NWUrMDIgIDYuNzk3ZSswMSAgLTIuNDUwIDAuMDE0MzUxICogIFxuZmFjdG9yKGlkKTE2OCAgIDIuMDg1ZSswMSAgMS4yODhlKzAxICAgMS42MTkgMC4xMDU0MzcgICAgXG5mYWN0b3IoaWQpMTY5ICAtMS4xMjdlKzAyICA1LjYwMGUrMDEgIC0yLjAxMiAwLjA0NDI5MSAqICBcbmZhY3RvcihpZCkxNzAgIC0xLjU3MmUrMDIgIDcuMTAwZSswMSAgLTIuMjE0IDAuMDI2ODY2ICogIFxuZmFjdG9yKGlkKTE3MSAgIDUuODAyZSswMSAgMS45OTdlKzAxICAgMi45MDUgMC4wMDM2OTMgKiogXG5mYWN0b3IoaWQpMTcyICAtMS4yMzJlKzAyICA1LjA2NWUrMDEgIC0yLjQzMiAwLjAxNTA3NyAqICBcbmZhY3RvcihpZCkxNzMgIC01Ljc4OWUrMDEgIDMuMjMxZSswMSAgLTEuNzkyIDAuMDczMjQzIC4gIFxuZmFjdG9yKGlkKTE3NCAgLTEuNDgyZSswMiAgNi44MjllKzAxICAtMi4xNzEgMC4wMzAwMzUgKiAgXG5mYWN0b3IoaWQpMTc1ICAtOC40OTdlKzAxICA3LjQ4OWUrMDEgIC0xLjEzNSAwLjI1NjYyMSAgICBcbmZhY3RvcihpZCkxNzYgIC0xLjY0NmUrMDIgIDcuNDI3ZSswMSAgLTIuMjE2IDAuMDI2NzI3ICogIFxuZmFjdG9yKGlkKTE3NyAgLTEuNDcxZSswMiAgNi45OTRlKzAxICAtMi4xMDMgMC4wMzU1NjggKiAgXG5mYWN0b3IoaWQpMTc4ICAgMS4yODFlKzAxICAxLjIyM2UrMDEgICAxLjA0NyAwLjI5NTIwOCAgICBcbmZhY3RvcihpZCkxNzkgIC0zLjkxNGUrMDAgIDEuMzU4ZSswMSAgLTAuMjg4IDAuNzczMTU4ICAgIFxuZmFjdG9yKGlkKTE4MCAgLTIuMjkxZSswMSAgMS40MzdlKzAxICAtMS41OTQgMC4xMTA5NjEgICAgXG5mYWN0b3IoaWQpMTgxICAgMi41MzZlKzAxICAxLjc2NmUrMDEgICAxLjQzNiAwLjE1MTE3MiAgICBcbmZhY3RvcihpZCkxODIgICAxLjAwMmUrMDIgIDIuMTkzZSswMSAgIDQuNTY4IDUuMTBlLTA2ICoqKlxuZmFjdG9yKGlkKTE4MyAgIDEuODA1ZSswMSAgMS4zMDZlKzAxICAgMS4zODIgMC4xNjY5NzggICAgXG5mYWN0b3IoaWQpMTg0ICAgNS40MzFlKzAxICAxLjI3MmUrMDEgICA0LjI3MCAyLjAwZS0wNSAqKipcbmZhY3RvcihpZCkxODUgICAyLjQ4NmUrMDEgIDEuMjMzZSswMSAgIDIuMDE2IDAuMDQzODU0ICogIFxuZmFjdG9yKGlkKTE4NiAgIDEuMjkwZSswMSAgMS4zMDZlKzAxICAgMC45ODggMC4zMjMyMDMgICAgXG5mYWN0b3IoaWQpMTg3ICAtOS42MDZlKzAxICA0Ljg3MWUrMDEgIC0xLjk3MiAwLjA0ODY5NiAqICBcbmZhY3RvcihpZCkxODggIC04LjYwN2UrMDAgIDEuOTYyZSswMSAgLTAuNDM5IDAuNjYwOTM0ICAgIFxuZmFjdG9yKGlkKTE4OSAgIDcuODM1ZSswMSAgMS4zOTdlKzAxICAgNS42MDkgMi4xOWUtMDggKioqXG5mYWN0b3IoaWQpMTkwICAtNS45MjNlKzAwICAxLjQ5NmUrMDEgIC0wLjM5NiAwLjY5MjIwMyAgICBcbmZhY3RvcihpZCkxOTEgICAxLjAyOGUrMDEgIDEuNjg4ZSswMSAgIDAuNjA5IDAuNTQyNDkwICAgIFxuZmFjdG9yKGlkKTE5MiAgLTIuNjA1ZSswMCAgMS41NDBlKzAxICAtMC4xNjkgMC44NjU2NjUgICAgXG5mYWN0b3IoaWQpMTkzICAtNC44MjRlKzAxICAxLjU3NmUrMDEgIC0zLjA2MSAwLjAwMjIyMiAqKiBcbmZhY3RvcihpZCkxOTQgICA4LjU5N2UrMDEgIDEuMjA4ZSswMSAgIDcuMTE4IDEuMzJlLTEyICoqKlxuZmFjdG9yKGlkKTE5NSAgLTEuNzY4ZSswMSAgMS4zOTRlKzAxICAtMS4yNjggMC4yMDQ5NDUgICAgXG5mYWN0b3IoaWQpMTk2ICAtMS41MTVlKzAxICAxLjIwNmUrMDEgIC0xLjI1NiAwLjIwOTE3OSAgICBcbmZhY3RvcihpZCkxOTcgIC0xLjg2OWUrMDEgIDEuMjE2ZSswMSAgLTEuNTM3IDAuMTI0NDg1ICAgIFxuIFsgcmVhY2hlZCBnZXRPcHRpb24oXCJtYXgucHJpbnRcIikgLS0gb21pdHRlZCA5NTIgcm93cyBdXG4tLS1cblNpZ25pZi4gY29kZXM6ICAwIOKAmCoqKuKAmSAwLjAwMSDigJgqKuKAmSAwLjAxIOKAmCrigJkgMC4wNSDigJgu4oCZIDAuMSDigJgg4oCZIDFcblxuUmVzaWR1YWwgc3RhbmRhcmQgZXJyb3I6IDE5LjQ4IG9uIDM0NDUgZGVncmVlcyBvZiBmcmVlZG9tXG5NdWx0aXBsZSBSLXNxdWFyZWQ6ICAwLjk0OTMsXHRBZGp1c3RlZCBSLXNxdWFyZWQ6ICAwLjkzMjMgXG5GLXN0YXRpc3RpYzogNTYuMDYgb24gMTE1MCBhbmQgMzQ0NSBERiwgIHAtdmFsdWU6IDwgMi4yZS0xNlxuIn0= -->
+<pre><code>
+Call:
+lm(formula = fare ~ dist + concen + passen + factor(id), data = airfare)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-106.726   -8.283 
+Coefficients: (1 not defined because of singularities)
+                 Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)     5.536e+01  3.023e+01   1.831 0.067125 .  
+dist            1.371e-01  4.192e-02   3.270 0.001087 ** 
+concen         -2.752e+00  5.375e+00  -0.512 0.608757    
+passen         -5.113e-02  2.759e-03 -18.533  &lt; 2e-16 ***
+factor(id)2    -4.754e+01  1.391e+01  -3.417 0.000640 ***
+factor(id)3     6.032e+01  1.369e+01   4.407 1.08e-05 ***  -3.026 0.002500 ** 
+factor(id)6     9.887e+01  1.970e+01   5.018 5.49e-07 ***
+factor(id)7    -1.546e+00  2.701e+01  -0.057 0.954377    
+factor(id)8     1.933e+01  1.243e+01   1.554 0.120196    
+factor(id)9    -1.178e+02  4.287e+01  -2.748 0.006021 ** 
+factor(id)10   -7.970e+01  5.516e+01  -1.445 0.148569    
+factor(id)11   -4.807e+00  2.150e+01  -0.224 0.823113    
+factor(id)12    2.816e+01  1.299e+01   2.167 0.030278 *  
+factor(id)13    9.313e+01  1.870e+01   4.981 6.65e-07 ***
+factor(id)14    9.875e-01  2.300e+01   0.043 0.965758    
+factor(id)15    7.665e+00  1.223e+01   0.627 0.530993    
+factor(id)16   -3.198e+00  1.201e+01  -0.266 0.790012    
+factor(id)17    1.626e+01  1.476e+01   1.102 0.270626    
+factor(id)18    1.501e+01  1.203e+01   1.248 0.212288    
+factor(id)19    1.394e+01  1.705e+01   0.818 0.413617    
+factor(id)20   -4.007e+01  4.865e+01  -0.824 0.410169    
+factor(id)21   -1.639e+01  1.450e+01  -1.130 0.258357    
+factor(id)22   -1.129e+01  1.222e+01  -0.923 0.355830    
+factor(id)23   -1.006e+02  3.806e+01  -2.643 0.008251 ** 
+factor(id)24    4.130e+01  1.970e+01   2.096 0.036155 *  
+factor(id)25   -4.643e+01  2.143e+01  -2.166 0.030359 *  
+factor(id)26    8.085e+00  1.460e+01   0.554 0.579780    
+factor(id)27    1.930e+01  1.244e+01   1.551 0.120885    
+factor(id)28   -5.236e-01  1.223e+01  -0.043 0.965854    
+factor(id)29   -2.317e+01  1.480e+01  -1.566 0.117379    
+factor(id)30   -1.475e+01  1.414e+01  -1.043 0.296992    
+factor(id)31   -5.200e+01  2.377e+01  -2.188 0.028753 *  
+factor(id)32   -2.694e+01  1.572e+01  -1.713 0.086782 .  
+factor(id)33   -6.618e+01  4.181e+01  -1.583 0.113570    
+factor(id)34    1.357e+02  1.205e+01  11.262  &lt; 2e-16 ***
+factor(id)35   -4.494e+01  1.498e+01  -3.000 0.002722 ** 
+factor(id)36    1.512e+01  1.674e+01   0.903 0.366458    
+factor(id)37    1.174e+01  1.959e+01   0.600 0.548875    
+factor(id)38    1.954e+00  1.365e+01   0.143 0.886156    
+factor(id)39   -3.447e+01  1.230e+01  -2.802 0.005110 ** 
+factor(id)40    6.963e+01  2.659e+01   2.619 0.008860 ** 
+factor(id)41    7.548e+01  1.294e+01   5.833 5.95e-09 ***
+factor(id)42    8.859e+01  1.307e+01   6.778 1.43e-11 ***
+factor(id)43    5.745e+01  1.569e+01   3.661 0.000255 ***
+factor(id)44    9.974e+01  1.648e+01   6.051 1.59e-09 ***
+factor(id)45    1.119e+00  1.199e+01   0.093 0.925652    
+factor(id)46    1.184e+02  2.173e+01   5.450 5.39e-08 ***
+factor(id)47    1.388e+02  2.293e+01   6.055 1.56e-09 ***
+factor(id)48    1.831e+02  1.530e+01  11.968  &lt; 2e-16 ***
+factor(id)49    1.603e+02  1.795e+01   8.931  &lt; 2e-16 ***
+factor(id)50    7.055e+01  1.340e+01   5.264 1.50e-07 ***
+factor(id)51   -1.373e+00  2.391e+01  -0.057 0.954196    
+factor(id)52    1.564e+02  2.415e+01   6.476 1.07e-10 ***
+factor(id)53    9.954e+01  1.580e+01   6.301 3.34e-10 ***
+factor(id)54    1.341e+02  1.354e+01   9.903  &lt; 2e-16 ***
+factor(id)55    4.757e+01  1.620e+01   2.937 0.003334 ** 
+factor(id)56    5.572e+01  2.439e+01   2.285 0.022380 *  
+factor(id)57    5.563e+01  1.304e+01   4.266 2.05e-05 ***
+factor(id)58   -2.140e+01  1.211e+01  -1.767 0.077298 .  
+factor(id)59    7.540e+01  1.332e+01   5.659 1.65e-08 ***
+factor(id)60    1.931e+01  1.407e+01   1.373 0.169953    
+factor(id)61    7.453e+01  2.015e+01   3.699 0.000219 ***
+factor(id)62    4.503e+01  1.384e+01   3.254 0.001149 ** 
+factor(id)63    5.928e+01  1.237e+01   4.793 1.71e-06 ***
+factor(id)64    1.245e+02  1.618e+01   7.698 1.79e-14 ***
+factor(id)65    1.571e+02  1.895e+01   8.292  &lt; 2e-16 ***
+factor(id)66    6.057e+01  2.148e+01   2.820 0.004825 ** 
+factor(id)67    4.011e+01  1.200e+01   3.342 0.000842 ***
+factor(id)68   -4.143e+01  4.574e+01  -0.906 0.365147    
+factor(id)69    1.189e+02  2.021e+01   5.883 4.41e-09 ***
+factor(id)70    1.008e+02  1.558e+01   6.467 1.14e-10 ***
+factor(id)71    3.799e+01  5.382e+01   0.706 0.480278    
+factor(id)72    1.346e+02  1.962e+01   6.862 8.04e-12 ***
+factor(id)73    5.471e+01  1.947e+01   2.810 0.004981 ** 
+factor(id)74    7.049e+01  1.298e+01   5.432 5.95e-08 ***
+factor(id)75    7.856e+01  1.208e+01   6.503 9.02e-11 ***
+factor(id)76    6.364e+01  1.501e+01   4.240 2.29e-05 ***
+factor(id)77    6.541e+01  2.024e+01   3.231 0.001244 ** 
+factor(id)78    1.892e+02  2.333e+01   8.107 7.16e-16 ***
+factor(id)79    5.226e+01  1.652e+01   3.163 0.001574 ** 
+factor(id)80    3.339e+02  2.000e+01  16.699  &lt; 2e-16 ***
+factor(id)81   -1.568e+01  1.422e+01  -1.102 0.270424    
+factor(id)82    2.080e+01  1.405e+01   1.480 0.138851    
+factor(id)83    4.921e+01  1.228e+01   4.007 6.29e-05 ***
+factor(id)84    6.747e+01  1.313e+01   5.139 2.91e-07 ***
+factor(id)85   -3.801e+01  5.210e+01  -0.730 0.465644    
+factor(id)86    1.098e+02  1.765e+01   6.217 5.66e-10 ***
+factor(id)87    9.311e+01  1.299e+01   7.169 9.22e-13 ***
+factor(id)88    4.257e+01  3.931e+01   1.083 0.278922    
+factor(id)89    1.019e+02  1.394e+01   7.312 3.25e-13 ***
+factor(id)90   -3.730e+01  6.320e+01  -0.590 0.555106    
+factor(id)91    8.925e+01  1.488e+01   5.997 2.22e-09 ***
+factor(id)92    8.311e+01  1.875e+01   4.432 9.62e-06 ***
+factor(id)93    8.834e+01  1.489e+01   5.934 3.25e-09 ***
+factor(id)94    5.747e+01  1.218e+01   4.717 2.49e-06 ***
+factor(id)95   -5.197e+01  5.996e+01  -0.867 0.386174    
+factor(id)96   -5.156e+00  3.945e+01  -0.131 0.896022    
+factor(id)97    5.359e+01  1.415e+01   3.788 0.000154 ***
+factor(id)98    2.382e+00  5.166e+01   0.046 0.963227    
+factor(id)99    5.584e+01  6.173e+01   0.905 0.365772    
+factor(id)100   3.971e+01  6.089e+01   0.652 0.514396    
+factor(id)101   5.366e+01  5.282e+01   1.016 0.309719    
+factor(id)102   2.753e+01  2.331e+01   1.181 0.237621    
+factor(id)103  -1.205e+01  6.358e+01  -0.190 0.849656    
+factor(id)104   1.237e+02  1.495e+01   8.273  &lt; 2e-16 ***
+factor(id)105   5.326e+01  1.268e+01   4.199 2.75e-05 ***
+factor(id)106   1.065e+02  1.751e+01   6.081 1.32e-09 ***
+factor(id)107   6.931e+01  1.196e+01   5.794 7.48e-09 ***
+factor(id)108   1.772e+01  2.157e+01   0.822 0.411372    
+factor(id)109   1.907e+02  1.561e+01  12.217  &lt; 2e-16 ***
+factor(id)110   4.315e+01  1.348e+01   3.200 0.001385 ** 
+factor(id)111   8.673e+01  2.120e+01   4.092 4.38e-05 ***
+factor(id)112   1.114e+01  1.693e+01   0.658 0.510659    
+factor(id)113   8.213e+00  1.426e+01   0.576 0.564808    
+factor(id)114  -6.047e+01  1.692e+01  -3.575 0.000355 ***
+factor(id)115  -3.649e+01  1.526e+01  -2.391 0.016838 *  
+factor(id)116  -4.990e+01  1.372e+01  -3.636 0.000281 ***
+factor(id)117  -4.916e+01  2.978e+01  -1.651 0.098909 .  
+factor(id)118   2.931e+01  4.370e+01   0.671 0.502355    
+factor(id)119   4.880e+01  1.672e+01   2.918 0.003547 ** 
+factor(id)120   1.073e+02  2.506e+01   4.282 1.90e-05 ***
+factor(id)121   1.013e+02  1.243e+01   8.149 5.08e-16 ***
+factor(id)122   1.160e+01  1.385e+01   0.838 0.402218    
+factor(id)123  -1.155e+01  2.100e+01  -0.550 0.582326    
+factor(id)124   5.326e+01  2.572e+01   2.071 0.038429 *  
+factor(id)125  -4.466e+01  2.031e+01  -2.199 0.027956 *  
+factor(id)126  -1.916e+01  2.581e+01  -0.742 0.457959    
+factor(id)127   4.801e+00  1.915e+01   0.251 0.802060    
+factor(id)128   1.705e+00  2.065e+01   0.083 0.934215    
+factor(id)129  -2.218e+01  1.222e+01  -1.815 0.069551 .  
+factor(id)130   2.401e+01  1.582e+01   1.518 0.129172    
+factor(id)131   8.669e+01  3.624e+01   2.392 0.016794 *  
+factor(id)132  -2.074e+01  1.756e+01  -1.181 0.237671    
+factor(id)133  -6.612e+00  1.408e+01  -0.470 0.638581    
+factor(id)134  -3.797e+01  2.315e+01  -1.641 0.100984    
+factor(id)135  -2.576e+01  3.597e+01  -0.716 0.473941    
+factor(id)136   1.641e+01  3.473e+01   0.473 0.636534    
+factor(id)137  -8.479e+01  4.652e+01  -1.822 0.068475 .  
+factor(id)138   3.072e+01  1.209e+01   2.542 0.011069 *  
+factor(id)139   5.251e+01  2.847e+01   1.844 0.065231 .  
+factor(id)140  -2.137e+01  1.194e+01  -1.790 0.073492 .  
+factor(id)141   7.568e+01  1.810e+01   4.181 2.98e-05 ***
+factor(id)142   1.574e+02  1.834e+01   8.581  &lt; 2e-16 ***
+factor(id)143   1.056e+02  1.403e+01   7.528 6.53e-14 ***
+factor(id)144   1.374e+02  1.622e+01   8.468  &lt; 2e-16 ***
+factor(id)145   3.244e+01  2.017e+01   1.608 0.107919    
+factor(id)146   6.344e+01  1.922e+01   3.301 0.000972 ***
+factor(id)147   8.924e+01  2.500e+01   3.570 0.000362 ***
+factor(id)148   1.157e+01  3.551e+01   0.326 0.744528    
+factor(id)149   5.304e+01  1.697e+01   3.125 0.001794 ** 
+factor(id)150  -9.123e+00  1.548e+01  -0.589 0.555640    
+factor(id)151  -2.523e+01  1.536e+01  -1.643 0.100533    
+factor(id)152   4.622e+01  2.093e+01   2.208 0.027291 *  
+factor(id)153   4.760e+00  2.566e+01   0.186 0.852848    
+factor(id)154   2.053e+01  1.409e+01   1.457 0.145296    
+factor(id)155  -1.263e+01  1.209e+01  -1.045 0.295984    
+factor(id)156  -2.165e+01  1.658e+01  -1.306 0.191749    
+factor(id)157  -1.424e+02  6.043e+01  -2.356 0.018529 *  
+factor(id)158  -8.701e+01  6.959e+01  -1.250 0.211241    
+factor(id)159  -1.331e+01  1.456e+01  -0.914 0.360686    
+factor(id)160  -1.706e+01  1.598e+01  -1.067 0.285888    
+factor(id)161   1.171e+02  1.571e+01   7.456 1.12e-13 ***
+factor(id)162  -1.854e+00  1.282e+01  -0.145 0.884976    
+factor(id)163  -3.724e+01  1.753e+01  -2.124 0.033741 *  
+factor(id)164   1.007e+02  2.456e+01   4.101 4.21e-05 ***
+factor(id)165  -4.704e+01  2.391e+01  -1.967 0.049216 *  
+factor(id)166  -4.823e+01  1.866e+01  -2.585 0.009788 ** 
+factor(id)167  -1.665e+02  6.797e+01  -2.450 0.014351 *  
+factor(id)168   2.085e+01  1.288e+01   1.619 0.105437    
+factor(id)169  -1.127e+02  5.600e+01  -2.012 0.044291 *  
+factor(id)170  -1.572e+02  7.100e+01  -2.214 0.026866 *  
+factor(id)171   5.802e+01  1.997e+01   2.905 0.003693 ** 
+factor(id)172  -1.232e+02  5.065e+01  -2.432 0.015077 *  
+factor(id)173  -5.789e+01  3.231e+01  -1.792 0.073243 .  
+factor(id)174  -1.482e+02  6.829e+01  -2.171 0.030035 *  
+factor(id)175  -8.497e+01  7.489e+01  -1.135 0.256621    
+factor(id)176  -1.646e+02  7.427e+01  -2.216 0.026727 *  
+factor(id)177  -1.471e+02  6.994e+01  -2.103 0.035568 *  
+factor(id)178   1.281e+01  1.223e+01   1.047 0.295208    
+factor(id)179  -3.914e+00  1.358e+01  -0.288 0.773158    
+factor(id)180  -2.291e+01  1.437e+01  -1.594 0.110961    
+factor(id)181   2.536e+01  1.766e+01   1.436 0.151172    
+factor(id)182   1.002e+02  2.193e+01   4.568 5.10e-06 ***
+factor(id)183   1.805e+01  1.306e+01   1.382 0.166978    
+factor(id)184   5.431e+01  1.272e+01   4.270 2.00e-05 ***
+factor(id)185   2.486e+01  1.233e+01   2.016 0.043854 *  
+factor(id)186   1.290e+01  1.306e+01   0.988 0.323203    
+factor(id)187  -9.606e+01  4.871e+01  -1.972 0.048696 *  
+factor(id)188  -8.607e+00  1.962e+01  -0.439 0.660934    
+factor(id)189   7.835e+01  1.397e+01   5.609 2.19e-08 ***
+factor(id)190  -5.923e+00  1.496e+01  -0.396 0.692203    
+factor(id)191   1.028e+01  1.688e+01   0.609 0.542490    
+factor(id)192  -2.605e+00  1.540e+01  -0.169 0.865665    
+factor(id)193  -4.824e+01  1.576e+01  -3.061 0.002222 ** 
+factor(id)194   8.597e+01  1.208e+01   7.118 1.32e-12 ***
+factor(id)195  -1.768e+01  1.394e+01  -1.268 0.204945    
+factor(id)196  -1.515e+01  1.206e+01  -1.256 0.209179    
+factor(id)197  -1.869e+01  1.216e+01  -1.537 0.124485    
+ [ reached getOption(&quot;max.print&quot;) -- omitted 952 rows ]
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 19.48 on 3445 degrees of freedom
+Multiple R-squared:  0.9493,    Adjusted R-squared:  0.9323 
+F-statistic: 56.06 on 1150 and 3445 DF,  p-value: &lt; 2.2e-16</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>The results are a bit ugly and would be over a thousand lines long. When compared to the fixed effects estimates, we can see that the estimated coefficients for <span class="math inline">\(concen\)</span> and <span class="math inline">\(passen\)</span> are identical between the two models.</p>
+</div>
+<div id="random-effects" class="section level2">
+<h2>Random effects</h2>
+<p>Next, we will look at the <strong>Random Effects</strong> estimator. The model being estimated looks like:</p>
+<p><span class="math display">\[\begin{equation}
+fare_{i} = \alpha +\beta_1 distance_{i} + \beta_2 concentration_i +\beta_3 passengers_i +\epsilon_i + \omega_j
+\end{equation}\]</span></p>
+<p>In this model, <span class="math inline">\(\omega_j\)</span> is a separate error term for each of the <span class="math inline">\(j\)</span> cross-sectional groups in your data; here, therefore, it is a different error term for each air route. What differentiates this from the fixed effects model is that <span class="math inline">\(\omega_j\)</span> is assumed to be normally distributed; we can test this assumption using the Hausman test, which we will see a bit later.</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucmVnMWYgPC0gcGxtKGZhcmUgfiBkaXN0ICsgY29uY2VuICsgcGFzc2VuLCBkYXRhID0gYWlyZmFyZXBhbmVsLCBtb2RlbCA9IGMoXCJyYW5kb21cIikpXG5zdGFyZ2F6ZXIocmVnMWIsIHJlZzFjLCByZWcxZCwgcmVnMWYsIGNvbHVtbi5sYWJlbHMgPSBjKFwiUG9vbGVkXCIsIFwiQmV0d2VlblwiLCBcIkZpeGVkXCIsIFwiUmFuZG9tXCIpLCB0eXBlID0gXCJ0ZXh0XCIpXG5gYGAifQ== -->
+<pre class="r"><code>reg1f &lt;- plm(fare ~ dist + concen + passen, data = airfarepanel, model = c(&quot;random&quot;))
+stargazer(reg1b, reg1c, reg1d, reg1f, column.labels = c(&quot;Pooled&quot;, &quot;Between&quot;, &quot;Fixed&quot;, &quot;Random&quot;), type = &quot;text&quot;)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG49PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT1cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBEZXBlbmRlbnQgdmFyaWFibGU6ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxuICAgICAgICAgICAgIC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBmYXJlICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgUG9vbGVkICAgICAgICAgICAgICAgICAgICAgQmV0d2VlbiAgICAgICAgICAgICAgICAgICAgRml4ZWQgICAgICAgICAgICAgIFJhbmRvbSAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICgxKSAgICAgICAgICAgICAgICAgICAgICAgICgyKSAgICAgICAgICAgICAgICAgICAgICAgKDMpICAgICAgICAgICAgICAgICg0KSAgICAgXG4tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS1cbmRpc3QgICAgICAgICAgICAgICAgICAwLjA4NyoqKiAgICAgICAgICAgICAgICAgICAwLjA4OSoqKiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgMC4wNzcqKiogIFxuICAgICAgICAgICAgICAgICAgICAgICAoMC4wMDIpICAgICAgICAgICAgICAgICAgICAoMC4wMDMpICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAoMC4wMDMpICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgNjkuNDMxKioqICAgICAgICAgICAgICAgICAgNzcuMjQ0KioqICAgICAgICAgICAgICAgICAgLTIuNzUyICAgICAgICAgICAgMTcuNjQyKioqICBcbiAgICAgICAgICAgICAgICAgICAgICAgKDUuMTIzKSAgICAgICAgICAgICAgICAgICAoMTAuMzA1KSAgICAgICAgICAgICAgICAgICAoNS4zNzUpICAgICAgICAgICAgKDQuODY4KSAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG5wYXNzZW4gICAgICAgICAgICAgICAgLTAuMDA1KioqICAgICAgICAgICAgICAgICAgIC0wLjAwNCogICAgICAgICAgICAgICAgICAtMC4wNTEqKiogICAgICAgICAgLTAuMDIxKioqICBcbiAgICAgICAgICAgICAgICAgICAgICAgKDAuMDAxKSAgICAgICAgICAgICAgICAgICAgKDAuMDAyKSAgICAgICAgICAgICAgICAgICAoMC4wMDMpICAgICAgICAgICAgKDAuMDAyKSAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG5Db25zdGFudCAgICAgICAgICAgICAgNTIuOTk1KioqICAgICAgICAgICAgICAgICAgNDYuMTgzKioqICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgMTA1LjYyOSoqKiBcbiAgICAgICAgICAgICAgICAgICAgICAgKDQuNDg4KSAgICAgICAgICAgICAgICAgICAgKDguOTUwKSAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgKDUuMTkzKSAgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG4tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS1cbk9ic2VydmF0aW9ucyAgICAgICAgICAgIDQsNTk2ICAgICAgICAgICAgICAgICAgICAgIDEsMTQ5ICAgICAgICAgICAgICAgICAgICAgNCw1OTYgICAgICAgICAgICAgIDQsNTk2ICAgIFxuUjIgICAgICAgICAgICAgICAgICAgICAgMC40MTggICAgICAgICAgICAgICAgICAgICAgMC40NDQgICAgICAgICAgICAgICAgICAgICAwLjA5MiAgICAgICAgICAgICAgMC4xNzkgICAgXG5BZGp1c3RlZCBSMiAgICAgICAgICAgICAwLjQxOCAgICAgICAgICAgICAgICAgICAgICAwLjQ0MyAgICAgICAgICAgICAgICAgICAgLTAuMjEyICAgICAgICAgICAgICAwLjE3OSAgICBcbkYgU3RhdGlzdGljICAxLDEwMC43MjIqKiogKGRmID0gMzsgNDU5MikgMzA1LjE1MioqKiAoZGYgPSAzOyAxMTQ1KSAxNzMuODgwKioqIChkZiA9IDI7IDM0NDUpIDEsMDAyLjE2MioqKlxuPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09XG5Ob3RlOiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAqcDwwLjE7ICoqcDwwLjA1OyAqKipwPDAuMDFcbiJ9 -->
+<pre><code>
+=========================================================================================================
+                                                 Dependent variable:                                     
+             --------------------------------------------------------------------------------------------
+                                                         fare                                            
+                       Pooled                     Between                    Fixed              Random   
+                         (1)                        (2)                       (3)                (4)     
+---------------------------------------------------------------------------------------------------------
+dist                  0.087***                   0.089***                                      0.077***  
+                       (0.002)                    (0.003)                                      (0.003)   
+                                        69.431***                  77.244***                  -2.752            17.642***  
+                       (5.123)                   (10.305)                   (5.375)            (4.868)   
+                                                                                                         
+passen                -0.005***                   -0.004*                  -0.051***          -0.021***  
+                       (0.001)                    (0.002)                   (0.003)            (0.002)   
+                                                                                                         
+Constant              52.995***                  46.183***                                    105.629*** 
+                       (4.488)                    (8.950)                                      (5.193)   
+                                                                                                         
+---------------------------------------------------------------------------------------------------------
+Observations            4,596                      1,149                     4,596              4,596    
+R2                      0.418                      0.444                     0.092              0.179    
+Adjusted R2             0.418                      0.443                    -0.212              0.179    
+F Statistic  1,100.722*** (df = 3; 4592) 305.152*** (df = 3; 1145) 173.880*** (df = 2; 3445) 1,002.162***
+=========================================================================================================
+Note:                                                                         *p&lt;0.1; **p&lt;0.05; ***p&lt;0.01</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+<div id="model-testing" class="section level2">
+<h2>Model testing</h2>
+<p>The typical “workflow” in econometrics is to estimate the <strong>Pooled</strong>, <strong>Random Effects</strong>, and <strong>Fixed Effects</strong> model and then do a couple of tests to determine which model is the best.</p>
+<p>First, we test whether or not the <strong>Random Effects</strong> model is better than the <strong>Pooled</strong> model using the <strong>Lagrange Multiplier Test</strong> and the <code>plmtest()</code> command.</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucGxtdGVzdChyZWcxYilcbmBgYCJ9 -->
+<pre class="r"><code>plmtest(reg1b)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG5cdExhZ3JhbmdlIE11bHRpcGxpZXIgVGVzdCAtIChIb25kYSkgZm9yIGJhbGFuY2VkIHBhbmVsc1xuXG5kYXRhOiAgZmFyZSB+IGRpc3QgKyBjb25jZW4gKyBwYXNzZW5cbm5vcm1hbCA9IDcyLjIzOCwgcC12YWx1ZSA8IDIuMmUtMTZcbmFsdGVybmF0aXZlIGh5cG90aGVzaXM6IHNpZ25pZmljYW50IGVmZmVjdHNcbiJ9 -->
+<pre><code>
+    Lagrange Multiplier Test - (Honda) for balanced panels
+
+data:  fare ~ dist + concen + passen
+normal = 72.238, p-value &lt; 2.2e-16
+alternative hypothesis: significant effects</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>Recall that <code>reg1b</code> was the regression object from the pooled model. Because the p-value is less than .05, we conclude that the random effects model is preferred to the pooled model. Next, we test whether or not the fixed effects model is preferred to the pooled model using the <strong>Hausman Test</strong> and the <code>phtest()</code> command:</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucGh0ZXN0KHJlZzFkLCByZWcxZilcbmBgYCJ9 -->
+<pre class="r"><code>phtest(reg1d, reg1f)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG5cdEhhdXNtYW4gVGVzdFxuXG5kYXRhOiAgZmFyZSB+IGRpc3QgKyBjb25jZW4gKyBwYXNzZW5cbmNoaXNxID0gMjI3LjExLCBkZiA9IDIsIHAtdmFsdWUgPCAyLjJlLTE2XG5hbHRlcm5hdGl2ZSBoeXBvdGhlc2lzOiBvbmUgbW9kZWwgaXMgaW5jb25zaXN0ZW50XG4ifQ== -->
+<pre><code>
+    Hausman Test
+
+data:  fare ~ dist + concen + passen
+chisq = 227.11, df = 2, p-value &lt; 2.2e-16
+alternative hypothesis: one model is inconsistent</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>Again, our p-value is less than .05, so we conclude that the fixed effects model is preferred to the random effects model.</p>
+</div>
+<div id="first-difference-modeling" class="section level2">
+<h2>First difference modeling</h2>
+<p>One final type of panel model to look at is the <strong>First Difference</strong> model. This model first-differences the variables within each group and estimates the regression using those first differences. Because we have 4 time periods, we can calculate 3 first differences for each group:</p>
+<ul>
+<li>1997 to 1998</li>
+<li>1998 to 1999</li>
+<li>1999 to 2000</li>
+</ul>
+<p>Thus, the model we are estimating is:</p>
+<p><span class="math display">\[\begin{equation}
+\Delta fare_{i} = \alpha +\beta_1 \Delta distance_{i} + \beta_2 \Delta concentration_i +\beta_3 \Delta passengers_i +\epsilon_i 
+\end{equation}\]</span></p>
+<p>Where we take the Greek letter Delta (<span class="math inline">\(\Delta\)</span>) to mean “change in”. So we are asking whether or not we can explain the year-to-year change in fare by the year-to-year change in distance (which will of course zero out, as it did with the fixed effects estimator), the year-to-year change in market concentration, and the year-to-year change in passengers.</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucmVnMWcgPC0gcGxtKGZhcmUgfiBkaXN0ICsgY29uY2VuICsgcGFzc2VuLCBkYXRhID0gYWlyZmFyZXBhbmVsLCBtb2RlbCA9IGMoXCJmZFwiKSlcbnN0YXJnYXplcihyZWcxYiwgcmVnMWMsIHJlZzFkLCByZWcxZiwgcmVnMWcsIGNvbHVtbi5sYWJlbHMgPSBjKFwiUG9vbGVkXCIsIFwiQmV0d2VlblwiLCBcIkZpeGVkXCIsIFwiUmFuZG9tXCIsIFwiRmlyc3QgRGlmZlwiKSwgdHlwZSA9IFwidGV4dFwiKVxuYGBgIn0= -->
+<pre class="r"><code>reg1g &lt;- plm(fare ~ dist + concen + passen, data = airfarepanel, model = c(&quot;fd&quot;))
+stargazer(reg1b, reg1c, reg1d, reg1f, reg1g, column.labels = c(&quot;Pooled&quot;, &quot;Between&quot;, &quot;Fixed&quot;, &quot;Random&quot;, &quot;First Diff&quot;), type = &quot;text&quot;)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 </div>
+</div>
 
-<div id="rmd-source-code">LS0tDQp0aXRsZTogIlBhbmVsIFJlZ3Jlc3Npb24iDQpvdXRwdXQ6IGh0bWxfbm90ZWJvb2sNCi0tLQ0KDQojIE92ZXJ2aWV3DQoNCioqUGFuZWwgUmVncmVzc2lvbioqIGlzIGEgdGVjaG5pcXVlIHVzZWQgZm9yIGRhdGEgdGhhdCBoYXMgYm90aCBhICpjcm9zcyBzZWN0aW9uYWwqIGFuZCBhICp0aW1lIHNlcmllcyogY29tcG9uZW50LiAgSW4gb3RoZXIgd29yZHMsIGRhdGEgd2hlcmUgZWFjaCBpbmRpdmlkdWFsL2NvdW50cnkvY29tcGFueS9ldGMuIGluIHRoZSBkYXRhIHNldCBpcyBvYnNlcnZlZCBhdCBtdWx0aXBsZSBwb2ludHMgaW4gdGltZS4gIFdoaWxlIHRoZXJlIGFyZSBwYW5lbCB2ZXJzaW9ucyBvZiBtb3N0IG9mIHRoZSBtb2RlbHMgd2UgaGF2ZSBlbmNvdW50ZXJlZCB0aHVzIGZhciAoZS5nLiBsb2dpdC9wcm9iaXQsIFRvYml0LCBuZWdiaW4sIC4uLiksIHdlIHdpbGwgZm9jdXMgb25seSBvbiB0aGUgbGluZWFyIG1vZGVsLiAgDQoNCkFzIHVzdWFsLCB3ZSBiZWdpbiB3aXRoIGxvYWRpbmcgaW4gc29tZSBlc3NlbnRpYWwgcGFja2FnZXMuIFdlIHdpbGwgbmVlZCB0aGUgYHBsbWAgcGFja2FnZSwgc28gaW5zdGFsbCBpdCBpZiB5b3UgaGF2ZSBub3QgZG9uZSBzbyBhbHJlYWR5LiAgDQoNCg0KYGBge3IsIGV2YWwgPSBGQUxTRX0NCmluc3RhbGwucGFja2FnZXMoInBsbSIpDQpgYGANCg0KYGBge3IsIHdhcm5pbmc9RkFMU0UsIG1lc3NhZ2UgPSBGQUxTRX0NCmxpYnJhcnkodGlkeXZlcnNlKQ0KbGlicmFyeShzdGFyZ2F6ZXIpDQpsaWJyYXJ5KHBsbSkNCmxpYnJhcnkod29vbGRyaWRnZSkNCmxpYnJhcnkoQUVSKQ0KbGlicmFyeShmaXZldGhpcnR5ZWlnaHQpDQoNCmRhdGEoVVNTZWF0QmVsdHMpDQpkYXRhKEZhdGFsaXRpZXMpDQpkYXRhKE11bmljaXBhbGl0aWVzKQ0KZGF0YShVU0FpcmxpbmVzKQ0KZGF0YShkcml2aW5nKQ0KZGF0YShhaXJmYXJlKQ0KZGF0YShtdXJkZXIpDQpkYXRhKE5hdHVyYWxHYXMpDQpkYXRhKEhlYWx0aEluc3VyYW5jZSkNCmRhdGEod2FnZXBhbikNCg0KYGBgDQoNCiMgQ2Vuc29yZWQgTW9kZWxz</div>
+<div id="rmd-source-code">LS0tDQp0aXRsZTogIlBhbmVsIFJlZ3Jlc3Npb24iDQpvdXRwdXQ6IGh0bWxfbm90ZWJvb2sNCi0tLQ0KDQojIE92ZXJ2aWV3DQoNCioqUGFuZWwgUmVncmVzc2lvbioqIGlzIGEgdGVjaG5pcXVlIHVzZWQgZm9yIGRhdGEgdGhhdCBoYXMgYm90aCBhICoqY3Jvc3MtIHNlY3Rpb25hbCoqIGFuZCBhICoqdGltZSBzZXJpZXMqKiBjb21wb25lbnQuICBJbiBvdGhlciB3b3JkcywgZGF0YSB3aGVyZSBlYWNoIGluZGl2aWR1YWwvY291bnRyeS9jb21wYW55L2V0Yy4gaW4gdGhlIGRhdGEgc2V0IGlzIG9ic2VydmVkIGF0IG11bHRpcGxlIHBvaW50cyBpbiB0aW1lLiAgV2hpbGUgdGhlcmUgYXJlIHBhbmVsIHZlcnNpb25zIG9mIG1vc3Qgb2YgdGhlIG1vZGVscyB3ZSBoYXZlIGVuY291bnRlcmVkIHRodXMgZmFyIChlLmcuIGxvZ2l0L3Byb2JpdCwgVG9iaXQsIG5lZ2JpbiwgLi4uKSwgd2Ugd2lsbCBmb2N1cyBvbmx5IG9uIHRoZSBsaW5lYXIgbW9kZWwuICANCg0KQXMgdXN1YWwsIHdlIGJlZ2luIHdpdGggbG9hZGluZyBpbiBzb21lIGVzc2VudGlhbCBwYWNrYWdlcy4gV2Ugd2lsbCBuZWVkIHRoZSBgcGxtYCBwYWNrYWdlLCBzbyBpbnN0YWxsIGl0IGlmIHlvdSBoYXZlIG5vdCBkb25lIHNvIGFscmVhZHkuICANCg0KDQpgYGB7ciwgZXZhbCA9IEZBTFNFfQ0KaW5zdGFsbC5wYWNrYWdlcygicGxtIikNCmBgYA0KDQpgYGB7ciwgd2FybmluZz1GQUxTRSwgbWVzc2FnZSA9IEZBTFNFfQ0KbGlicmFyeSh0aWR5dmVyc2UpDQpsaWJyYXJ5KHN0YXJnYXplcikNCmxpYnJhcnkocGxtKQ0KbGlicmFyeSh3b29sZHJpZGdlKQ0KbGlicmFyeShBRVIpDQpsaWJyYXJ5KGZpdmV0aGlydHllaWdodCkNCg0KZGF0YShVU1NlYXRCZWx0cykNCmRhdGEoRmF0YWxpdGllcykNCmRhdGEoTXVuaWNpcGFsaXRpZXMpDQpkYXRhKFVTQWlybGluZXMpDQpkYXRhKGRyaXZpbmcpDQpkYXRhKGFpcmZhcmUpDQpkYXRhKG11cmRlcikNCmRhdGEoTmF0dXJhbEdhcykNCmRhdGEoSGVhbHRoSW5zdXJhbmNlKQ0KZGF0YSh3YWdlcGFuKQ0KZGF0YShDaWdhcmV0dGVzU1cpDQoNCmBgYA0KDQojIFBhbmVsIERhdGENCg0KVGh1cyBmYXIgdGhpcyBzZW1lc3RlciwgbmVhcmx5IGV2ZXJ5IGRhdGEgc2V0IHdlIGhhdmUgZGVhbHQgd2l0aCBoYXMgKipjcm9zcy1zZWN0aW9uYWwqKjsgZWFjaCBzdWJqZWN0IGlzIG9ic2VydmVkIG9uY2UsIGFuZCB0eXBpY2FsbHkgYWxsIHN1YmplY3RzIGFyZSBvYnNlcnZlZCBhdCB0aGUgc2FtZSB0aW1lLiAgQnkgY29udHJhc3QsICoqcGFuZWwgZGF0YSoqIChzb21ldGltZXMgcmVmZXJyZWQgdG8gYXMgKipsb25naXR1ZGluYWwgZGF0YSoqKSBpbmNsdWRlcyBtdWx0aXBsZSBvYnNlcnZhdGlvbnMgb2YgdGhlIHNhbWUgc2V0IG9mIHN1YmplY3RzLCBtYWRlIGF0IGRpZmZlcmVudCBwb2ludHMgaW4gdGltZS4gIFRvIHNlZSB0aGlzIGRpc3RpbmN0aW9uIG1vcmUgY2xlYXJseSwgbGV0J3MgbG9vayBhdCBhbiBleGFtcGxlIG9mIGEgcGFuZWwgZGF0YSBzZXQsIHRoZSBgYWlyZmFyZWAgZGF0YSBmcm9tIHRoZSBgd29vbGRyaWRnZWAgcGFja2FnZS4gDQoNClRoaXMgaXMgYSBwcmV0dHkgaHVnZSBkYXRhIHNldCwgd2l0aCA0NTk2IG9ic2VydmF0aW9ucyBvdmVyIDE0IHZhcmlhYmxlcy4gIElmIHdlIGV4YW1pbmUgdGhlIGRlc2NyaXB0aW9uIG9mIHRoZSBkYXRhIHVzaW5nIGA/YWlyZmFyZWAsIHdlIGNhbiBzZWUgdGhlIGZlYXR1cmVzIG9mIHRoaXMgZGF0YSBzZXQgdGhhdCBtYWtlIGl0IHBhbmVsIGRhdGEuICBGaXJzdCwgdGhlIHZhcmlhYmxlICR5ZWFyJCBpbmRpY2F0ZXMgdGhhdCB0aGUgZGF0YSBpcyBjb2xsZWN0ZWQgaW4gZWFjaCBvZiA0IHllYXJzOyAxOTk3LCAxOTk4LCAxOTk5LCBhbmQgMjAwMC4gIFNlY29uZCwgdGhlIGRhdGEgaGFzIGFuIGluZGl2aWR1YWwgaWRlbnRpZmllciwgaW4gdGhpcyBjYXNlICRpZCQuICBJZiB3ZSB0YWtlIGEgZGVlcGVyIGxvb2sgYXQgdGhlIGRhdGEgYW5kIHNlZSB0aGF0IHdlIGhhdmUgYW4gb2JzZXJ2YXRpb24gZm9yIGVhY2ggJHllYXIgXHRpbWVzIGlkJCBjb21iaW5hdGlvbiwgdGhlbiB3ZSBoYXZlIGEgcGFuZWwgZGF0YSBzZXQuICBUbyB0aGF0IGVuZCwgbGV0J3MgdGFrZSBhIHF1aWNrIGxvb2sgYXQgdGhlIHZhcmlhYmxlcyB3ZSB3aWxsIGJlIGxvb2tpbmcgYXQgZnJvbSB0aGUgZmlyc3QgMjAgbGluZXMgb2YgZGF0YToNCg0KYGBge3J9DQphaXJmYXJlICU+JSANCiAgICBzZWxlY3QoeWVhciwgaWQsIGZhcmUsIGRpc3QsIHBhc3NlbiwgY29uY2VuKSAlPiUgDQogICAgc2xpY2UoMToxMCkNCg0KYGBgDQpUbyBzZWUgdGhhdCB0aGlzIGlzIHBhbmVsIGRhdGEsIGxvb2sgYXQgdGhlIGZpcnN0IHR3byBjb2x1bW5zLiAgT2JzZXJ2YXRpb25zIDEtNCBhcmUgZm9yICRpZCA9IDEkIGZvciBlYWNoIG9mIHRoZSA0IHBvc3NpYmxlIHZhbHVlcyBvZiAkeWVhciQsIG9ic2VydmF0aW9ucyA1LTggYXJlIHRoZSBzYW1lIGZvciAkaWQgPSAyJCwgYW5kIHNvIGZvcnRoLiAgV2UgYWxzbyBoYXZlIDQgb3RoZXIgdmFyaWFibGVzIHdlIHdpbGwgbG9vayBhdDogDQoNCiogJGZhcmUkIC0gdGhlIGF2ZXJhZ2UgdGlja2V0IHByaWNlIA0KKiAkZGlzdCQgLSB0aGUgZGlzdGFuY2Ugb2YgZWFjaCBhaXIgcm91dGUNCiogJHBhc3NlbiQgLSB0aGUgYXZlcmFnZSBkYWlseSBwYXNzZW5nZXJzIG9uIGVhY2ggcm91dGUNCiogJGNvbmNlbiQgLSBhIG1lYXN1cmUgb2YgdGhlIG1hcmtldCBzaGFyZSBvZiB0aGUgYmlnZ2VzdCBjYXJyaWVyDQoNClRvIGJlZ2luIHVzaW5nIHRoaXMgZGF0YSwgd2UgbmVlZCB0byBmaXJzdCB0cmFuc2Zvcm0gaXQgaW50byBhIHBhbmVsIGRhdGEgc2V0LiAgVGhpcyBtZWFucyBleHBsaWNpdGx5IHRlbGxpbmcgUiB0aGF0ICRpZCQgYW5kICR5ZWFyJCBhcmUgdGhlIHZhcmlhYmxlcyB0aGF0IGRlZmluZSB0aGUgKipjcm9zcy1zZWN0aW9uYWwqKiBhbmQgKip0aW1lIHNlcmllcyoqIGRpbWVuc2lvbnMgb2Ygb3VyIGRhdGEuICBBcyB3ZSBjYW4gc2VlLCBSIGN1cnJlbnRseSB2aWV3cyB0aGVtIGFzIG51bWVyaWMuICANCg0KYGBge3J9DQpzdW1tYXJ5KGFpcmZhcmUpDQpgYGANCg0KV2UgY2FuIHVzZSB0aGUgYHBkYXRhLmZyYW1lKClgIGNvbW1hbmQgaW4gdGhlIGBwbG1gIHBhY2thZ2UgdG8gc2V0ICRpZCQgYW5kICR5ZWFyJCBhcyBvdXIgYGluZGV4YCB2YXJpYWJsZXMuICANCg0KYGBge3J9DQphaXJmYXJlcGFuZWwgPC0gcGRhdGEuZnJhbWUoYWlyZmFyZSwgaW5kZXggPSBjKCJpZCIsInllYXIiKSkNCmBgYA0KDQpOb3csIHdoZW4gd2UgbG9vayBhdCBob3cgdGhlICRpZCQgYW5kICR5ZWFyJCB2YXJpYWJsZXMgYXJlIHN0b3JlZCBpbiB0aGUgYGFpcmZhcmVgIGFuZCBgYWlyZmFyZXBhbmVsYCBvYmplY3RzLCB3ZSBzZWUgdGhhdCBSIHZpZXdzIHRoZW0gcXVpdGUgZGlmZmVyZW50bHk7IGVzc2VudGlhbGx5LCBpdCBpcyB0cmVhdGluZyB0aGVtIGFzIGZhY3RvcnMuDQoNCmBgYHtyfQ0KYWlyZmFyZSAlPiUgc2VsZWN0KGlkLCB5ZWFyKSAlPiUgDQogICAgc3VtbWFyeSguKQ0KYWlyZmFyZXBhbmVsICU+JSBzZWxlY3QoaWQsIHllYXIpICU+JSANCiAgICBzdW1tYXJ5KC4pDQpgYGANCg0KQmVmb3JlIHdlIGVzdGltYXRlIGFueSBtb2RlbHMgd2l0aCBvdXIgcGFuZWwgZGF0YSwgbGV0IHVzIGZpcnN0IGVzdGltYXRlIGFuIE9MUyBtb2RlbCB3aXRoIGBsbSgpYCBvbiB0aGUgYGFpcmZhcmVgIGRhdGEuIFRoZSBtb2RlbCB3ZSBhcmUgZXN0aW1hdGluZyBpczoNCg0KXGJlZ2lue2VxdWF0aW9ufQ0KZmFyZV97aX0gPSBcYWxwaGEgK1xiZXRhXzEgZGlzdGFuY2Vfe2l9ICsgXGJldGFfMiBjb25jZW50cmF0aW9uX2kgK1xiZXRhXzMgcGFzc2VuZ2Vyc19pDQpcZW5ke2VxdWF0aW9ufQ0KDQoNCmBgYHtyLCB3YXJuaW5nID0gRkFMU0V9DQpyZWcxYSA8LSBsbShmYXJlIH4gZGlzdCArIGNvbmNlbiArIHBhc3NlbiwgZGF0YSA9IGFpcmZhcmUpDQpzdGFyZ2F6ZXIocmVnMWEsIHR5cGUgPSAidGV4dCIpDQoNCmBgYA0KDQpJbnRlcnByZXRpbmcgdGhpcyByZWdyZXNzaW9uLCB3ZSBzZWUgdGhhdCBkaXN0YW5jZSBhbmQgbWFya2V0IHNoYXJlIGFyZSBwb3NpdGl2ZWx5IGNvcnJlbGF0ZWQgd2l0aCBmYXJlIGFuZCB0aGUgbnVtYmVyIG9mIHBhc3NlbmdlcnMgaXMgbmVnYXRpdmVseSBjb3JyZWxhdGVkIHdpdGggZmFyZS4NCg0KIyMgUG9vbGVkIE9MUw0KDQpXZSBjYW4gZXN0aW1hdGUgdGhlIHNhbWUgcmVncmVzc2lvbiB1c2luZyBvdXIgcGFuZWwgZGF0YSBzZXQgdXNpbmcgdGhlIGBwbG0oKWAgKCoqUCoqYW5lbCAqKkwqKmluZWFyICoqTSoqb2RlbCApIGNvbW1hbmQuICBCZWNhdXNlIHdlIGFscmVhZHkgc3BjZWlmaWVkIHRoYXQgdGhlIGBhaXJmYXJlcGFuZWxgIG9iamVjdCBpcyBwYW5lbCBkYXRhLCB0aGUgYHBsbSgpYCBjb21tYW5kIG9ubHkgcmVxdWlyZXMgb25lIG1vcmUgYXJndW1lbnQgdGhhbiB0aGUgYGxtKClgIGNvbW1hbmQgeW91IHNob3VsZCBiZSB1c2VkIHRvIGJ5IG5vdywgdGhlIGBtb2RlbCA9YCBhcmd1bWVudC4gIFRvIGVzdGltYXRlIHRoZSBzYW1lIHJlZ3Jlc3Npb24gYXMgYSBiYXNpYyBPTFMgbW9kZWwsIHdlIHVzZSB0aGUgYG1vZGVsID0gInBvb2xpbmciYCBvcHRpb24gdG8gZXN0aW1hdGUgYSAqKnBvb2xlZCoqIHJlZ3Jlc3Npb24uDQoNCmBgYHtyLCB3YXJuaW5nID0gRkFMU0V9DQpyZWcxYiA8LSBwbG0oZmFyZSB+IGRpc3QgKyBjb25jZW4gKyBwYXNzZW4gLCBkYXRhID0gYWlyZmFyZXBhbmVsLCBtb2RlbCA9ICJwb29saW5nIikNCnN0YXJnYXplcihyZWcxYSwgcmVnMWIsIGNvbHVtbi5sYWJlbHMgPSBjKCJPTFMiLCAiUG9vbGVkIiksIHR5cGUgPSAidGV4dCIpDQoNCmBgYA0KDQpBICoqcG9vbGVkKiogcmVncmVzc2lvbiBpcyBvbmUgdGhhdCB1c2VzIHBhbmVsIGRhdGEsIGJ1dCBkb2Vzbid0IGFjdHVhbGx5IHRha2UgaW50byBjb25zaWRlcmF0aW9uIHRoZSBmYWN0IHRoYXQgd2UgaGF2ZSB0aGUgc2FtZSBzdWJqZWN0cyBiZWluZyBvYnNlcnZlZCBvdmVyIG11bHRpcGxlIHRpbWUgcGVyaW9kcy4gIA0KDQojIyBCZXR3ZWVuIGVzdGltYXRvcg0KDQpPbmUgd2F5IHRvIHRha2UgaW50byBjb25zaWRlcmF0aW9uIHRoZSBmYWN0IHRoYXQgd2UgaGF2ZSBtdWx0aXBsZSBvYnNlcnZhdGlvbnMgb2YgZWFjaCBzdWJqZWN0IGlzIHRvICJjb2xsYXBzZSIgdGhlIGRhdGEgaW50byBncm91cCBhdmVyYWdlcyBhbmQgZXN0aW1hdGUgYSBsaW5lYXIgbW9kZWwgdXNpbmcgdGhhdCBkYXRhLiAgVGhpcyBpcyBjYWxsZWQgdGhlICoqYmV0d2VlbioqIGVzdGltYXRvci4gIFRoZSAqKmJldHdlZW4qKiBlc3RpbWF0b3IgaXMgbm90IGNvbW1vbmx5IHVzZWQgaW4gZWNvbm9taWNzLCBidXQgY2FuIGJlIGVzdGltYXRlZCB1c2luZyB0aGUgYHBsbSgpYCBjb21tYW5kIGFzIGJlbG93Og0KDQpgYGB7ciwgd2FybmluZyA9IEZBTFNFfQ0KcmVnMWMgPC0gcGxtKGZhcmUgfiBkaXN0ICsgY29uY2VuICsgcGFzc2VuICwgZGF0YSA9IGFpcmZhcmVwYW5lbCwgbW9kZWwgPSAiYmV0d2VlbiIpIA0Kc3RhcmdhemVyKHJlZzFiLCByZWcxYywgY29sdW1uLmxhYmVscyA9IGMoIlBvb2xlZCIsICJCZXR3ZWVuIiksIHR5cGUgPSAidGV4dCIpDQpgYGANCg0KIyMgRml4ZWQgZWZmZWN0cw0KDQpUaGUgbW9zdCAicG9wdWxhciIgcGFuZWwgbW9kZWwgaW4gZWNvbm9taWNzIGlzIHRoZSAqKkZpeGVkIEVmZmVjdHMqKiwgb3IgKipXaXRoaW4qKiwgZXN0aW1hdG9yLiAgVGhlIGVxdWF0aW9uIGZvciB0aGlzIG1vZGVsIGxvb2tzIGxpa2U6DQoNClxiZWdpbntlcXVhdGlvbn0NCmZhcmVfe2l9ID0gXGFscGhhICsgXHVwc2lsb25faitcYmV0YV8xIGRpc3RhbmNlX3tpfSArIFxiZXRhXzIgY29uY2VudHJhdGlvbl9pICtcYmV0YV8zIHBhc3NlbmdlcnNfaQ0KXGVuZHtlcXVhdGlvbn0NCg0KSW4gdGhpcyBlcXVhdGlvbiwgJFx1cHNpbG9uX2okIGlzIGEgc2VwYXJhdGUgY29uc3RhbnQgdGVybSBmb3IgZWFjaCBvZiB0aGUgJGokIGNyb3NzLXNlY3Rpb25hbCBncm91cHMgaW4geW91ciBkYXRhOyBoZXJlLCB0aGVyZWZvcmUsIGl0IGlzIGEgZGlmZmVyZW50IGNvbnN0YW50IHRlcm0gZm9yIGVhY2ggYWlyIHJvdXRlLiAgDQoNClRoZXJlIGFyZSB0d28gd2F5cyB0byBjb25jZXB0dWFsaXplIHRoZSAqKkZpeGVkIEVmZmVjdHMqKiBtb2RlbDoNCg0KKiBUaGUgKipGaXhlZCBFZmZlY3RzKiogbW9kZWwgc2ltcGx5IGFkZHMgYSB3aG9sZSBsb3Qgb2YgZHVtbXkgdmFyaWFibGVzLCBvbmUgZm9yIGVhY2ggb2YgeW91ciBjcm9zcy1zZWN0aW9uYWwgZ3JvdXBzLiBGb3IgdGhpcyBkYXRhLCBhcyB0aGVyZSAxMTQ5IGRpZmZlcmVudCByb3V0ZXMsIHRoZXJlIHdvdWxkIGJlIDExNDkgZHVtbWllcyBhZGRlZCB0byB0aGUgcmVncmVzc2lvbi4NCiogVGhlICoqRml4ZWQgRWZmZWN0cyoqIG1vZGVsIGNhbGN1bGF0ZXMgdGhlIHdpdGhpbi1ncm91cCBtZWFuIGZvciBlYWNoIHZhcmlhYmxlLCBjYWxjdWxhdGVzIHRoZSBkaWZmZXJlbmNlIGJldHdlZW4gZWFjaCBvYnNlcnZhdGlvbiBhbmQgaXRzIHdpdGhpbi1ncm91cCBtZWFuLCBhbmQgcnVucyB0aGUgcmVncmVzc2lvbiB1c2luZyB0aGVzZSBkaWZmZXJlbmNlcy4gIFRoaXMgaXMgd2hlcmUgaXQgZ2V0cyBpdHMgYWx0ZXJuYXRlIG5hbWUgb2YgdGhlICoqV2l0aGluKiogbW9kZWwgZnJvbS4gIA0KDQpJdCB0dXJucyBvdXQgdGhhdCBib3RoIG9mIHRoZXNlIHdheXMgdG8gY29uY2VwdHVhbGl6ZSB0aGUgZml4ZWQgZWZmZWN0cyBtb2RlbCBhcmUgdGhlIHNhbWUsIGV2ZW4gdGhvdWdoIHRoZXkgbWF5IG5vdCBzZWVtIGxpa2UgaXQuIFRoZSBmaXhlZCBlZmZlY3RzIGVzdGltYXRvciBjYW4gYmUgb2J0YWluZWQgdXNpbmcgdGhlIGBtb2RlbCA9ICJ3aXRoaW4iYCBvcHRpb24gaW4gdGhlIGBwbG0oKWAgY29tbWFuZDoNCg0KYGBge3IsIHdhcm5pbmcgPSBGQUxTRX0NCnJlZzFkIDwtIHBsbShmYXJlIH4gZGlzdCArIGNvbmNlbiArIHBhc3NlbiAsIGRhdGEgPSBhaXJmYXJlLCBpbmRleCA9IGMoImlkIiwieWVhciIpLCBtb2RlbCA9ICJ3aXRoaW4iKSANCnN0YXJnYXplcihyZWcxYiwgcmVnMWMsIHJlZzFkLCBjb2x1bW4ubGFiZWxzID0gYygiUG9vbGVkIiwgIkJldHdlZW4iLCAiRml4ZWQiKSwgdHlwZSA9ICJ0ZXh0IikNCmBgYA0KV2hpbGUgdGhlIGJldHdlZW4gYW5kIHBvb2xlZCBlc3RpbWF0b3JzIGxvb2tlZCB2ZXJ5IHNpbWlsYXIsIHRoZSBmaXhlZCBlZmZlY3QgbW9kZWwgbG9va3MgdmVyeSBkaWZmZXJlbnQuICBUaGUgZmlyc3QgdGhpbmcgd2UgbWlnaHQgbm90ZSBpcyB0aGF0IHRoZXJlIGlzIG5vIGVzdGltYXRlIGZvciB0aGUgJGRpc3QkIHZhcmlhYmxlLiBSZWNhbGwgdGhlIHNlY29uZCBjb25jZXB0dWFsaXp0aW9uIG9mIHRoZSBmaXhlZCBlZmZlY3RzIG1ldGhvZCBhYm92ZSwgdGhhdCBpdCBpcyBjYWxjdWxhdGluZyB3aXRoaW4tZ3JvdXAgdmFyaWF0aW9uIGFuZCB1c2luZyB0aGF0IHRvIGVzdGltYXRlIHRoZSBtb2RlbC4gIEhvd2V2ZXIsICRkaXN0JCBpcyB0aW1lIGludmFyaWFudCB3aXRoaW4gZWFjaCByb3V0ZSAtLSB0aGUgZGlzdGFuY2VzIG9mIHRoZSByb3V0ZXMgZG8gbm90IGNoYW5nZSBmcm9tIHllYXIgdG8geWVhci4gU2luY2UgdGhleSBkbyBub3QgY2hhbmdlLCB0aGUgJGRpc3QkIHZhcmlhYmxlIGlzIGJhc2ljYWxseSBhIGNvbHVtbiBmdWxsIG9mIHplcm9lcywgYW5kIHRoYXQgY2FuJ3QgYmUgaW5jbHVkZWQgaW4gYSByZWdyZXNzaW9uLiBPbmUgb2YgdGhlIGRyYXdiYWNrcyBvZiBhIGZpeGVkIGVmZmVjdCByZWdyZXNzaW9uIGlzIHRoYXQgaXQgaXMgbm90IHZlcnkgdXNlZnVsIGlmIG9uZSBvZiB5b3VyIHZhcmlhYmxlcyBvZiBpbnRlcmVzdCBpcyB0aW1lIGludmFyaWFudC4gIA0KDQpUaGUgb3RoZXIgdGhpbmcgd2UgbWlnaHQgbm90ZSBpcyB0aGF0IHRoZXJlIGlzIGNvbnN0YW50IHRlcm0sIHdoeSBub3Q/ICBSZWNhbGwgdGhlIGZpcnN0IGNvbmNlcHR1YWxpemF0aW9uIG9mIHRoZSBmaXhlZCBlZmZlY3QgbW9kZWwgYWJvdmUsIHRoYXQgaXQgaXMgdGhlIHNhbWUgdGhpbmcgYXMgcnVubmluZyBhIHJlZ3Jlc3Npb24gd2l0aCBhIHdob2xlIHNsZXcgb2YgZHVtbXkgdmFyaWFibGVzLiAgVHlwaWNhbGx5LCBpbiBzdWNoIGNhc2VzLCB3ZSB3b3VsZCBvbWl0IG9uZSBkdW1teSB2YXJpYWJsZSwgYmVjYXVzZSBoYXZpbmcgYSBmdWxsIHNldCBvZiBkdW1taWVzIHdvdWxkIGJlIGNvbGxpbmVhciB3aXRoIHRoZSBjb25zdGFudCB0ZXJtLiAgSW5zdGVhZCwgd2UgY291bGQgc2ltcGx5IG9taXQgdGhlIGNvbnN0YW50IHRlcm0sIHdoaWNoIGlzIHdoYXQgaXMgZ29pbmcgb24gaGVyZS4gIA0KDQpXZSBjYW4gYWxzbyBkZW1vbnN0cmF0ZSB0aGUgZXF1aXZhbGVuY2Ugb2YgdGhlIGZpeGVkIGVmZmVjdHMgbW9kZWwgd2l0aCBhIGR1bW15IHZhcmlhYmxlIG1vZGVsIHByZXR0eSBlYXNpbHkuICBMZXQncyBlc3RpbWF0ZSB0aGUgc2FtZSBtb2RlbCB1c2luZyAgYGxtKClgIGFuZCBhZGRpbmcgYGZhY3RvcihpZClgIGFzIG9uZSBvZiBvdXIgdmFyaWFibGVzIC0tIGBmYWN0b3IoaWQpYCB0ZWxscyBSIHRvIHRyZWF0ICRpZCQgYXMgYSBmYWN0b3IgdmFyaWFibGUgc28gaXQgd2lsbCBtYWtlIDExNDkgZHVtbWllcyBhbmQgZXN0aW1hdGUgdGhhdCBtb2RlbC4gIFRoaXMgaXMgZmFyIG1vcmUgY29tcHV0YXRpb25hbGx5IGludGVuc2l2ZSB0aGFuIHRoZSBgcGxtKClgIGNvbW1hbmQsIGFuZCBydW5uaW5nIHRoZSByZXN1bHQgdGhyb3VnaCBgc3RhcmdhemVyYCB3aWxsIHB0b2JhYmx5IGJlIGRpc2FzdGVyb3VzLCBzbyBsZXQncyBqdXN0IGxvb2sgYXQgdGhlIGBzdW1tYXJ5KClgIG9mIHRoZSBPTFMgcmVncmVzc2lvbiBhbmQgY29tcGFyZSBpdCB0byB0aGUgZml4ZWQgZWZmZWN0cyBlc3RpbWF0b3IgYWJvdmUuIA0KDQoNCmBgYHtyLCB3YXJuaW5nID0gRkFMU0V9DQpyZWcxZSA8LSBsbShmYXJlIH4gZGlzdCArIGNvbmNlbiArIHBhc3NlbiArICBmYWN0b3IoaWQpLCBkYXRhID0gYWlyZmFyZSApDQpzdW1tYXJ5KHJlZzFlKQ0KYGBgDQpUaGUgcmVzdWx0cyBhcmUgYSBiaXQgdWdseSBhbmQgd291bGQgYmUgb3ZlciBhIHRob3VzYW5kIGxpbmVzIGxvbmcuICBXaGVuIGNvbXBhcmVkIHRvIHRoZSBmaXhlZCBlZmZlY3RzIGVzdGltYXRlcywgd2UgY2FuIHNlZSB0aGF0IHRoZSBlc3RpbWF0ZWQgY29lZmZpY2llbnRzIGZvciAkY29uY2VuJCBhbmQgJHBhc3NlbiQgYXJlIGlkZW50aWNhbCBiZXR3ZWVuIHRoZSB0d28gbW9kZWxzLiAgDQoNCiMjIFJhbmRvbSBlZmZlY3RzDQoNCk5leHQsIHdlIHdpbGwgbG9vayBhdCB0aGUgKipSYW5kb20gRWZmZWN0cyoqIGVzdGltYXRvci4gIFRoZSBtb2RlbCBiZWluZyBlc3RpbWF0ZWQgbG9va3MgbGlrZToNCg0KXGJlZ2lue2VxdWF0aW9ufQ0KZmFyZV97aX0gPSBcYWxwaGEgK1xiZXRhXzEgZGlzdGFuY2Vfe2l9ICsgXGJldGFfMiBjb25jZW50cmF0aW9uX2kgK1xiZXRhXzMgcGFzc2VuZ2Vyc19pICtcZXBzaWxvbl9pICsgXG9tZWdhX2oNClxlbmR7ZXF1YXRpb259DQoNCkluIHRoaXMgbW9kZWwsICRcb21lZ2FfaiQgaXMgYSBzZXBhcmF0ZSBlcnJvciB0ZXJtIGZvciBlYWNoIG9mIHRoZSAkaiQgY3Jvc3Mtc2VjdGlvbmFsIGdyb3VwcyBpbiB5b3VyIGRhdGE7IGhlcmUsIHRoZXJlZm9yZSwgaXQgaXMgYSBkaWZmZXJlbnQgZXJyb3IgdGVybSBmb3IgZWFjaCBhaXIgcm91dGUuIFdoYXQgZGlmZmVyZW50aWF0ZXMgdGhpcyBmcm9tIHRoZSBmaXhlZCBlZmZlY3RzIG1vZGVsIGlzIHRoYXQgJFxvbWVnYV9qJCBpcyBhc3N1bWVkIHRvIGJlIG5vcm1hbGx5IGRpc3RyaWJ1dGVkOyB3ZSBjYW4gdGVzdCB0aGlzIGFzc3VtcHRpb24gdXNpbmcgdGhlIEhhdXNtYW4gdGVzdCwgd2hpY2ggd2Ugd2lsbCBzZWUgYSBiaXQgbGF0ZXIuDQoNCmBgYHtyLCB3YXJuaW5nID0gRkFMU0V9DQpyZWcxZiA8LSBwbG0oZmFyZSB+IGRpc3QgKyBjb25jZW4gKyBwYXNzZW4sIGRhdGEgPSBhaXJmYXJlcGFuZWwsIG1vZGVsID0gYygicmFuZG9tIikpDQpzdGFyZ2F6ZXIocmVnMWIsIHJlZzFjLCByZWcxZCwgcmVnMWYsIGNvbHVtbi5sYWJlbHMgPSBjKCJQb29sZWQiLCAiQmV0d2VlbiIsICJGaXhlZCIsICJSYW5kb20iKSwgdHlwZSA9ICJ0ZXh0IikNCg0KYGBgDQoNCiMjIE1vZGVsIHRlc3RpbmcNCg0KVGhlIHR5cGljYWwgIndvcmtmbG93IiBpbiBlY29ub21ldHJpY3MgaXMgdG8gZXN0aW1hdGUgdGhlICoqUG9vbGVkKiosICoqUmFuZG9tIEVmZmVjdHMqKiwgYW5kICoqRml4ZWQgRWZmZWN0cyoqIG1vZGVsIGFuZCB0aGVuIGRvIGEgY291cGxlIG9mIHRlc3RzIHRvIGRldGVybWluZSB3aGljaCBtb2RlbCBpcyB0aGUgYmVzdC4gIA0KDQpGaXJzdCwgd2UgIHRlc3Qgd2hldGhlciBvciBub3QgdGhlICoqUmFuZG9tIEVmZmVjdHMqKiBtb2RlbCBpcyBiZXR0ZXIgdGhhbiB0aGUgKipQb29sZWQqKiBtb2RlbCB1c2luZyB0aGUgKipMYWdyYW5nZSBNdWx0aXBsaWVyIFRlc3QqKiBhbmQgdGhlIGBwbG10ZXN0KClgIGNvbW1hbmQuICANCg0KYGBge3J9DQpwbG10ZXN0KHJlZzFiKQ0KYGBgDQpSZWNhbGwgdGhhdCBgcmVnMWJgIHdhcyB0aGUgcmVncmVzc2lvbiBvYmplY3QgZnJvbSB0aGUgcG9vbGVkIG1vZGVsLiAgQmVjYXVzZSB0aGUgcC12YWx1ZSBpcyBsZXNzIHRoYW4gLjA1LCB3ZSBjb25jbHVkZSB0aGF0IHRoZSByYW5kb20gZWZmZWN0cyBtb2RlbCBpcyBwcmVmZXJyZWQgdG8gdGhlIHBvb2xlZCBtb2RlbC4gIE5leHQsIHdlIHRlc3Qgd2hldGhlciBvciBub3QgdGhlIGZpeGVkIGVmZmVjdHMgbW9kZWwgaXMgcHJlZmVycmVkIHRvIHRoZSBwb29sZWQgbW9kZWwgdXNpbmcgdGhlICoqSGF1c21hbiBUZXN0KiogYW5kIHRoZSBgcGh0ZXN0KClgIGNvbW1hbmQ6DQoNCg0KYGBge3J9DQpwaHRlc3QocmVnMWQsIHJlZzFmKQ0KYGBgDQpBZ2Fpbiwgb3VyIHAtdmFsdWUgaXMgbGVzcyB0aGFuIC4wNSwgc28gd2UgY29uY2x1ZGUgdGhhdCB0aGUgZml4ZWQgZWZmZWN0cyBtb2RlbCBpcyBwcmVmZXJyZWQgdG8gdGhlIHJhbmRvbSBlZmZlY3RzIG1vZGVsLg0KDQojIyBGaXJzdCBkaWZmZXJlbmNlIG1vZGVsaW5nDQoNCk9uZSBmaW5hbCB0eXBlIG9mIHBhbmVsIG1vZGVsIHRvIGxvb2sgYXQgaXMgdGhlICoqRmlyc3QgRGlmZmVyZW5jZSoqIG1vZGVsLiAgVGhpcyBtb2RlbCBmaXJzdC1kaWZmZXJlbmNlcyB0aGUgdmFyaWFibGVzIHdpdGhpbiBlYWNoIGdyb3VwIGFuZCBlc3RpbWF0ZXMgdGhlIHJlZ3Jlc3Npb24gdXNpbmcgdGhvc2UgZmlyc3QgZGlmZmVyZW5jZXMuICBCZWNhdXNlIHdlIGhhdmUgNCB0aW1lIHBlcmlvZHMsIHdlIGNhbiBjYWxjdWxhdGUgMyBmaXJzdCBkaWZmZXJlbmNlcyBmb3IgZWFjaCBncm91cDoNCg0KKiAxOTk3IHRvIDE5OTgNCiogMTk5OCB0byAxOTk5DQoqIDE5OTkgdG8gMjAwMA0KDQpUaHVzLCB0aGUgbW9kZWwgd2UgYXJlIGVzdGltYXRpbmcgaXM6DQoNClxiZWdpbntlcXVhdGlvbn0NClxEZWx0YSBmYXJlX3tpfSA9IFxhbHBoYSArXGJldGFfMSBcRGVsdGEgZGlzdGFuY2Vfe2l9ICsgXGJldGFfMiBcRGVsdGEgY29uY2VudHJhdGlvbl9pICtcYmV0YV8zIFxEZWx0YSBwYXNzZW5nZXJzX2kgK1xlcHNpbG9uX2kgDQpcZW5ke2VxdWF0aW9ufQ0KDQpXaGVyZSB3ZSB0YWtlIHRoZSBHcmVlayBsZXR0ZXIgRGVsdGEgKCRcRGVsdGEkKSB0byBtZWFuICJjaGFuZ2UgaW4iLiAgU28gd2UgYXJlIGFza2luZyB3aGV0aGVyIG9yIG5vdCB3ZSBjYW4gZXhwbGFpbiB0aGUgeWVhci10by15ZWFyIGNoYW5nZSBpbiBmYXJlIGJ5IHRoZSB5ZWFyLXRvLXllYXIgY2hhbmdlIGluIGRpc3RhbmNlICh3aGljaCB3aWxsIG9mIGNvdXJzZSB6ZXJvIG91dCwgYXMgaXQgZGlkIHdpdGggdGhlIGZpeGVkIGVmZmVjdHMgZXN0aW1hdG9yKSwgdGhlIHllYXItdG8teWVhciBjaGFuZ2UgaW4gbWFya2V0IGNvbmNlbnRyYXRpb24sIGFuZCB0aGUgeWVhci10by15ZWFyIGNoYW5nZSBpbiBwYXNzZW5nZXJzLiAgDQoNCmBgYHtyLCB3YXJuaW5nID0gRkFMU0V9DQpyZWcxZyA8LSBwbG0oZmFyZSB+IGRpc3QgKyBjb25jZW4gKyBwYXNzZW4sIGRhdGEgPSBhaXJmYXJlcGFuZWwsIG1vZGVsID0gYygiZmQiKSkNCnN0YXJnYXplcihyZWcxYiwgcmVnMWMsIHJlZzFkLCByZWcxZiwgcmVnMWcsIGNvbHVtbi5sYWJlbHMgPSBjKCJQb29sZWQiLCAiQmV0d2VlbiIsICJGaXhlZCIsICJSYW5kb20iLCAiRmlyc3QgRGlmZiIpLCB0eXBlID0gInRleHQiKQ0KYGBgDQoNCg==</div>
 
 
 

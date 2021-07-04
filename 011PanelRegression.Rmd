@@ -5,7 +5,7 @@ output: html_notebook
 
 # Overview
 
-**Panel Regression** is a technique used for data that has both a *cross sectional* and a *time series* component.  In other words, data where each individual/country/company/etc. in the data set is observed at multiple points in time.  While there are panel versions of most of the models we have encountered thus far (e.g. logit/probit, Tobit, negbin, ...), we will focus only on the linear model.  
+**Panel Regression** is a technique used for data that has both a **cross- sectional** and a **time series** component.  In other words, data where each individual/country/company/etc. in the data set is observed at multiple points in time.  While there are panel versions of most of the models we have encountered thus far (e.g. logit/probit, Tobit, negbin, ...), we will focus only on the linear model.  
 
 As usual, we begin with loading in some essential packages. We will need the `plm` package, so install it if you have not done so already.  
 
@@ -32,7 +32,171 @@ data(murder)
 data(NaturalGas)
 data(HealthInsurance)
 data(wagepan)
+data(CigarettesSW)
 
 ```
 
-# Censored Models
+# Panel Data
+
+Thus far this semester, nearly every data set we have dealt with has **cross-sectional**; each subject is observed once, and typically all subjects are observed at the same time.  By contrast, **panel data** (sometimes referred to as **longitudinal data**) includes multiple observations of the same set of subjects, made at different points in time.  To see this distinction more clearly, let's look at an example of a panel data set, the `airfare` data from the `wooldridge` package. 
+
+This is a pretty huge data set, with 4596 observations over 14 variables.  If we examine the description of the data using `?airfare`, we can see the features of this data set that make it panel data.  First, the variable $year$ indicates that the data is collected in each of 4 years; 1997, 1998, 1999, and 2000.  Second, the data has an individual identifier, in this case $id$.  If we take a deeper look at the data and see that we have an observation for each $year \times id$ combination, then we have a panel data set.  To that end, let's take a quick look at the variables we will be looking at from the first 20 lines of data:
+
+```{r}
+airfare %>% 
+    select(year, id, fare, dist, passen, concen) %>% 
+    slice(1:10)
+
+```
+To see that this is panel data, look at the first two columns.  Observations 1-4 are for $id = 1$ for each of the 4 possible values of $year$, observations 5-8 are the same for $id = 2$, and so forth.  We also have 4 other variables we will look at: 
+
+* $fare$ - the average ticket price 
+* $dist$ - the distance of each air route
+* $passen$ - the average daily passengers on each route
+* $concen$ - a measure of the market share of the biggest carrier
+
+To begin using this data, we need to first transform it into a panel data set.  This means explicitly telling R that $id$ and $year$ are the variables that define the **cross-sectional** and **time series** dimensions of our data.  As we can see, R currently views them as numeric.  
+
+```{r}
+summary(airfare)
+```
+
+We can use the `pdata.frame()` command in the `plm` package to set $id$ and $year$ as our `index` variables.  
+
+```{r}
+airfarepanel <- pdata.frame(airfare, index = c("id","year"))
+```
+
+Now, when we look at how the $id$ and $year$ variables are stored in the `airfare` and `airfarepanel` objects, we see that R views them quite differently; essentially, it is treating them as factors.
+
+```{r}
+airfare %>% select(id, year) %>% 
+    summary(.)
+airfarepanel %>% select(id, year) %>% 
+    summary(.)
+```
+
+Before we estimate any models with our panel data, let us first estimate an OLS model with `lm()` on the `airfare` data. The model we are estimating is:
+
+\begin{equation}
+fare_{i} = \alpha +\beta_1 distance_{i} + \beta_2 concentration_i +\beta_3 passengers_i
+\end{equation}
+
+
+```{r, warning = FALSE}
+reg1a <- lm(fare ~ dist + concen + passen, data = airfare)
+stargazer(reg1a, type = "text")
+
+```
+
+Interpreting this regression, we see that distance and market share are positively correlated with fare and the number of passengers is negatively correlated with fare.
+
+## Pooled OLS
+
+We can estimate the same regression using our panel data set using the `plm()` (**P**anel **L**inear **M**odel ) command.  Because we already spceified that the `airfarepanel` object is panel data, the `plm()` command only requires one more argument than the `lm()` command you should be used to by now, the `model =` argument.  To estimate the same regression as a basic OLS model, we use the `model = "pooling"` option to estimate a **pooled** regression.
+
+```{r, warning = FALSE}
+reg1b <- plm(fare ~ dist + concen + passen , data = airfarepanel, model = "pooling")
+stargazer(reg1a, reg1b, column.labels = c("OLS", "Pooled"), type = "text")
+
+```
+
+A **pooled** regression is one that uses panel data, but doesn't actually take into consideration the fact that we have the same subjects being observed over multiple time periods.  
+
+## Between estimator
+
+One way to take into consideration the fact that we have multiple observations of each subject is to "collapse" the data into group averages and estimate a linear model using that data.  This is called the **between** estimator.  The **between** estimator is not commonly used in economics, but can be estimated using the `plm()` command as below:
+
+```{r, warning = FALSE}
+reg1c <- plm(fare ~ dist + concen + passen , data = airfarepanel, model = "between") 
+stargazer(reg1b, reg1c, column.labels = c("Pooled", "Between"), type = "text")
+```
+
+## Fixed effects
+
+The most "popular" panel model in economics is the **Fixed Effects**, or **Within**, estimator.  The equation for this model looks like:
+
+\begin{equation}
+fare_{i} = \alpha + \upsilon_j+\beta_1 distance_{i} + \beta_2 concentration_i +\beta_3 passengers_i
+\end{equation}
+
+In this equation, $\upsilon_j$ is a separate constant term for each of the $j$ cross-sectional groups in your data; here, therefore, it is a different constant term for each air route.  
+
+There are two ways to conceptualize the **Fixed Effects** model:
+
+* The **Fixed Effects** model simply adds a whole lot of dummy variables, one for each of your cross-sectional groups. For this data, as there 1149 different routes, there would be 1149 dummies added to the regression.
+* The **Fixed Effects** model calculates the within-group mean for each variable, calculates the difference between each observation and its within-group mean, and runs the regression using these differences.  This is where it gets its alternate name of the **Within** model from.  
+
+It turns out that both of these ways to conceptualize the fixed effects model are the same, even though they may not seem like it. The fixed effects estimator can be obtained using the `model = "within"` option in the `plm()` command:
+
+```{r, warning = FALSE}
+reg1d <- plm(fare ~ dist + concen + passen , data = airfare, index = c("id","year"), model = "within") 
+stargazer(reg1b, reg1c, reg1d, column.labels = c("Pooled", "Between", "Fixed"), type = "text")
+```
+While the between and pooled estimators looked very similar, the fixed effect model looks very different.  The first thing we might note is that there is no estimate for the $dist$ variable. Recall the second conceptualiztion of the fixed effects method above, that it is calculating within-group variation and using that to estimate the model.  However, $dist$ is time invariant within each route -- the distances of the routes do not change from year to year. Since they do not change, the $dist$ variable is basically a column full of zeroes, and that can't be included in a regression. One of the drawbacks of a fixed effect regression is that it is not very useful if one of your variables of interest is time invariant.  
+
+The other thing we might note is that there is constant term, why not?  Recall the first conceptualization of the fixed effect model above, that it is the same thing as running a regression with a whole slew of dummy variables.  Typically, in such cases, we would omit one dummy variable, because having a full set of dummies would be collinear with the constant term.  Instead, we could simply omit the constant term, which is what is going on here.  
+
+We can also demonstrate the equivalence of the fixed effects model with a dummy variable model pretty easily.  Let's estimate the same model using  `lm()` and adding `factor(id)` as one of our variables -- `factor(id)` tells R to treat $id$ as a factor variable so it will make 1149 dummies and estimate that model.  This is far more computationally intensive than the `plm()` command, and running the result through `stargazer` will ptobably be disasterous, so let's just look at the `summary()` of the OLS regression and compare it to the fixed effects estimator above. 
+
+
+```{r, warning = FALSE}
+reg1e <- lm(fare ~ dist + concen + passen +  factor(id), data = airfare )
+summary(reg1e)
+```
+The results are a bit ugly and would be over a thousand lines long.  When compared to the fixed effects estimates, we can see that the estimated coefficients for $concen$ and $passen$ are identical between the two models.  
+
+## Random effects
+
+Next, we will look at the **Random Effects** estimator.  The model being estimated looks like:
+
+\begin{equation}
+fare_{i} = \alpha +\beta_1 distance_{i} + \beta_2 concentration_i +\beta_3 passengers_i +\epsilon_i + \omega_j
+\end{equation}
+
+In this model, $\omega_j$ is a separate error term for each of the $j$ cross-sectional groups in your data; here, therefore, it is a different error term for each air route. What differentiates this from the fixed effects model is that $\omega_j$ is assumed to be normally distributed; we can test this assumption using the Hausman test, which we will see a bit later.
+
+```{r, warning = FALSE}
+reg1f <- plm(fare ~ dist + concen + passen, data = airfarepanel, model = c("random"))
+stargazer(reg1b, reg1c, reg1d, reg1f, column.labels = c("Pooled", "Between", "Fixed", "Random"), type = "text")
+
+```
+
+## Model testing
+
+The typical "workflow" in econometrics is to estimate the **Pooled**, **Random Effects**, and **Fixed Effects** model and then do a couple of tests to determine which model is the best.  
+
+First, we  test whether or not the **Random Effects** model is better than the **Pooled** model using the **Lagrange Multiplier Test** and the `plmtest()` command.  
+
+```{r}
+plmtest(reg1b)
+```
+Recall that `reg1b` was the regression object from the pooled model.  Because the p-value is less than .05, we conclude that the random effects model is preferred to the pooled model.  Next, we test whether or not the fixed effects model is preferred to the pooled model using the **Hausman Test** and the `phtest()` command:
+
+
+```{r}
+phtest(reg1d, reg1f)
+```
+Again, our p-value is less than .05, so we conclude that the fixed effects model is preferred to the random effects model.
+
+## First difference modeling
+
+One final type of panel model to look at is the **First Difference** model.  This model first-differences the variables within each group and estimates the regression using those first differences.  Because we have 4 time periods, we can calculate 3 first differences for each group:
+
+* 1997 to 1998
+* 1998 to 1999
+* 1999 to 2000
+
+Thus, the model we are estimating is:
+
+\begin{equation}
+\Delta fare_{i} = \alpha +\beta_1 \Delta distance_{i} + \beta_2 \Delta concentration_i +\beta_3 \Delta passengers_i +\epsilon_i 
+\end{equation}
+
+Where we take the Greek letter Delta ($\Delta$) to mean "change in".  So we are asking whether or not we can explain the year-to-year change in fare by the year-to-year change in distance (which will of course zero out, as it did with the fixed effects estimator), the year-to-year change in market concentration, and the year-to-year change in passengers.  
+
+```{r, warning = FALSE}
+reg1g <- plm(fare ~ dist + concen + passen, data = airfarepanel, model = c("fd"))
+stargazer(reg1b, reg1c, reg1d, reg1f, reg1g, column.labels = c("Pooled", "Between", "Fixed", "Random", "First Diff"), type = "text")
+```
+

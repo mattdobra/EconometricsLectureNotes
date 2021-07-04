@@ -33,7 +33,10 @@ data(Medicaid1986)
 data(DoctorVisits)
 data(EquationCitations)
 data(NMES1988)
-
+data(wagepan)
+data(murder)
+data(NaturalGas)
+data(HealthInsurance)
 ```
 
 # Censored Models
