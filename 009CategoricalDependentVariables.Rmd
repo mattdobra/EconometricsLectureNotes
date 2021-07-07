@@ -328,6 +328,8 @@ Looked at this way, we can see that education is not a good predictor of recidiv
 
 ### Data for further exploration
 
+For this assignment, choose 2 of the datasets below to analyze.
+
 * `AER:CreditCard` - model $card$, a binary variable denoting whether or not a credit card application was accepted.
 * `AER:HMDA` - model $deny$, looking in particular for discrimination against black borrowers (the $afam$ dummy). Does discrimination go away when controlling for all relevant factors?
 * `AER:PSID1976` - model $participation$ as a function of education, age, number of children, family income, etc.
@@ -390,6 +392,8 @@ tibble(temphousing)
 
 * The `fivethirtyeight` dataset `steak_survey` has an interesting ordinal variable, $steak\_prep$, which comes from a survey of how well done Americans like their steak.
 * The `comma_survey` in the `fivethirtyeight` dataset includes a variable called $care\_proper\_grammar$ that is a likert scale on how much people care about proper use of grammar.
+* In the `wooldridge:happiness` dataset, the `happy` variable is ordinal.
+
 
 # Wrapping Up
 

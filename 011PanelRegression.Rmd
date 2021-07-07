@@ -3,6 +3,8 @@ title: "Panel Regression"
 output: html_notebook
 ---
 
+
+
 # Overview
 
 **Panel Regression** is a technique used for data that has both a **cross- sectional** and a **time series** component.  In other words, data where each individual/country/company/etc. in the data set is observed at multiple points in time.  While there are panel versions of most of the models we have encountered thus far (e.g. logit/probit, Tobit, negbin, ...), we will focus only on the linear model.  
@@ -40,13 +42,12 @@ data(CigarettesSW)
 
 Thus far this semester, nearly every data set we have dealt with has **cross-sectional**; each subject is observed once, and typically all subjects are observed at the same time.  By contrast, **panel data** (sometimes referred to as **longitudinal data**) includes multiple observations of the same set of subjects, made at different points in time.  To see this distinction more clearly, let's look at an example of a panel data set, the `airfare` data from the `wooldridge` package. 
 
-This is a pretty huge data set, with 4596 observations over 14 variables.  If we examine the description of the data using `?airfare`, we can see the features of this data set that make it panel data.  First, the variable $year$ indicates that the data is collected in each of 4 years; 1997, 1998, 1999, and 2000.  Second, the data has an individual identifier, in this case $id$.  If we take a deeper look at the data and see that we have an observation for each $year \times id$ combination, then we have a panel data set.  To that end, let's take a quick look at the variables we will be looking at from the first 20 lines of data:
+This is a pretty huge data set, with 4596 observations over 14 variables.  If we examine the description of the data using `?airfare`, we can see the features of this data set that make it panel data.  First, the variable $year$ indicates that the data is collected in each of 4 years; 1997, 1998, 1999, and 2000.  Second, the data has an individual identifier, in this case $id$.  If we take a deeper look at the data and see that we have an observation for each $year \times id$ combination, then we have a panel data set.  To that end, let's take a quick look at the variables we will be looking at from the first 10 lines of data:
 
 ```{r}
 airfare %>% 
     select(year, id, fare, dist, passen, concen) %>% 
     slice(1:10)
-
 ```
 To see that this is panel data, look at the first two columns.  Observations 1-4 are for $id = 1$ for each of the 4 possible values of $year$, observations 5-8 are the same for $id = 2$, and so forth.  We also have 4 other variables we will look at: 
 
@@ -131,9 +132,9 @@ It turns out that both of these ways to conceptualize the fixed effects model ar
 
 ```{r, warning = FALSE}
 reg1d <- plm(fare ~ dist + concen + passen , data = airfare, index = c("id","year"), model = "within") 
-stargazer(reg1b, reg1c, reg1d, column.labels = c("Pooled", "Between", "Fixed"), type = "text")
+stargazer(reg1b, reg1d, column.labels = c("Pooled", "Fixed"), type = "text")
 ```
-While the between and pooled estimators looked very similar, the fixed effect model looks very different.  The first thing we might note is that there is no estimate for the $dist$ variable. Recall the second conceptualiztion of the fixed effects method above, that it is calculating within-group variation and using that to estimate the model.  However, $dist$ is time invariant within each route -- the distances of the routes do not change from year to year. Since they do not change, the $dist$ variable is basically a column full of zeroes, and that can't be included in a regression. One of the drawbacks of a fixed effect regression is that it is not very useful if one of your variables of interest is time invariant.  
+While the between and pooled estimators looked very similar, the fixed effect model looks very different.  The first thing we might note is that there is no estimate for the $dist$ variable. Recall the second conceptualization of the fixed effects method above, that it is calculating within-group variation and using that to estimate the model.  However, $dist$ is **time invariant** within each route -- the distances of the routes do not change from year to year. Since they do not change, the $dist$ variable is basically a column full of zeroes, and that can't be included in a regression. One of the drawbacks of a fixed effect regression is that it is not very useful if one of your variables of interest is time invariant.  
 
 The other thing we might note is that there is constant term, why not?  Recall the first conceptualization of the fixed effect model above, that it is the same thing as running a regression with a whole slew of dummy variables.  Typically, in such cases, we would omit one dummy variable, because having a full set of dummies would be collinear with the constant term.  Instead, we could simply omit the constant term, which is what is going on here.  
 
@@ -158,7 +159,7 @@ In this model, $\omega_j$ is a separate error term for each of the $j$ cross-sec
 
 ```{r, warning = FALSE}
 reg1f <- plm(fare ~ dist + concen + passen, data = airfarepanel, model = c("random"))
-stargazer(reg1b, reg1c, reg1d, reg1f, column.labels = c("Pooled", "Between", "Fixed", "Random"), type = "text")
+stargazer(reg1b, reg1d, reg1f, column.labels = c("Pooled", "Fixed", "Random"), type = "text")
 
 ```
 
@@ -193,10 +194,55 @@ Thus, the model we are estimating is:
 \Delta fare_{i} = \alpha +\beta_1 \Delta distance_{i} + \beta_2 \Delta concentration_i +\beta_3 \Delta passengers_i +\epsilon_i 
 \end{equation}
 
-Where we take the Greek letter Delta ($\Delta$) to mean "change in".  So we are asking whether or not we can explain the year-to-year change in fare by the year-to-year change in distance (which will of course zero out, as it did with the fixed effects estimator), the year-to-year change in market concentration, and the year-to-year change in passengers.  
+Where we take the Greek letter Delta ($\Delta$) to mean "change in".  So we are asking whether or not we can explain the year-to-year change in fare by the year-to-year change in distance (which will of course zero out, as it did with the fixed effects estimator), the year-to-year change in market concentration, and the year-to-year change in passengers.  This model can be estimated using the `model = "fd"` option in the `plm()` command:
 
 ```{r, warning = FALSE}
-reg1g <- plm(fare ~ dist + concen + passen, data = airfarepanel, model = c("fd"))
-stargazer(reg1b, reg1c, reg1d, reg1f, reg1g, column.labels = c("Pooled", "Between", "Fixed", "Random", "First Diff"), type = "text")
+reg1g <- plm(fare ~ dist + concen + passen, data = airfarepanel, model = "fd")
+stargazer(reg1b, reg1d, reg1f, reg1g, column.labels = c("Pooled", "Fixed", "Random", "First Diff."), type = "text")
+```
+As expected, the $dist$ variable had to be dropped due to the fact that it is time invariant within group.  It is also noteworthy that the number of observations fell from 4596 to 3447 -- this is a natural consequence of the process of first-differencing the data; if there are 4 time periods, there can only be 3 first-differences.  Because of the wayt he data ha been transformed, the coefficients need to be interpreted with respect to the fact that the regression was estimated on first-differenced data.  
+
+Let's analyze another panel data set.  If you are pretty sure you aren't interested in a first-differenced model, the baseic workflow is fairly simple:
+
+1. Identify cross-sectional and time series variables in the data.
+2. Estimate pooled, random, and fixed effects, and interpret the results.
+3. Perform tests to see which model is prefered model
+
+First, we will create the new object called `seatbeltpanel` that specifies our `index()` for the data.
+
+```{r}
+seatbeltpanel <- pdata.frame(USSeatBelts, index = c("state","year"))
 ```
 
+Next, we estimate the 3 basic panel models:
+
+```{r, warning = FALSE}
+reg2a <- plm(fatalities ~ seatbelt + speed65 + speed70 + drinkage + alcohol + income + age + enforce, data = seatbeltpanel, model = "pooling")
+reg2b <- plm(fatalities ~ seatbelt + speed65 + speed70 + drinkage + alcohol + income + age + enforce, data = seatbeltpanel, model = "random")
+reg2c <- plm(fatalities ~ seatbelt + speed65 + speed70 + drinkage + alcohol + income + age + enforce, data = seatbeltpanel, model = "within")
+stargazer(reg2a, reg2b, reg2c, type = "text", column.labels = c("Pooled","Random Eff.", "Fixed Eff"))
+
+```
+All told, these are extremely consistent results.  They suggest that traffic fatalities are higher with higher speed limits, but are lower in states with more strict alcohol laws, higher rates of seat belt usage, and higher incomes.
+
+Finally, we estimate the Lagarange Multiplier and Hausman tests. 
+
+```{r}
+plmtest(reg2a)
+```
+
+The Lagrange Multiplier test indicates that the random effects model is preferred to the pooled model. 
+
+```{r}
+phtest(reg2b, reg2c)
+```
+
+The Hausman test does not show a signficant difference between the models, so this suggests that the random effects model the right model.
+
+### Data for further exploration
+
+* `AER:Fatalities` is a similar sort of dataset to the Seatbelt data above.
+* `AER:Municipalities` is an interesting Swedish dataset of city taxes and spending
+* `AER:USAirlines`
+* `wooldridge:driving`
+* `wooldridge:crime4`

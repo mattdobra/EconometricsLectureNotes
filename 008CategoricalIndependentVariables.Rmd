@@ -459,6 +459,18 @@ stargazer(reg5b, reg5c, type = "text")
 ```
 If your theory were correct, you would expect to see a positive and significant sign on the interaction term.  However, the interaction term is the wrong sign and insignificant as well, suggesting that perhaps the impact of funding is not different based on the poverty characteristics of schools.
 
+### Data for further exploration
+
+For this assignment, choose 2 of the datasets below to analyze.  You must use at least one of the factor variables in your analysis.
+
+* `AER:GrowthDJ` - look at economic growth.
+* `AER:CollegeDistance` - use $education$ as the dependent variable.
+* `wooldridge:beauty` - use $wage$ or $logwage$ as your dependent variable.
+* `wooldridge:campus` - Use some measure of crime as your dependent variable. Might be worth transforming some variables into rate variables.
+* `wooldridge:twoyear` - This data looks at the returns to education from 2 and 4 year colleges, use the $lwage$ variable (log wages) as your depentent variable.  
+* Choose any of one of the `wooldridge` datasets relating to gpa: `gpa`, `gpa2`, or `gpa3` and predict GPA.
+
+
 # Wrapping up
 
 When we began our discussion of regression, we limited ourselves to using only numeric independent variables; in this notebook, we extended power of regression modeling can be extended to include categorical independent variables as well.  The next step is to consider the ability of regression modeling to explain categorical dependent variables.     

@@ -13,8 +13,13 @@ As usual, let's start by loading the libraries and data we will be using in this
 library(tidyverse)
 library(stargazer)
 library(AER)
+library(wooldridge)
+library(fivethirtyeight)
 data(CPS1985)
 attach(CPS1985)
+data(wine)
+data(pulitzer)
+data("StrikeDuration")
 ```
 
 # Prelude to Regression: The Correlation Test
@@ -497,6 +502,14 @@ stargazer(reg5, type = "text")
 ```
 The $R^2$ is pretty huge $R^2 = 0.86$ and the $\hat{\beta}$ is positive and significant at the 99% level.  This is a tricky $\beta$ to interpret, because the variable shareA is defined as $\frac{Expenditures\:by\: Candiate\:A}{Expenditures\:by\:Candidate\:A + Expenditures\:by\:Candidate\:B}$. It can be done, but it is tricky.  In some cases, it is easier just interpreting the **signs** and **significance** of the coefficients, and not focusing so much on the actual **magnitude** of the coefficients.  
 
+### Data for further analysis
+
+Choose 2 of the datasets below to analyze.  
+
+* `wooldridge:wine` has 3 interesting variables to use as dependent variables against wine consumption.
+* In the `fivethirtyeight:pulitzer` data, can $pctchg\_circ$ be explained by the pulitzer prize winners at each newspaper?
+* Predict the drop in output with the duration of strikes using the `AER:StrikeDuration` data.
+
 # Multivariate Regression
 
 ## Predictive modeling and hypothesis testing
@@ -570,7 +583,17 @@ We found a negative relationship between expenditures and math scores.  Let's ad
 reg4z <- lm(math4 ~ exppp + lunch, data = meap01)
 stargazer(reg4, reg4z, type = "text")
 ```
-The $R^2$ shot up, and now we see that per pupil expenditures is positively (and significantly) correlated with student math scores, while the percent of students eligible for free or reduced lunch (a measure of poverty) is negative and significant.  
+The $R^2$ shot up, and now we see that per pupil expenditures is positively (and significantly) correlated with student math scores, while the percent of students eligible for free or reduced lunch (a measure of poverty) is negative and significant. 
+
+### Data for further analysis
+
+For your assignment, look at the  `AER:CigarettesB` data and the `AER:Electricity1955` data.
+
+* Using `AER:CigarettesB`, estimate a demand function for cigarettes. Use $packs$ as your dependent variable. Does your demand curve slope downward? Are cigarettes a normal good? Since this is a log-log regression, the coefficient on price is the price elasticity of demand.  Typically, we assume cigarettes are inelastic, is that what you are finding? What do you think might be going on here? 
+* Use the `AER:Electricity1955` data to estimate a Cobb-Douglas cost function.  Use the code in the "Examples" section to estimate the model and test whether or not electricity has constant returns to scale.
+* `AER:MASchools` has 2 possible dependent variables to model as a function of school district attributes, $score4$ and $score8$.
+* `AER:CASchools` is another interesting school dataset.
+* Predict student grades using the `wooldridge:attend` data.
 
 # Wrapping Up
 
