@@ -241,8 +241,17 @@ The Hausman test does not show a signficant difference between the models, so th
 
 ### Data for further exploration
 
-* `AER:Fatalities` is a similar sort of dataset to the Seatbelt data above.
-* `AER:Municipalities` is an interesting Swedish dataset of city taxes and spending
-* `AER:USAirlines`
-* `wooldridge:driving`
-* `wooldridge:crime4`
+For this assignment, choose 2 of the datasets below to analyze.  One of your choices must be the `AER:CigarettesSW` data.  
+
+* `AER:Fatalities` - This is a similar sort of dataset to the Seatbelt data above.
+* `AER:Municipalities` This is an interesting Swedish dataset of city taxes and spending.
+* `AER:USAirlines` - Small dataset that looks at cost of production.
+* `wooldridge:driving` - This is another driving fatality dataset.
+* `wooldridge:crime4` - Crime data is often a good place to look at first-difference models
+* `wooldridge:wagepan` - Looking at wages in a panel often provides very different conclusions than just in a cross sectional
+* `AER:NaturalGas` - A good dataset for estimating a demand function
+* `AER:CigarettesSW` - Another good dataset for estimating a demand function. This is also a good place to look at a first-difference model. How do these results compare to those you found earlier this sememster using a similar Cigarettes dataset from AER?  You may need to estimate a log-log model to get elasticities for a clean comparison.
+
+# Wrapping Up
+
+Panel methods, particularly Fixed Effects models, are incredibly important in economics because they give the ability to control for individual specific unobservable characteristics.  
