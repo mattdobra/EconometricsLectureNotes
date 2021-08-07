@@ -306,6 +306,13 @@ Interpreting results like this add nuance to the issue of the gender wage gap.
 
 This is enough ANOVA for here.  Econometrics typically focuses on regression analysis, not ANOVA.  And, for what its worth, ANOVA is just a very special case of regression analysis anyhow.  
 
+### Data for further exploration
+
+Choose 1 of the datasets below to analyze with one-way ANOVA and Tukey-Kramer tests.  
+
+* Use the famous`datasets:iris` data to see if any of the 4 measures of iris size ($Sepal.Length$,$Sepal.Width$,$Petal.Length$,$Petal.Width$) varies by iris $Species$.
+* Use the `datasets:mtcars` data to see if size of an engine as measured in number of cylinders ($cyl$) influences fuel efficiency ($mpg$), power ($hp$), or speed ($qsec$).  Important: Make sure you force R to treat the cylinder variable as a factor, not a number! 
+
 ## Chi-Square
 
 The Chi-Square test looks at relationships between 2 (or more) categorical variables.  Let's look at the *affairs* dataset from the `AER` package. This data is from a 1978 paper that looks into the prevalence of extramarital affairs.  We might ask the question whether or not there is a relationship between extramarital affairs and whether or not a married couple has kids.  

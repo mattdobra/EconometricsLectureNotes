@@ -502,7 +502,7 @@ stargazer(reg5, type = "text")
 ```
 The $R^2$ is pretty huge $R^2 = 0.86$ and the $\hat{\beta}$ is positive and significant at the 99% level.  This is a tricky $\beta$ to interpret, because the variable shareA is defined as $\frac{Expenditures\:by\: Candiate\:A}{Expenditures\:by\:Candidate\:A + Expenditures\:by\:Candidate\:B}$. It can be done, but it is tricky.  In some cases, it is easier just interpreting the **signs** and **significance** of the coefficients, and not focusing so much on the actual **magnitude** of the coefficients.  
 
-### Data for further analysis
+### Data for further exploration
 
 Choose 2 of the datasets below to analyze.  
 
