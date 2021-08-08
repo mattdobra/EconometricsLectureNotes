@@ -7,11 +7,12 @@ output:  html_notebook
 
 This notebook will provide an overview of basic statistics.  This is not meant to replace the full-semester course that you should have already taken, but rather to demonstrate how to implement the techniques learned in that class using R.
 
-Before we get started, a brief note on graphing.  We will be using both Base R graphics and `ggplot()` graphics. In my opinion, `ggplot()` makes better looking graphics and is more intuitive when you want to customize your graphs than Base R.  But sometimes, you just want a quick and dirty graph, and Base R is just fine for that.  Thsi notebook will use both from time to time. Also, I won't be wasting a lot of time making every graph look "good" here.  A good looking graph needs to have a title, axis titles, legends, and so forth.   Sometimes I will put in the effort to make the graph look proper when it is a `ggplot()` graph, sometimes I won't. Data visualization is well beyond the scope of this course.
+Before we get started, a brief note on graphing.  We will be using both Base R graphics and `ggplot()` graphics. In my opinion, `ggplot()` makes better looking graphics and is more intuitive when you want to customize your graphs than Base R.  But sometimes, you just want a quick and dirty graph, and Base R is just fine for that.  This notebook will use both from time to time; for your assignments, focus on using `ggplot()`. Also, I won't be wasting a lot of time making every graph look "good" here.  A good looking graph needs to have a title, axis titles, legends, and so forth.  For the purposes of this set of notes, sometimes I will put in the effort to make the graph look proper when it is a `ggplot()` graph, sometimes I won't. A deeper dive into data visualization is well beyond the scope of this course.
 
 Finally, before we get going, let's load in the packages we will be needing and load and attach 2 data sets:
 ```{r}
 library(tidyverse)
+library(stargazer)
 library(AER)
 data(CPS1985)
 attach(CPS1985)
@@ -25,7 +26,7 @@ attach(vote1)
 The `ggplot()` function is in the `ggplot2` package, which is part of the `tidyverse`.  It is based on a graphing philosophy called the **Grammar of Graphics**.  The Grammar of Graphics is based on the idea that a graphic has a set of indispensable elements:
 
 * **Aesthetic** - The dimensions and visual attributes of the graph.  This can be the x/y dimension, but also you can graph using color, size, and so forth
-* **Layers** - Objects are created on the aesthetic in layers.  Each layer includes, or is define by:
+* **Layers** - Objects are created on the aesthetic in layers.  Each layer includes, or is defined by:
     * **Data** - what is being graphed
     * **Mapping** - how the data is put into the layer
     * **Statistical Transformation** - how are you displaying the data? raw data? means? counts?
@@ -97,6 +98,14 @@ The differences are much plainer to see in a bar chart:
 ```{r}
 barplot(b)
 ```
+
+### Data for further exploration
+
+Analyze the hiphop lyrics dataset ***and*** one of the other two dataselts below using bar charts created with `ggplot()`.  Ensure that your bar charts include x- and y- axis labels and a title.  
+
+* Look at `fivethirtyeight:hiphop_cand_lyrics` and make bar charts of $sentiment$ for both Donald Trump and Hillary Clinton.
+* Examine the Use the `AER:BankWages` data to see which job type ($job$) is the most common in the data set.
+* Create a bar chart looking at the distribution of student $ethnicity$ in the `AER:STAR` data.
 
 ## Boxplots
 
@@ -175,7 +184,7 @@ CPS1985 %>% ggplot(aes(x = married, y = wage, fill = gender)) +
 ```
 ## Histograms
 
-Histograms are useful for displaying the distribution of continuous data.  Again, much easier to do in R than in something like Excel. Here is the distribution of respondent age in the CPS1985 data set using the `hist()` function.
+Histograms are useful for displaying the distribution of continuous data.  Again, these are much easier to do in R than in something like Excel. Here is the distribution of respondent age in the CPS1985 data set using the `hist()` function.
 
 ```{r}
 hist(age)
@@ -216,7 +225,14 @@ CPS1985 %>%  ggplot(aes(x = age)) +
 ```
 Ok, enough silliness.
 
-## Stacked and Grouped Bar Charts
+### Data for further exploration
+
+Choose one of the data sets below to practice creating boxplots and histograms using `ggplot()`. Again, ensure you have well labeled plots, including titles and appropriate labels.  
+
+* Using the `AER:NMES1988` dataset, create a histogram of the number of physician office visits ($visits$) and a box plot looking at the number of $visits$ by $health$ status. 
+* Using the `dplyr:starwars` dataset, create a histogram of the $height$ of Star Wars characters and a box plot looking at height by the $sex$ of the characters.
+
+## Stacked and grouped bar charts
 
 These are used to look at the compositions of groups.  This is another place where `ggplot()` is a bit easier.  TO make a stacked or grouped bar chart in Base R, we start by making a table.   Let's look at the gender composition of each occupation.
 
@@ -299,6 +315,14 @@ vote1 %>% ggplot(aes(x = shareA, y = voteA)) +
 ```
 
 All in all, R has some extremely powerful graphing capabilities that go well beyond what something like Excel is capable of.  It's no surprise that many major news networks use R, and particularly `ggplot()` to do their graphics. For example, the BBC and the New York Times produce many of their graphics using `ggplot()`, as does The Economist.  In fact, the BBC has even distributed a package you can download called `bbplot` that you can install (using `devtools` unfortuantely) make your graphs look like BBC graphics! 
+
+### Data for further exploration
+
+Choose two of the data sets below to practice creating scatterplots using `ggplot()`. Again, ensure you have well labeled plots, including titles and appropriate labels.  
+
+* Use `datasets:USArrests` to look at the relationship between urbanization ($UrbanPop$) and each of the three measures of crime.
+* Look at the relationship between alcohol consumption ($alcohol$) and $deaths$, $heart$, and $liver$ in `wine:wooldridge`.
+* Using `wooldridge:meap01`, look at the relationship between expenditures per student ($expp$) and the various test scores ($math4$ and $read4$).
 
 # Summarizing Data Numerically
 
