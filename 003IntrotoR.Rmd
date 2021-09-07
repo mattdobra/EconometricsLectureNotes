@@ -133,12 +133,14 @@ install.packages("knitr")
 
 Some of the formatting code (especially the $\LaTeX$ stuff) in my notebooks is beyond the scope of what you will need; for the purposes of this class, you should be fine with very basic R Markdown formatting syntax: go to <http:\\rmarkdown.rstudio.com/lesson-1.html>, and read chapters 1-3.2 of ***R Markdown: The Definitive Guide*** by Yihui Xie <https://bookdown.org/yihui/rmarkdown/> to learn the basic (Pandoc) formatting syntax. 
 
-Working with Notebooks is fairly simple.  Create a new notebook with the top left button.  Change the title in the preamble (or modify it using YAML options--learn about these in the Xie book if you want).  Use basic Pandoc formatting to do stuff like headers, font formatting, etc. Create **code chunks** by clicking the **Insert Chunk** button on the toolbar or by pressing **Ctrl+Alt+I**, and write your R script in the code chunks.  It is also worth learning a couple useful options for your code chunks, here are 4 I suspect you might find useful:
+Working with Notebooks is fairly simple.  Create a new notebook with the top left button.  Change the title in the preamble (or modify it using YAML options--learn about these in the Xie book if you want).  Use basic Pandoc formatting to do stuff like headers, font formatting, etc. Create **code chunks** by clicking the **Insert Chunk** button on the toolbar or by pressing **Ctrl+Alt+I**, and write your R script in the code chunks.  It is also worth learning a couple useful options for your code chunks, here are 6 I suspect you might find useful:
 
 * `eval = FALSE` - Display the code in the finished document but don't execute it. 
 * `warning = FALSE` - If R spits out a warning, don't display the warning in the finished document.  Very useful with `stargazer()`.
-* `echo = FALSE` - Execute the code and display the results, but don't put the code into the final document.  
-* `message = FALSE` - Don't display any messages R tells you as a result of running code.  Very useful with `ggplot()` when specifying `geom_smooth(method = lm)`.
+* `echo = FALSE` - Execute the code and display the results, but don't put the code into the final document. Very useful if you are trying to write professional looking documents.
+* `include = FALSE` - execute the code but don't display the code or the results.  Very useful if you are trying to look professional looking documents.
+* `message = FALSE` - Don't display any messages R tells you as a result of running code.  Very useful with `ggplot()` when specifying `geom_smooth(method = lm)`.  Very useful in conjunction with the `library()` command as well.
+* `results = 'asis'` - Useful in cases where the R output is already in html format (or $\LaTeX$ format when making PDFs).
 
 When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).  The preview shows you a rendered HTML copy of the contents of the editor. *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed. 
 
@@ -473,7 +475,7 @@ class(CPS1985$union)
 ```
 If you have a categorical/factor variable, you can use the `levels` function to see what all the possible values are:
 ```{r}
-levels(gender)
+levels(ethnicity)
 levels(occupation)
 ```
 We can get a generic summary of the data with the `summary()` command.

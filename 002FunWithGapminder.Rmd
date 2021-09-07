@@ -1,6 +1,8 @@
 ---
 title: "Messing around with Gapminder"
-output: html_notebook
+output:
+  html_document:
+    df_print: paged
 ---
 
 Let's start with a bit of a whirlwind introduction to R using the Gapminder data.  The focus of this notebook will be on doing stuff and seeing what R is capable of and developing some basic coding intuition; we will go into greater detail on the code works in later notebooks.    
@@ -109,7 +111,7 @@ ggplot(data = gapminder, aes(x = continent, y = lifeExp)) +
     labs(y = "Life Expectancy in Years", title = "Life Expectancy by Continent", x = "")
     
 ```
-We will come back to doing visualizationsa bit later.
+We will come back to doing visualizations a bit later.
 
 ## Manipulating the Data
 
