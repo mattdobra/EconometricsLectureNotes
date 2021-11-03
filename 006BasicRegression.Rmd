@@ -188,7 +188,7 @@ lm(wage ~ education, data = CPS1985)
 The immediate output from a regression model is not very helpful; it tells you the values of $\hat{\alpha}$ and $\hat{\beta}$, but that's it.  You pretty much always want to to store your model as an object and inspect the object separately. 
 
 ```{r, warning = FALSE}
-reg1 <- lm(wage ~ education)
+reg1 <- lm(wage ~ education, data = CPS1985)
 ```
 
 We can use the `attributes()` command to see what is contained within this object; we will make use of some of these shortly.  
@@ -293,7 +293,7 @@ We can start by looking at a scatterplot:
 
 ```{r, message = FALSE}
 airfare %>% ggplot(aes(x = dist, y = fare)) +
-    geom_point() + 
+    geom_point(size = .7) + 
     geom_smooth(method=lm)
 ```
 Next, we can estimate the regression model using the `lm()` command.  Because I didn't attach the dataset, I need to tell the `lm()` function where the variables are.  One option would be to use the \$ notation, as in `lm(airfare$fare ~ airfare$dist)`, though I prefer the `lm(fare ~ dist, data = airfare)` syntax because I stopped paying attention in typing class when we got to the section on symbols and I always make typos when I type \$:
@@ -335,7 +335,7 @@ Next, let's take a look at the gpa2 data. This data includes student data from a
 
 ```{r, message = FALSE}
 gpa2 %>%  ggplot(aes(x = sat, y = colgpa)) +
-    geom_point() +
+    geom_point(size = .7) +
     geom_smooth(method = lm)
 ```
 Next, store the regression in an object and look at it using `stargazer()`
@@ -343,7 +343,7 @@ Next, store the regression in an object and look at it using `stargazer()`
 reg3 <- lm(colgpa ~ sat, data = gpa2)
 stargazer(reg3, type = "text")
 ```
-Here, $R^2 = .17$ and our estimate of $\hat{\beta}$ is significant at the 99% level.  We can interpret the coefficient of .002 as stating that we expect GPA go go up by .002 on average for every 1 point of SAT.  This is a bit of an awkward interpretation, notably because SAT scores don't go up by 1, they go up by 10!  We can use the same trick as above to scale these numbers in a way that is more meaningful; a 100 point increase in overall SAT score is associated with a 0.2 increase in GPA seems a lot more meangingful.  
+Here, $R^2 = .17$ and our estimate of $\hat{\beta}$ is significant at the 99% level.  We can interpret the coefficient of .002 as stating that we expect GPA go go up by .002 on average for every 1 point of SAT.  This is a bit of an awkward interpretation, notably because SAT scores don't go up by 1, they go up by 10!  We can use the same trick as above to scale these numbers in a way that is more meaningful; a 100 point increase in overall SAT score is associated with a 0.2 increase in GPA seems a lot more meaningful.  
 
 Let's look at the estimated value of $\hat{\alpha}$ of 0.663.  What does that mean, and what does it mean that it is significant?  Let's start with the question of what it means and look at the regression equation:
 
@@ -475,8 +475,8 @@ Let's return to some simpler examples, starting with the meap01 data; this data 
 
 ```{r, message = FALSE}
 meap01 %>% ggplot(aes(x = exppp, y = math4)) +
-    geom_point(color = "goldenrod",
-               alpha = .4) +
+    geom_point(color = "darkslateblue",
+               alpha = .6) +
     geom_smooth(method = lm)
 ```
 If you have read a paper or two in the economics of education literature, the slope of that line shouldn't come as a surprise to you.  Let's estimate a regression:
@@ -491,10 +491,10 @@ Finally, let's take a look at the voting data in the vote1 dataset.  Specificall
 
 ```{r, message = FALSE}
 vote1 %>% ggplot(aes(x = shareA, y = voteA)) +
-    geom_point() +
-    geom_smooth(method = lm)
+    geom_point(color="indianred") +
+    geom_smooth(color = "dodgerblue", method = lm)
 ```
-Next, we estimate the regression and put the results into `stargazer()*` for ease of viewing. 
+Next, we estimate the regression and put the results into `stargazer()` for ease of viewing. 
 
 ```{r, warning = FALSE}
 reg5 <- lm(voteA ~ shareA, data = vote1)
@@ -507,7 +507,7 @@ The $R^2$ is pretty huge $R^2 = 0.86$ and the $\hat{\beta}$ is positive and sign
 Choose 2 of the datasets below to analyze.  
 
 * `wooldridge:wine` has 3 interesting variables to use as dependent variables against wine consumption.
-* In the `fivethirtyeight:pulitzer` data, can $pctchg\_circ$ be explained by the pulitzer prize winners at each newspaper?
+* In the `fivethirtyeight:pulitzer` data, can $pctchg\_circ$ be explained by the Pulitzer prize winners at each newspaper?
 * Predict the drop in output with the duration of strikes using the `AER:StrikeDuration` data.
 
 # Multivariate Regression

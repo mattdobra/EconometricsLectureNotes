@@ -1,6 +1,8 @@
 ---
 title: "Categorical Independent Variables"
-output: html_notebook
+output:
+  html_document:
+    df_print: paged
 ---
 
 # Overview
@@ -45,6 +47,7 @@ We can see that R considers this to be a factor variable:
 ```{r}
 class(CPS1985$gender)
 ```
+
 Let's transform this into a set of dummy variables.  Because our factor variable has 2 possible levels, we can make 2 different dummy variables out of it: a male dummy and a female dummy.  
 
 ```{r}
@@ -190,7 +193,8 @@ Just like with ANOVA, we can look at interaction effects with categorical variab
 
 ```{r, warning = FALSE}
 reg3a <- lm(wage ~ gender*married, data = tempdata)
-stargazer(reg3a, type = "text")
+reg3ajosh <- lm(wage ~ gender + married, data = tempdata)
+stargazer(reg3a, reg3ajosh, type = "text")
 ```
 
 This result is a bit trickier to interpret, so let's start with examining the regression model being estimated:
@@ -247,12 +251,12 @@ In this model, $\hat{\beta_1}=0.751$ tells us that an additional year of educati
 ```{r}
 CPS1985 %>% ggplot(aes(x = education, y = wage, color = gender)) +
     geom_point() +
-    scale_color_manual(values = c("darkgreen","orange")) +
-    geom_abline(slope = .751, intercept = .218, color = "darkgreen") +
-    geom_abline(slope = .751, intercept = .218-2.124, color = "orange") +
+    scale_color_manual(values = c("indianred","cornflowerblue")) +
+    geom_abline(slope = .751, intercept = .218, color = "red") +
+    geom_abline(slope = .751, intercept = .218-2.124, color = "darkblue") +
     theme_classic()
 ```
-This is an important tool, so let's work through a few more examples, starting with the HousePrices data in the AER package:
+This is an important tool, so let's work through a few more examples, starting with the AER::HousePrices data in the AER package:
 
 ```{r}
 head(HousePrices)
@@ -341,7 +345,7 @@ diamonds2$cut <- factor(diamonds2$cut, ordered = FALSE)
 diamonds2$color <- factor(diamonds2$color, ordered = FALSE)
 diamonds2$clarity <- factor(diamonds2$clarity, ordered = FALSE)
 diamonds2$color <- relevel(diamonds2$color, c("J")) 
-reg4c <- lm(price ~ carat + cut + color + clarity, data = diamonds2)
+reg4c <- lm(price ~ carat +I(carat^2) + cut + color + clarity, data = diamonds2)
 stargazer(reg4c, type = "text")
 ```
 Could we predict the price of a 32 carat, D color, internally flawless with ideal cut diamond?  Mathematically, sure we could:
@@ -364,7 +368,7 @@ knitr::include_graphics("images/extrapolating.png")
 Turning away from hedonic regression, let's look at the gpa2 data in the wooldridge package.  Let's model GPA as a function of SAT score, an athlete dummy, and a gender dummy. Note that this data set has the athlete and gender variables coded as dummies already, so we are not dealing with factor variables.   
 
 ```{r, warning = FALSE}
-reg4d <- lm(colgpa ~ sat + athlete + female, data = gpa2)
+reg4d <- lm(colgpa ~ I(sat/100) + athlete + female, data = gpa2)
 stargazer(reg4d, type = "text")
 ```
 
@@ -377,7 +381,7 @@ These results suggest:
 Lets try this again with a slight variation: here we include a female athlete interaction effect.
 
 ```{r, warning = FALSE}
-reg4e <- lm(colgpa ~ sat + athlete*female, data = gpa2)
+reg4e <- lm(colgpa ~ I(sat/100) + athlete*female, data = gpa2)
 stargazer(reg4d, reg4e, type = "text")
 ```
 Note that R includes both the interaction variable, as well as the two variables individually.  This is what you want it to do.
@@ -428,10 +432,11 @@ If we plug in $ethnicity_i = 1$ for African Americans, we get:
 \begin{equation}
 ln(Wage_{i}) = 4.993 - 0.124 + .086 \cdot education_i - .010 \cdot education_i
 \end{equation}
+
 \begin{equation}
 ln(Wage_{i}) = 4.869 + 0.076 \cdot education_i
-\end{equation
-}
+\end{equation}
+
 If we plug in $ethnicity_i = 0$ for Caucasians, we get:
 
 \begin{equation}
@@ -439,6 +444,7 @@ ln(Wage_{i}) = 4.993 + .086 \cdot education_i
 \end{equation}
 
 For African Americans, both the intercept is different (due to the $\hat{\beta}$ on the ethnicity dummy), ***and*** the slope on education is different (due to the $\hat{\beta}$ on the interaction effect).  Reminding ourselves of the regression results:
+
 ```{r, warning = FALSE}
 stargazer(reg5a, type = "text")
 ```

@@ -1,6 +1,8 @@
 ---
 title: "Regression Assumptions"
-output: html_notebook
+output:
+  html_document:
+    df_print: paged
 ---
 
 # Overview
@@ -13,8 +15,8 @@ library(stargazer)
 library(sandwich)
 library(lmtest)
 library(wooldridge)
-data(wage1)
 library(AER)
+data(wage1)
 data(CPS1985)
 data(ceosal1)
 data(nyse)
@@ -39,7 +41,9 @@ This is the equation for a straight line.  But what if the data doesn't really l
 
 ```{r, message = FALSE}
 ceosal1 %>% ggplot(aes(y = salary, x = sales)) + 
-    geom_point() 
+    geom_point() +
+    theme_classic() +
+    geom_smooth(method=lm)
 ```
 So this doesn't say much, and I'd guess there is not much of a relationship when we estimate the regression.  But, part of what is going on might be due to the fact that both the CEO salary and sales data look skewed, so maybe we just don't have a linear relationship.  Let's see what the regression looks like:
 
@@ -59,11 +63,13 @@ tempdata <- ceosal1 %>%
     mutate(lnsales = log(sales))
 ```
 
-Now, let's take a look at the plot between lnsubs and lnprice:
+Now, let's take a look at the plot between lnsales and lnprice:
 
-```{r}
+```{r, warning = FALSE}
 tempdata %>% ggplot(aes(x = lnsales, y = lnsalary)) +
-    geom_point()
+    geom_point() +
+    theme_classic() +
+  geom_smooth(method = lm)
     
 ```
 Wow, quite a change.  This data looks like it might actually have a **linear** relationship now.
@@ -101,9 +107,9 @@ Another common non-linear transformation is the quadratic transformation; this i
 
 ```{r}
 hprice3 %>% ggplot(aes(x = age, y = price)) +
-    geom_point() +
+    geom_point(color = "orange") +
     theme_classic() +
-    labs(title = "House Value and Age")
+    labs(title = "House Value and Age") 
 ```
 This relationship looks somewhat U-shaped; moving left to right, it seems that the value of houses falls as they get older, but at a certain point, the relationship reverses course and older becomes **more** valuable!
 
@@ -131,18 +137,18 @@ We can look at these two models graphically as well: the orange line is the line
 
 ```{r, message = FALSE}
 hprice3 %>% ggplot(aes(x = age, y = price)) +
-    geom_point(color = "darkgreen",
+    geom_point(color = "darkorange3",
                alpha = .4) +
     theme_classic() +
     labs(title = "House Value and Age",
          y = "Price",
          x = "Age") +
     geom_smooth(method = lm, 
-                color = "orange",
+                color = "black",
                 se = FALSE) +
     geom_smooth(method = lm, 
                 formula = y ~ x + I(x^2),
-                color = "Purple",
+                color = "brown",
                 se = FALSE) +
     scale_y_continuous(labels=scales::dollar_format())
 ```
@@ -230,6 +236,7 @@ plot(reg5a$residuals ~ reg5a$fitted.values)
 abline(a = 0, b = 0)
 
 ```
+
 Note that the variation around the horizontal line is roughly the same for all of the possible fitted values.  Now, let's take a look at a regression using the smoke data in the wooldridge package.  We estimate the effect of income on the number of daily cigarettes smoked.  The estimated coefficients are not significant, but that's not important for what we are trying to show here.
 
 ```{r}
@@ -238,6 +245,7 @@ plot(reg5b$residuals ~ reg5b$fitted.values)
 abline(a = 0, b = 0)
 
 ```
+
 See how the shape of the residual plot looks a bit like a cone, with less spread on the left and a lot more spread on the right?  This is heteroskedasticity.  
 
 For the most part, academic economists simply assume that heteroskedasticity is always a problem and as a matter of course just report **robust standard errors**.  In R, we can get this from the `sandwich` library.  If you haven't already, install and load the `sandwich` library and use `coeftest` function with the `vcovHC` option.
@@ -259,7 +267,7 @@ It's a bit tough to see here, but the coefficients didn't change at all, only th
 
 If a model is not **heteroskedastic** and doesn't have **autocorrelation**, it is said to have **spherical errors** and the error terms are **IID** (Independent and Identically Distributed).
 
-## Assumption 6: No indepentent variable is perfect linear function of other explanatory variables.
+## Assumption 6: No independent variable is a perfect linear function of other explanatory variables.
 
 This one is important and will probably create quite a few headaches for you when we get to regression with categorical independent variables.  Let's introduce the concept quickly here though.  
 
@@ -269,7 +277,7 @@ For example:
 
 ```{r}
 reg6a <- lm(voteA ~ shareA + shareA, data = vote1)
-summary(reg6a)
+stargazer(reg6a, type = "text")
 ```
 R doesn't even let me run this--note that shareA is only included in the table once.  So let's trick it into running a regression with two identical variables:
 
@@ -277,8 +285,8 @@ R doesn't even let me run this--note that shareA is only included in the table o
 tempdata3 <- vote1
 tempdata3$shareAclone <- tempdata3$shareA
 reg6b <- lm(voteA ~ shareA + shareAclone, data = tempdata3)
+stargazer(reg6b, type = "text")
 summary(reg6b)
-
 ```
 Now R is quite displeased with us.  R simply dropped the shareAclone variable because it is impossible to run a regression with both shareA and shareAclone.
 
@@ -319,9 +327,10 @@ You can see that shareA and shareArand are very highly correlated.  What happens
 
 ```{r, warning = FALSE}
 reg6d <- lm(voteA ~ shareA + shareArand, data = tempdata4)
-stargazer(reg6a, reg6d, type = "text")
+reg6e <- lm(voteA ~ shareArand, data = tempdata4)
+stargazer(reg6a, reg6d, reg6e, type = "text")
 ```
-Compare the model with the multicollinearity on the right with the original model on the left. The coefficients are huge in absolute value compared to column 1.  One of the coefficients has the wrong sign.  And if you add the two $\beta$s in column 2 dogether, you get a number very close to the coefficient on shareA in column 1.  This is typical of models with multicollinearity.
+Compare the model with the multicollinearity on the right with the original model on the left. The coefficients are huge in absolute value compared to column 1.  One of the coefficients has the wrong sign.  And if you add the two $\beta$s in column 2 together, you get a number very close to the coefficient on shareA in column 1.  This is typical of models with multicollinearity.
 
 Solving multicollinearity is pretty easy.  Just drop one of the collinear variables and the problem is solved.
 
@@ -334,6 +343,7 @@ reg7a <- lm(voteA ~ shareA, data = vote1)
 qqnorm(reg7a$residuals)
 qqline(reg7a$residuals)
 ```
+
 This Q-Q plot is pretty close to the line, indicating the residuals have pretty close to a normal distribution.  
 
 Let's look at the Q-Q plot from the CEO salary regressions from up above:
@@ -342,6 +352,7 @@ Let's look at the Q-Q plot from the CEO salary regressions from up above:
 qqnorm(reg1b$residuals)
 qqline(reg1b$residuals)
 ```
+
 Not quite as close to the line, but still not bad.  
 
 The Q-Q plot (and the residual plot from assumption 5) can be obtained another way; if you plot a regression object, you get 4 diagnostic plots, two of which are the ones we've looked at.

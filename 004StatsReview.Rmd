@@ -10,7 +10,7 @@ This notebook will provide an overview of basic statistics.  This is not meant t
 Before we get started, a brief note on graphing.  We will be using both Base R graphics and `ggplot()` graphics. In my opinion, `ggplot()` makes better looking graphics and is more intuitive when you want to customize your graphs than Base R.  But sometimes, you just want a quick and dirty graph, and Base R is just fine for that.  This notebook will use both from time to time; for your assignments, focus on using `ggplot()`. Also, I won't be wasting a lot of time making every graph look "good" here.  A good looking graph needs to have a title, axis titles, legends, and so forth.  For the purposes of this set of notes, sometimes I will put in the effort to make the graph look proper when it is a `ggplot()` graph, sometimes I won't. A deeper dive into data visualization is well beyond the scope of this course.
 
 Finally, before we get going, let's load in the packages we will be needing and load and attach 2 data sets:
-```{r}
+```{r message = FALSE}
 library(tidyverse)
 library(stargazer)
 library(AER)
@@ -49,7 +49,7 @@ How does this code work?
 * `CPS1985 %>%` pipes the CPS data into the `ggplot()` function
 * `aes()` is where I set the *aesthetic* for the graph.  I want the x dimension to be the occupation variable, hence `aes(x = occupation)`.  I don't need to define y because I'm making a bar graph
 * Adding the `+` allows me to break up my code over multiple lines. This is optional but makes for much neater looking R scripts when making fancy graphs.
-* `geom_bar()` creates a basic bar chart.
+* `geom_bar()` creates a basic bar chart.  The *geometry* is that of a *bar chart*.
 
 This can be made to look more proper very quickly:
 ```{r}
@@ -101,9 +101,9 @@ barplot(b)
 
 ### Data for further exploration
 
-Analyze the hiphop lyrics dataset ***and*** one of the other two dataselts below using bar charts created with `ggplot()`.  Ensure that your bar charts include x- and y- axis labels and a title.  
+Analyze the hiphop lyrics dataset ***and*** one of the other two datasets below using bar charts created with `ggplot()`.  Ensure that your bar charts include x- and y- axis labels and a title.  
 
-* Look at `fivethirtyeight:hiphop_cand_lyrics` and make bar charts of $sentiment$ for both Donald Trump and Hillary Clinton.
+* Look at `fivethirtyeight:hiphop_cand_lyrics` and make bar charts of $sentiment$ for both Donald Trump and Hillary Clinton.  
 * Examine the Use the `AER:BankWages` data to see which job type ($job$) is the most common in the data set.
 * Create a bar chart looking at the distribution of student $ethnicity$ in the `AER:STAR` data.
 
@@ -202,7 +202,7 @@ CPS1985 %>%  ggplot(aes(x = age)) +
     geom_histogram(binwidth = 5, color = "black")
 
 ```
-Note that with `ggplot()`, usually the `color` option is used for outlines and `fill` is used to color in spaces.  Let's make our graph with the MU official colors:
+Note that with `ggplot()`, usually the `color` option is used for outlines and `fill` is used to color in spaces.  Let's make our graph with the MU official colors, obtained from the 2020 *Methodist University Identity Standards Manual*:
 * MU Green (#00573C)
 * Metallic Gold (#B4985A)
 * Non-Metallic Gold (#CBB676)
@@ -280,9 +280,15 @@ This iteration shows the relative proportions pretty well.
 
 ## Scatter Plots
 
-Scatter plots are useful for looking at the relationship between 2 numerical (preferably continuous) variables. Because there is only 1 continuous variable in the CPS1985 dataset, let's switch to using the vote1 dataset.  To see what is in this, type `?vote1` in your console.   
+Scatter plots are useful for looking at the relationship between 2 numerical (preferably continuous) variables. Because there is only 1 continuous variable in the CPS1985 dataset, let's switch to using the vote1 dataset.  To see what is in this, type `?vote1` in your console.  We might also want to get a quick overview of the data with the `head(vote1)` command:
 
-Let's look at the relationship between the share of campaign expenditures (shareA) and vote share received (voteA).  Base R makes a simple scatter plot with the plot function.  The syntax is `plot(y ~ x)`; recall, think of the `~` as saying "as a function of" here.
+```{r}
+head(vote1)
+```
+
+
+Let's look at the relationship between the share of campaign expenditures (shareA) and vote share received (voteA).  Base R makes a simple scatter plot with the plot function.  The syntax is `plot(y ~ x)`; recall, think of the `~` as saying "as a function of" here. 
+
 ```{r}
 plot(voteA ~ shareA)
 ```
@@ -420,6 +426,10 @@ The  `stargazer()` package/function makes nicely formatted tables of summary sta
 
 ```{r}
 stargazer(CPS1985, type = "text")
+```
+
+```{r, results = 'asis'}
+stargazer(CPS1985, type = "html")
 ```
 
 # Wrapping Up

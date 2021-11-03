@@ -216,7 +216,7 @@ Let's calculate an ANOVA looking at the relationship between wages and occupatio
 
 ```{r}
 CPS1985 %>% ggplot(aes(x = occupation, y = wage)) +
-    geom_boxplot() +
+    geom_boxplot(color = "blue4", fill = "cornflowerblue") +
     stat_boxplot(geom = "errorbar", width = 0.5)
 ```
 The Null hypothesis in ANOVA is that ALL of the means are the same...$\mu_1 = \mu_2 = ... = \mu_k$.  The alternative is that at least one is different from at least one other.  It certainly looks like these means are different, but we can use ANOVA to test this.
@@ -245,7 +245,7 @@ Ugh this is unreadable.  Let's try that again, some minor edits for readability:
 
 ```{r}
 par(mar = c(3,10,3,3))
-plot(TukeyHSD(anova1), las=1, cex.axis = .75)
+plot(TukeyHSD(anova1), las = 1, cex.axis = .75)
 ```
 Any combination where 0 is not included in the confidence interval is considered to be a significant difference!  Looks like there are quite a few of them.
 
@@ -325,7 +325,8 @@ table(affair2)
 ```
 On a percentage basis, it looks like affairs are more prevalent among couples with kids.  Maybe this is more clear with a graph:
 ```{r}
-affair2 %>% ggplot(aes(x = as.factor(kids), fill = as.factor(affair))) +
+affairs %>% 
+    ggplot(aes(x = as.factor(kids), fill = as.factor(affair))) +
     geom_bar(position = "fill") +
     scale_fill_viridis_d() +
     labs(y = "")
