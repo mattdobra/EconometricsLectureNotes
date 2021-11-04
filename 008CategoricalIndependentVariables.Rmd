@@ -433,6 +433,8 @@ If we plug in $ethnicity_i = 1$ for African Americans, we get:
 ln(Wage_{i}) = 4.993 - 0.124 + .086 \cdot education_i - .010 \cdot education_i
 \end{equation}
 
+This simplifies to:
+
 \begin{equation}
 ln(Wage_{i}) = 4.869 + 0.076 \cdot education_i
 \end{equation}
