@@ -1,8 +1,6 @@
 ---
 title: "Categorical Independent Variables"
-output:
-  html_document:
-    df_print: paged
+output:  html_notebook
 ---
 
 # Overview
