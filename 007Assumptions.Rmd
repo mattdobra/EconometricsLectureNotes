@@ -246,11 +246,11 @@ abline(a = 0, b = 0)
 
 See how the shape of the residual plot looks a bit like a cone, with less spread on the left and a lot more spread on the right?  This is heteroskedasticity.  
 
-For the most part, academic economists simply assume that heteroskedasticity is always a problem and as a matter of course just report **robust standard errors**.  In R, we can get this from the `sandwich` library.  If you haven't already, install and load the `sandwich` library and use `coeftest` function with the `vcovHC` option.
+For the most part, academic economists simply assume that heteroskedasticity is always a problem and as a matter of course just report **robust standard errors**.  In R, we can get this from the `lmtest` library.  If you haven't already, install and load the `sandwich` library and use `coeftest` function with the `vcovHC` option.
 
 ```{r, eval = FALSE}
-install.packages("sandwich")
-library(sandwich)
+install.packages("lmtest")
+library(lmtest)
 ```
 ```{r}
 coeftest(reg5b, vcovHC)
@@ -273,7 +273,7 @@ As discussed in a previous notebook, ordinary least squares works by attributing
 
 For example:
 
-```{r}
+```{r, warning = FALSE}
 reg6a <- lm(voteA ~ shareA + shareA, data = vote1)
 stargazer(reg6a, type = "text")
 ```

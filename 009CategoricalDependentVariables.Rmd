@@ -64,13 +64,14 @@ Let's start with a simple bivariate model; it should help develop the intuition 
 Let's start by just putting the two variables we are going to analyze into a smaller dataframe called `retdata` and look at some summary statistics.
 
 ```{r}
-retdata <- k401ksubs %>% select(inc, p401k)
+retdata <- k401ksubs %>% 
+    dplyr::select(inc, p401k) # Need to use dplyr::select because MASS has a select function
 summary(retdata)
 ```
 How do we interpret the results of the `p401k` variable? Because it is coded as a dummy variable, `p401k=1` tells us that an individual has a 401k account, and `p401k=0` tells us they do not. The mean of `r mean(retdata$p401k)` tells us that 27.6% of the individuals in the data set have a 401k account.  We can look to see if there is a different mean income of the two groups:
 
 ```{r, message = FALSE}
-retdata %>% group_by(p401k) %>% 
+k401ksubs %>% group_by(p401k) %>% 
     summarize(mean = mean(inc))
 ```
 
@@ -108,7 +109,8 @@ Somehow the model gives this individual a greater than 100% chance of participat
 ```{r, message = FALSE}
 k401ksubs %>% ggplot(aes(x = inc, y = p401k)) +
     geom_point() +
-    geom_smooth(method = lm)
+    geom_smooth(method = lm, se = FALSE) +
+    theme_classic()
 ```
 
 A second problem with the LPM becomes apparent when examining the Q-Q plot.  Recall, the Q-Q plot examines the residuals of the model, and the Q-Q plot is expected to be a relatively straight line.  For a the linear probability model, it will almost certainly never be so:
@@ -140,13 +142,16 @@ First though, let's look at a graph of what we just estimated.
 ```{r, message = FALSE}
 k401ksubs %>% ggplot(aes(x = inc, y = p401k)) +
     geom_point() +
-    geom_smooth(method = lm, color = "blue") +
+    geom_smooth(method = lm, color = "cornflowerblue", se = FALSE) +
     stat_smooth(method = "glm", 
                 method.args = list(family = binomial(link = "probit")),
-                color = "red") +
+                color = "mediumorchid",
+                se = FALSE) +
     stat_smooth(method = "glm", 
                 method.args = list(family = binomial(link = "logit")),
-                color = "darkgreen") 
+                color = "limegreen",
+                se = FALSE) +
+    theme_classic()
 
 ```
 The blue line is the linear model that we plotted earlier, the red and green lines are the probit and logit models respectively.  Some points of note:
@@ -167,7 +172,7 @@ MEM is easier to calculate, though in my opinion AME is the more generally appro
 
 Unfortunately, `stargazer` does not work well with the output of the margins command, so we will switch to use `export_summs()` from the `jtools` package.  
 
-```{r}
+```{r, warning = FALSE}
 reg1bmargins <- margins(reg1b)
 reg1cmargins <- margins(reg1c)
 export_summs(reg1a, reg1bmargins, reg1cmargins)
@@ -281,7 +286,7 @@ They have similar measures of AIC, but the **Bayesian Information Criterion (BIC
 
 Let's work through one more probit example to see how we can estimate marginal effects for specific values of our independent variables.  This is especially important for calculating the marginal effects of interaction effects.  
 
-Let's use the `recid` data in the wooldridge package.  This data looks at prison recidivism, and the variable `cens` indicates whether or not an individual released from prison wound up back in prison ($cens = 0$) or did not ($cens = 1$) at some point in the next 6-7 years.  Let's suppose we believe that  recidivism is influenced by whether or not an individual was in the North Carolina prison work program, and that we suspect the effectiveness of the prison work program is somehow affected by years of education. We will model $cens$ as a function the interaction between the prisoner's years of education and whether or not the participated in the North Carolina prison work program and other control variables.  
+Let's use the `recid` data in the wooldridge package.  This data looks at prison recidivism, and the variable `cens` indicates whether or not an individual released from prison wound up back in prison ($cens = 0$) or did not ($cens = 1$) at some point in the next 6-7 years.  Let's suppose we believe that recidivism is influenced by whether or not an individual was in the North Carolina prison work program, and that we suspect the effectiveness of the prison work program is somehow affected by years of education. We will model $cens$ as a function the interaction between the prisoner's years of education and whether or not the participated in the North Carolina prison work program and other control variables.  
 
 ```{r}
 reg4a <- glm(cens ~ educ*workprg + age +I(age^2) + drugs + alcohol + black + tserved,
@@ -308,7 +313,7 @@ reg4amargins1 <- margins(reg4a, at = list(educ = 12))
 reg4amargins2 <- margins(reg4a, at = list(educ = 16))
 # reg4amargins2 <- margins(reg4a, at = list(educ = 16))
 export_summs(reg4amargins, reg4amargins0, reg4amargins1, reg4amargins2, 
-             number_format = "%.4f",
+             number_format = "%.3f",
              stars = c(`***` = 0.01, `**` = 0.05, `*` = 0.1),
              model.names = c("AME", "Education = 8", "Education = 12", "Education = 16"))
 
@@ -354,7 +359,7 @@ Some applications of ordered probit might include:
 * You are modeling purchase decisions on a scale (e.g. does a visitor to Disney World stay at a value resort, moderate resort, or luxury resort?).
 * Sometimes all you have is ordered data even if numeric data in principal exists, such as education level, income level, etc.
 
-By contrast, muntinomial probit would be called for in situations where the response variable doesn't have a natural ordering:
+By contrast, mulntinomial probit would be called for in situations where the response variable doesn't have a natural ordering:
 
 * You are modeling an unordered purchase decision, such as whether or not somebody purchased a Xbox Series X, PS5, or Nintendo Switch.
 * You are modeling individual preferences (e.g. you survey people and ask them their favorite fast food restaurant).

@@ -13,12 +13,12 @@ As usual, we begin with loading in some essential packages.  We have not yet use
 ```{r, eval = FALSE}
 install.packages("censReg")
 install.packages("sampleSelection")
+# NOTE NEED TO ADD MARGINAL EFFECTS TO NEGBIN AND POISSONS
 ```
 
 ```{r, warning=FALSE, message = FALSE}
 library(tidyverse)
 library(stargazer)
-library(MASS)
 library(censReg)
 library(sampleSelection)
 library(MASS)
@@ -44,7 +44,7 @@ data(HealthInsurance)
 We will look at two types of models to fit censored data: the **Tobit** model and the **Heckman** model.  Unlike Probit and Logit, these re not interchangeable, and which one you use depends on the type of censoring involved.  A censored variable is a variable that, for some reason, cannot take on a value below (left-censored) or above (right-censored) some value, or is missing for some observations. This might be due to "corner solutions" or top/bottom coding. For example:
 
 * If you are modeling demand for a sporting event, there is a maximum limit for how many tickets can be sold--the corner solution is the stadium capacity.
-* Corner solutions are often common when the dependent variable is a percentage, so obversations get bunched at 0% and/or 100%.
+* Corner solutions are often common when the dependent variable is a percentage, so observations get bunched at 0% and/or 100%.
 * If you are trying to predict SAT scores, they are top-coded at 800 and bottom-coded at 200.  
 * Data may not exist for some observations in your data set, and you think that the reason the data does not exist can be modeled.  
 
@@ -130,7 +130,7 @@ Let's push our analysis a bit further by estimating the same model with an OLS r
 
 ```{r, warning = FALSE}
 reg2b <- lm(gift ~ mailsyear + avggift, data = charity)
-stargazer(reg2a, reb2b, type = "text")
+stargazer(reg2a, reg2b, type = "text")
 
 ```
 The coefficients on these models are *very* different; the AIC and BIC are useful tools for comparing models of different types like this.  We can obtain these measures with the `AIC()` and `BIC()` commands, respectively.
@@ -185,7 +185,7 @@ Let's compare these estimates with a Tobit model and an OLS regression:
 
 
 ```{r, warning = FALSE}
-reg3b <- censReg(repwage ~ kidslt6 + educ + city + exper, data = mroz)
+reg3b <- censReg(repwage ~ kidslt6 + educ + city + exper, left = 0, right = Inf, data = mroz)
 reg3c <- lm(repwage ~ kidslt6 + educ + city + exper, data = mroz)
 stargazer(reg3a, reg3b, reg3c, type = "text")
 
@@ -213,6 +213,7 @@ The last type of data we will look at in this notebook is count data; dependent 
 * The number of doctor's visits a person makes in a year
 
 Typically we only use count models in cases where the counts are relatively low numbers -- a decent ballpark number is that the mean of the dependent variable should be under 10 -- We would not use a count model if our dependent variable was the number of McDonalds hamburgers sold annually at each restaurant or the number of puppies born each month by state, even though hamburgers and puppies are fundamentally countable. 
+
 The two primary models used for count data are the **Poisson** and the **Negative Binomial** models.  The poisson model is a bit easier to estimate, so we will begin there.
 
 We have used the binary measure from the `affairs` dataset in the `wooldridge` package before; let's now turn to the $\mathit{naffairs}$ variable, a count variable that measures the number of affairs an individual had in the past year.  First, let's look at a graph and some summary statistics of $\mathit{naffairs}$:

@@ -46,7 +46,7 @@ This is a pretty huge data set, with 4596 observations over 14 variables.  If we
 
 ```{r}
 airfare %>% 
-    select(year, id, fare, dist, passen, concen) %>% 
+    dplyr::select(year, id, fare, dist, passen, concen) %>% 
     slice(1:10)
 ```
 To see that this is panel data, look at the first two columns.  Observations 1-4 are for $id = 1$ for each of the 4 possible values of $year$, observations 5-8 are the same for $id = 2$, and so forth.  We also have 4 other variables we will look at: 
@@ -71,9 +71,9 @@ airfarepanel <- pdata.frame(airfare, index = c("id","year"))
 Now, when we look at how the $id$ and $year$ variables are stored in the `airfare` and `airfarepanel` objects, we see that R views them quite differently; essentially, it is treating them as factors.
 
 ```{r}
-airfare %>% select(id, year) %>% 
+airfare %>% dplyr::select(id, year) %>% 
     summary(.)
-airfarepanel %>% select(id, year) %>% 
+airfarepanel %>% dplyr::select(id, year) %>% 
     summary(.)
 ```
 
