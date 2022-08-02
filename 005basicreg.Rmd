@@ -1,0 +1,363 @@
+---
+title: "Intro to Regression"
+output: html_notebook
+---
+
+This notebook contains code from Chapter 5 of [Prelude to Econometrics Using R](https://bookdown.org/mattdobra/Prelude/).  
+
+The companion site to [Prelude to Econometrics Using R](https://bookdown.org/mattdobra/Prelude/) can be found at [https://mattdobra.github.io/EconometricsLectureNotes/](https://mattdobra.github.io/EconometricsLectureNotes/).
+
+Libraries needed for this notebook:
+
+```{r}
+library(tidyverse)
+library(wooldridge)
+library(AER)
+library(stargazer)
+library(quantmod)
+library(tidyquant)
+```
+
+Preload and attach data:
+
+```{r}
+data(gpa2)
+data(CPS1985)
+attach(CPS1985)
+data(vote1)
+data(k401k)
+data(StrikeDuration)
+data(gpa2)
+data(meap01)
+data(wine)
+data(airfare)
+
+```
+
+# Chapter 5
+
+## Prelude to Regression: The Correlation Test
+
+```{r echo = TRUE}
+cor(wage, education)
+```
+
+```{r, echo = TRUE, message = FALSE}
+CPS1985 %>% ggplot(aes(x = education, y = wage)) +
+    geom_point() +
+    geom_smooth(method = lm)
+```
+
+```{r echo = TRUE}
+cor.test(education, wage)
+```
+
+```{r, message = FALSE, echo = TRUE}
+CPS1985 %>% ggplot(aes(x = experience, y = wage)) +
+    geom_point() +
+    geom_smooth(method = lm)
+```
+
+```{r echo=TRUE}
+cor.test(wage, experience)
+```
+
+```{r echo = TRUE}
+CPS1985 %>% ggplot(aes(x = wage)) +
+    geom_histogram(binwidth = 2)
+```
+
+```{r echo = TRUE}
+cor.test(wage, experience, method = "spearman", exact = FALSE)
+```
+
+## Ordinary Least Squares
+
+\begin{equation}
+Y_{i} = \hat{\alpha} + \hat{\beta} X_{i}+ \epsilon_{i} 
+\end{equation}
+
+## Estimating an OLS
+
+```{r message = FALSE}
+CPS1985 %>% ggplot(aes(x = education, y = wage)) +
+    geom_point() 
+```
+
+```{r, echo = TRUE}
+lm(wage ~ education, data = CPS1985)
+```
+
+## Obtaining Useful Results
+
+```{r, echo = TRUE, warning = FALSE}
+reg1 <- lm(wage ~ education, data = CPS1985)
+```
+
+
+```{r, echo = TRUE}
+attributes(reg1)
+```
+
+```{r, echo = TRUE}
+summary(reg1)
+```
+
+```{r, echo = TRUE, warning = FALSE}
+stargazer(reg1, type = "text")
+```
+
+## Predicted Values and Residuals
+
+```{r, echo = TRUE}
+resids <- reg1$residuals
+preds <- reg1$fitted.values
+tempdata <- cbind(CPS1985, preds, resids)
+tempdata %>% 
+    select(c(wage,education, preds, resids)) %>% 
+    slice(1:10)
+```
+
+## Look at the stars, look how they shine for you
+
+```{r, warning = FALSE, echo = TRUE}
+stargazer(reg1, type = "text")
+```
+
+```{r echo = TRUE}
+cor(wage, education)
+cor(wage, education)^2
+```
+
+## Visualizing the Regression Line
+
+```{r, message = FALSE}
+CPS1985 %>% ggplot(aes(x = education, y = wage)) +
+    geom_point() +
+    geom_smooth(method = lm,
+                se = FALSE)
+```
+
+## Introducing Data Transformations
+
+```{r, message = FALSE, echo = TRUE}
+airfare %>% ggplot(aes(x = dist, y = fare)) +
+    geom_point(size = .7) + 
+    geom_smooth(method=lm)
+```
+
+```{r echo = TRUE}
+reg2 <- lm(fare ~ dist, data = airfare)
+```
+
+```{r, warning = FALSE, echo = TRUE}
+stargazer(reg2, type = "text")
+```
+
+```{r echo= TRUE}
+airfaretemp <- airfare %>% 
+    select(fare, dist) %>% 
+    mutate(dist100 = dist/100)
+airfaretemp[c(1,5,9,13,17),]
+```
+
+```{r, echo = TRUE, warning = FALSE}
+reg2a <- lm(fare ~ dist100, data = airfaretemp)
+stargazer(reg2, reg2a, type = "text")
+```
+
+## Does Alpha Matter?
+
+```{r, echo = TRUE, message = FALSE}
+gpa2 %>%  ggplot(aes(x = sat, y = colgpa)) +
+    geom_point(size = .7) +
+    geom_smooth(method = lm) +
+  labs(y = "GPA",
+       x = "SAT Score") +
+  theme_classic()
+  
+```
+
+```{r, echo = TRUE, warning = FALSE}
+reg3 <- lm(colgpa ~ sat, data = gpa2)
+stargazer(reg3, type = "text")
+```
+
+## Alternative Hypothesis Tests
+
+```{r, echo = TRUE, warning = FALSE, message = FALSE}
+firstsolar <- tq_get('FSLR', # firstsolar Ticker
+               from = "2017-01-01",
+               to = "2018-01-01",
+               get = "stock.prices")
+vanguard500 <- tq_get('VFINX',  # vanguard500 Ticker
+               from = "2017-01-01",
+               to = "2018-01-01",
+               get = "stock.prices")
+coke <- tq_get('KO',  # Coke Ticker
+               from = "2017-01-01",
+               to = "2018-01-01",
+               get = "stock.prices")
+spx <- tq_get('^GSPC',  # S&P 500 Ticker
+               from = "2017-01-01",
+               to = "2018-01-01",
+               get = "stock.prices")
+tbill <- tq_get('^IRX', # 90 day T-bill
+               from = "2017-01-01",
+               to = "2018-01-01",
+               get = "stock.prices")
+# Convert stocks prices into daily rates of return
+firstsolar <- firstsolar %>% 
+    select(date, adjusted) %>% 
+    mutate(lnadjusted = log(adjusted)) %>% 
+    mutate(firstsolar = lnadjusted - lag(lnadjusted)) %>% 
+    select(date, firstsolar)
+vanguard500 <- vanguard500 %>% 
+    select(date, adjusted) %>% 
+    mutate(lnadjusted = log(adjusted)) %>% 
+    mutate(vanguard500 = lnadjusted - lag(lnadjusted)) %>% 
+    select(date, vanguard500)
+coke <- coke %>% 
+    select(date, adjusted) %>% 
+    mutate(lnadjusted = log(adjusted)) %>% 
+    mutate(coke = lnadjusted - lag(lnadjusted)) %>% 
+    select(date, coke)
+spx <- spx %>% 
+    select(date, adjusted) %>% 
+    mutate(lnadjusted = log(adjusted)) %>% 
+    mutate(spx = lnadjusted - lag(lnadjusted)) %>% 
+    select(date, spx)
+# t bill quotes are annualized, convert to daily
+tbill <- tbill %>% 
+    select(date, adjusted) %>% 
+    mutate(tbill = adjusted/360) %>% 
+    select(date, tbill)
+# Combine all the datasets
+returns <- spx 
+returns <- merge(returns, vanguard500, by = "date")
+returns <- merge(returns, firstsolar, by = "date")
+returns <- merge(returns, coke, by = "date")
+returns <- merge(returns, tbill, by = "date")
+returns <- drop_na(returns)
+```
+
+```{r, warning = FALSE, echo = TRUE}
+capm1 <- lm(coke-tbill~spx-tbill, data = returns)
+capm2 <- lm(firstsolar-tbill~spx-tbill, data = returns)
+capm3 <- lm(vanguard500 - tbill ~ spx - tbill, data = returns)
+stargazer(capm1, capm2, capm3, type = "text")
+```
+
+```{r echo = TRUE}
+confint(capm1) # Coke Model
+```
+
+```{r echo = TRUE}
+confint(capm2) # First Solar Model
+confint(capm3) # Vanguard Model
+```
+
+## Not All Regressions Have Significant Results
+
+```{r, message = FALSE, echo = TRUE}
+meap01 %>% ggplot(aes(x = exppp, y = math4)) +
+    geom_point(color = "darkslateblue",
+               alpha = .6) +
+    geom_smooth(method = lm)
+```
+
+
+```{r, warning = FALSE, echo = TRUE}
+reg4 <- lm(math4 ~ exppp, data = meap01)
+stargazer(reg4, type  = "text")
+```
+
+## Signs, Signs, Everywhere There's Signs
+
+```{r, message = FALSE, echo = TRUE}
+vote1 %>% ggplot(aes(x = shareA, y = voteA)) +
+    geom_point(color="indianred") +
+    geom_smooth(color = "dodgerblue", method = lm, se = FALSE) +
+  labs(y = "Vote Share",
+       x = "Campaign Spending") +
+  theme_classic()
+```
+
+```{r, warning = FALSE, echo = TRUE}
+reg5 <- lm(voteA ~ shareA, data = vote1)
+stargazer(reg5, type = "text")
+```
+
+## Multivariate Regression
+
+```{r, echo = TRUE, warning = FALSE}
+reg1 <- lm(wage ~ education, data = CPS1985)
+reg6 <- lm(wage ~ age, data = CPS1985)
+reg7 <- lm(wage ~ education + age, data = CPS1985)
+stargazer(reg1, reg6, reg7, type = "text")
+```
+
+## Predictive modeling
+
+```{r, echo = TRUE, warning = FALSE}
+reg6 <- lm(wage ~ age, data = CPS1985)
+reg7 <- lm(wage ~ education + age, data = CPS1985)
+stargazer(reg6, reg7, type = "text")
+```
+
+
+```{r echo = TRUE}
+a <- data.frame(Model = "Bivariate", Residual = resid(reg6))
+b <- data.frame(Model = "Multivariate", Residual = resid(reg7))
+residdata <- rbind(a,b)
+ggplot(residdata) +
+  geom_boxplot(aes(y = Residual, fill = Model))
+```
+
+
+```{r echo = TRUE}
+sd(resid(reg6))
+sd(resid(reg7))
+```
+
+## Multivariate Models, Part Deux
+
+```{r, warning = FALSE}
+stargazer(reg1, reg6, reg7, type = "text")
+```
+
+## The Importance of Controls
+
+```{r, echo = TRUE, warning = FALSE}
+stargazer(reg4, type = "text")
+```
+
+```{r, echo = TRUE, warning = FALSE}
+reg4z <- lm(math4 ~ exppp + lunch, data = meap01)
+stargazer(reg4, reg4z, type = "text")
+```
+
+### Statistical vs. Economic Significance
+
+```{r, echo = FALSE}
+stargazer(reg4, reg4z, type = "text")
+```
+
+```{r, echo = TRUE}
+meap01 %>% 
+  select(exppp, math4) %>% 
+  stargazer(data = ., type = "text")
+```
+
+```{r, echo = TRUE}
+meap01 %>% 
+  ggplot(aes(x = math4)) +
+  geom_histogram(binwidth = 2, color = "black") +
+  scale_x_continuous(expand=c(0,0)) +
+  scale_y_continuous(expand=c(0,0)) +
+  theme_classic()
+```
+
+```{r, echo = FALSE, warning=FALSE, message = FALSE}
+detach(CPS1985)
+```

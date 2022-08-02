@@ -1,0 +1,392 @@
+---
+title: "Introductions are in Order, R you Ready?"
+output: html_notebook
+---
+
+This notebook contains code from Chapters 1 and 2 of [Prelude to Econometrics Using R](https://bookdown.org/mattdobra/Prelude/).  
+
+The companion site to [Prelude to Econometrics Using R](https://bookdown.org/mattdobra/Prelude/) can be found at [https://mattdobra.github.io/EconometricsLectureNotes/](https://mattdobra.github.io/EconometricsLectureNotes/).
+
+This first code chunk isn't in the book, but is useful for installing most/all of the intensively used packages in the book.  If you want to execute this code, only do it once!
+
+```{r}
+install.packages('knitr')
+install.packages('tidyverse')
+install.packages('kableExtra')
+install.packages('AER')
+install.packages('stargazer')
+install.packages('wooldridge')
+install.packages('fivethirtyeight')
+install.packages('sandwich')
+install.packages('lmtest')
+install.packages('margins')
+install.packages('MASS')
+install.packages('jtools')
+install.packages('mlogit')
+install.packages('censReg')
+install.packages('sampleSelection')
+install.packages('scales')
+install.packages('dynlm')
+install.packages('tseries')
+install.packages('forecast')
+install.packages('cowplot')
+install.packages('tidyquant')
+install.packages('plm')
+```
+
+Remember, only install things once! After that, just load them with the library command!
+Libraries needed for this notebook:
+
+```{r}
+library(tidyverse)
+library(wooldridge)
+library(AER)
+```
+
+
+# Chatper 1
+
+```{r}
+data(mtcars)
+mean(mtcars$mpg[mtcars$cyl==4]) 
+mean(mtcars$mpg[mtcars$cyl==6]) 
+test1 <- t.test(mtcars$mpg[mtcars$cyl==6], mtcars$mpg[mtcars$cyl==4]) 
+pander::pander(test1, split.cells = c(1,1,50,1,1,1)) # Will not work unless you have pander package installed
+```
+
+# Chapter 2
+
+## Assigning Objects and Basic Math
+
+```{r echo = TRUE}
+q <- 42
+```
+
+```{r echo = TRUE}
+print(q)
+```
+
+```{r echo = TRUE}
+q
+```
+
+
+```{r, error = TRUE,  echo = TRUE}
+Q
+```
+
+
+```{r  echo = TRUE}
+q.1 <- 2.718
+q_1 <- 3.142
+```
+
+
+```{r echo = TRUE}
+q <- 420
+```
+
+```{r echo = TRUE}
+q
+```
+
+```{r echo = TRUE}
+rm(q)
+```
+
+
+```{r echo = TRUE}
+rm(list=ls())
+```
+
+
+```{r echo = TRUE}
+z <- 132
+y <- 33
+```
+
+
+```{r echo = TRUE}
+a <- "Hello"
+a
+```
+
+
+```{r echo = TRUE}
+b <- "1"
+```
+
+
+```{r echo = TRUE}
+class(a)
+class(b)
+class(y)
+```
+
+
+```{r echo = TRUE}
+2+2
+24-18
+45*8
+84/4
+2^8
+abs(-42)
+```
+
+
+```{r echo = TRUE}
+z+y
+z-y
+z*y
+z/y
+sqrt(y)
+log(z)
+exp(y)
+```
+
+
+```{r echo = TRUE}
+z+4
+y^2
+z/y+3
+```
+
+
+```{r,  echo = TRUE, error = TRUE}
+z+b
+```
+
+
+```{r echo = TRUE}
+z+as.numeric(b)
+```
+
+
+```{r,  echo = TRUE, error = TRUE}
+z+as.numeric(a)
+```
+
+
+```{r echo = TRUE}
+q <- z/y
+q
+```
+
+## Vectors
+
+
+```{r echo = TRUE}
+num1 <- c(1,4,9,16,25)
+num2 <- c(1,3,6,10,15)
+```
+
+
+```{r echo = TRUE}
+countries <- c("USA", "Canada", "Mexico")
+```
+
+```{r echo = TRUE}
+num1-1
+num1*3
+sqrt(num1)
+```
+
+
+```{r echo = TRUE}
+num1+num2
+num1*num2
+```
+
+
+```{r echo = TRUE}
+num1[5] 
+num2[1]
+```
+
+
+```{r echo = TRUE}
+num1[-3]
+```
+
+```{r echo = TRUE}
+num1[num1>5]
+```
+
+## Packages and Libraries
+
+```{r echo = TRUE}
+ror6 <- 1 + c(.04, .13, -.03, .11, -.05, .08)
+```
+
+```{r echo = TRUE}
+EnvStats::geoMean(ror6)
+```
+
+```{r echo = TRUE}
+library(EnvStats)
+geoMean(ror6)
+```
+## Working with Data
+
+```{r echo = TRUE}
+data()
+```
+
+
+```{r echo = TRUE}
+data(iris)
+```
+
+```{r echo = TRUE}
+data(CPS1985)
+```
+
+
+```{r echo = TRUE}
+dim(CPS1985)
+ncol(CPS1985)
+nrow(CPS1985)
+```
+
+```{r echo = TRUE}
+head(CPS1985)
+tail(CPS1985)
+```
+
+```{r echo = TRUE}
+CPS1985[222:225,]
+```
+
+
+```{r echo = TRUE}
+CPS1985[CPS1985$age>60 , ]
+```
+
+```{r echo = TRUE}
+CPS1985[CPS1985$ethnicity == "cauc" & CPS1985$region == "south" & CPS1985$gender == "female" & CPS1985$married == "no", ]
+```
+
+
+```{r echo = TRUE}
+attach(CPS1985)
+```
+
+
+
+```{r echo = TRUE}
+CPS1985[ethnicity == "cauc" & region == "south" & gender == "female" & married == "no", ]
+```
+
+  
+```{r echo = TRUE}
+CPS1985[gender == "male" & occupation != "management" & age>55, -7]
+```
+
+```{r echo = TRUE}
+str(CPS1985)
+```
+
+
+```{r echo = TRUE}
+class(wage)
+class(age)
+class(married)
+class(union)
+```
+
+```{r echo = TRUE}
+class(CPS1985$union)
+```
+
+```{r echo = TRUE}
+levels(ethnicity)
+levels(occupation)
+```
+
+```{r echo = TRUE}
+summary(CPS1985)
+```
+
+
+```{r echo = TRUE}
+tempdata <- CPS1985
+tempdata$female <- ifelse(tempdata$gender == "female", 1, 0)
+tempdata[200:209,c(7,12)]
+```
+
+
+```{r echo = TRUE}
+class(tempdata$female)
+```
+
+
+
+```{r echo = TRUE}
+summary(tempdata$female)
+```
+
+
+```{r echo = TRUE}
+summary(as.factor(tempdata$female))
+```
+
+
+```{r echo = TRUE}
+tempdata$female <- factor(tempdata$female, levels = c(0,1), labels = c("male", "female"))
+summary(tempdata$female)
+```
+
+
+```{r echo = TRUE}
+summary(wage[gender == "male"])
+summary(wage[gender == "female"])
+```
+
+
+```{r echo = TRUE}
+femanager <- gender == "female" & occupation == "management"
+summary(femanager)
+```
+
+
+```{r echo = TRUE}
+tempdata <- cbind(CPS1985, femanager)
+class(tempdata$femanager)
+```
+
+
+```{r echo = TRUE}
+tempdata$femanager <- factor(tempdata$femanager, levels = c(FALSE,TRUE), labels = c("no", "yes"))
+class(tempdata$femanager)
+summary(tempdata$femanager)
+```
+
+## Basics of dplyr and tidyverse
+
+```{r echo = TRUE}
+CPS1985 %>% 
+  filter(age>60)
+```
+
+```{r echo = TRUE}
+CPS1985 %>% 
+  filter(ethnicity == "cauc") %>% 
+  filter(region == "south") %>% 
+  filter(gender == "female") %>% 
+  filter(married == "no")
+```
+
+```{r echo = TRUE}
+CPS1985 %>% 
+    filter(gender == "male") %>% 
+    filter(occupation != "management") %>% 
+    filter(age>55) %>% 
+    select(-gender)
+```
+
+```{r echo = TRUE}
+CPS1985 %>% 
+    group_by(gender) %>% 
+    summarize(wage = mean(wage))
+```
+

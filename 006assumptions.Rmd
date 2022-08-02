@@ -1,0 +1,242 @@
+---
+title: "Regression Assumptions"
+output: html_notebook
+---
+
+This notebook contains code from Chapter 6 of [Prelude to Econometrics Using R](https://bookdown.org/mattdobra/Prelude/).  
+
+The companion site to [Prelude to Econometrics Using R](https://bookdown.org/mattdobra/Prelude/) can be found at [https://mattdobra.github.io/EconometricsLectureNotes/](https://mattdobra.github.io/EconometricsLectureNotes/).
+
+Libraries needed for this notebook:
+
+```{r}
+library(tidyverse)
+library(wooldridge)
+library(AER)
+library(stargazer)
+library(sandwich)
+library(lmtest)
+```
+
+Preload and attach data:
+
+```{r}
+data(wage1)
+data(CPS1985)
+data(ceosal1)
+data(nyse)
+data(smoke)
+data(vote1)
+data(hprice3)
+data(infmrt)
+
+```
+
+# Chapter 6
+
+## Assumption 1: The Linear Regression Model is "Linear in Parameters"  
+
+```{r, echo = TRUE, message = FALSE}
+ceosal1 %>% ggplot(aes(y = salary, x = sales)) + 
+    geom_point() +
+    theme_classic() +
+    geom_smooth(method=lm)
+```
+
+
+```{r, echo=TRUE, warning = FALSE}
+reg1a <- lm(salary ~ sales, data = ceosal1)
+stargazer(reg1a, type = "text")
+```
+
+```{r echo = TRUE}
+tempdata <- ceosal1 %>% 
+    mutate(lnsalary = log(salary)) %>% 
+    mutate(lnsales = log(sales))
+```
+
+```{r, echo = TRUE, warning = FALSE}
+tempdata %>% ggplot(aes(x = lnsales, y = lnsalary)) +
+    geom_point() +
+    theme_classic() +
+  geom_smooth(method = lm)
+    
+```
+
+
+```{r, warning = FALSE, echo = TRUE}
+reg1b <- lm(lnsalary ~ lnsales, data = tempdata)
+stargazer(reg1b, type = "text")
+```
+
+
+```{r, echo = TRUE, warning = FALSE}
+stargazer(reg1a, reg1b, type = "text")
+```
+
+```{r, warning = FALSE, echo = TRUE}
+reg1c <- lm(lnsalary ~ sales, data = tempdata)
+reg1d <- lm(salary ~ lnsales, data = tempdata)
+stargazer(reg1a, reg1d, reg1c, reg1b, type = "text")
+```
+
+
+```{r echo = TRUE}
+hprice3 %>% ggplot(aes(x = age, y = price)) +
+    geom_point(color = "cornflowerblue") +
+    theme_classic() +
+    labs(title = "House Value and Age") 
+```
+
+```{r, warning = FALSE, echo = TRUE}
+reg1e <- lm(price ~ age, data = hprice3)
+reg1f <- lm(price ~ age + I(age^2), data = hprice3)
+reg1g <- lm(price ~ age + agesq, data = hprice3)
+stargazer(reg1e, reg1f, reg1g, type = "text")
+```
+
+```{r, message = FALSE, echo = TRUE}
+hprice3 %>% ggplot(aes(x = age, y = price)) +
+    geom_point(color = "cornflowerblue",
+               alpha = .4) +
+    theme_classic() +
+    labs(title = "House Value and Age",
+         y = "Price",
+         x = "Age") +
+    geom_smooth(method = lm, 
+                color = "palegreen4",
+                se = FALSE) +
+    geom_smooth(method = lm, 
+                formula = y ~ x + I(x^2),
+                color = "indianred3",
+                se = FALSE) +
+    scale_y_continuous(labels=scales::dollar_format())
+```
+
+## Assumption 2: The Average of the Error Term is 0
+
+
+```{r, echo = TRUE}
+summary(reg1b)
+```
+
+
+```{r, echo = TRUE}
+tempdata$resid <- reg1b$residuals
+head(tempdata[c(1,3,13,14,15)],)
+```
+
+
+```{r, echo = TRUE}
+mean(tempdata$resid)
+```
+
+```{r, echo = TRUE}
+format(mean(tempdata$resid), scientific = FALSE)
+```
+
+## Assumption 3: The Independent Variable is Uncorrelated with the Error Term
+
+```{r, echo = TRUE}
+cor(tempdata$lnsales, tempdata$resid)
+```
+
+## Assumption 4: The Error Term is not Serially Correlated.
+
+```{r echo = TRUE}
+tempdata2 <- nyse 
+tempdata2 %>% ggplot(aes(x = t, y = price)) +
+    geom_point() +
+    geom_line()
+```
+
+
+```{r echo = TRUE}
+reg4a <- lm(price ~ t, data = tempdata2)
+tempdata2$resid <- reg4a$residuals
+tempdata2 %>% ggplot(aes(x = t, y = resid)) +
+    geom_point() +
+    geom_line()
+```
+
+## Assumption 5: Homoskedasticity of the Error Term
+
+```{r echo = TRUE}
+reg5a <- lm(voteA ~ shareA, data = vote1)
+plot(reg5a$residuals ~ reg5a$fitted.values)
+abline(a = 0, b = 0)
+```
+
+```{r, echo = TRUE}
+reg5b <- lm(cigs ~ income, data = smoke)
+plot(reg5b$residuals ~ reg5b$fitted.values)
+abline(a = 0, b = 0)
+```
+
+
+```{r echo = TRUE}
+coeftest(reg5b, vcovHC)
+```
+
+```{r, warning = FALSE, echo = TRUE}
+stargazer(reg5b, coeftest(reg5b, vcovHC), type = "text")
+```
+
+```{r, echo = TRUE}
+reg5z <- lm(infmort ~ afdcper + physic, data = infmrt)
+stargazer(reg5z, coeftest(reg5z, vcovHC), type = "text")
+```
+
+## Assumption 6: No Independent Variable is a Perfect Linear Function of other Explanatory Variables.
+
+```{r, warning = FALSE, echo = TRUE}
+reg6a <- lm(voteA ~ shareA + shareA, data = vote1)
+stargazer(reg6a, type = "text")
+```
+
+```{r, error = TRUE, echo = TRUE}
+tempdata3 <- vote1
+tempdata3$shareAclone <- tempdata3$shareA
+reg6b <- lm(voteA ~ shareA + shareAclone, data = tempdata3)
+stargazer(reg6b, type = "text")
+summary(reg6b)
+```
+
+```{r echo = TRUE}
+tempdata3$six <- 6
+reg6c <- lm(voteA ~ shareA + six, data = tempdata3)
+summary(reg6c)
+```
+
+```{r echo = TRUE}
+set.seed(8675309)
+tempdata4 <- tempdata3 %>% 
+    mutate(shareArand = shareA + runif(173, min = -1, max = 1))
+cor(tempdata4$shareA, tempdata4$shareArand)
+```
+
+
+```{r, warning = FALSE, echo = TRUE}
+reg6d <- lm(voteA ~ shareA + shareArand, data = tempdata4)
+reg6e <- lm(voteA ~ shareArand, data = tempdata4)
+stargazer(reg6a, reg6e, reg6d, type = "text")
+```
+
+## Assumption 7: Normality of Error Terms
+
+
+```{r echo = TRUE}
+reg7a <- lm(voteA ~ shareA, data = vote1)
+qqnorm(reg7a$residuals)
+qqline(reg7a$residuals)
+```
+
+```{r echo = TRUE}
+qqnorm(reg1b$residuals)
+qqline(reg1b$residuals)
+```
+
+
+```{r echo = TRUE}
+plot(reg7a)
+```

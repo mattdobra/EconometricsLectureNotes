@@ -1,0 +1,327 @@
+---
+title: "Descriptive Statistics"
+output: html_notebook
+---
+
+This notebook contains code from Chapter 3 of [Prelude to Econometrics Using R](https://bookdown.org/mattdobra/Prelude/).  
+
+The companion site to [Prelude to Econometrics Using R](https://bookdown.org/mattdobra/Prelude/) can be found at [https://mattdobra.github.io/EconometricsLectureNotes/](https://mattdobra.github.io/EconometricsLectureNotes/).
+
+Libraries needed for this notebook:
+
+```{r}
+library(tidyverse)
+library(wooldridge)
+library(AER)
+library(stargazer)
+```
+
+Preload and attach data:
+
+```{r}
+data(CPS1985)
+attach(CPS1985)
+data(vote1)
+attach(vote1)
+```
+
+# Chatper 3
+
+## Bar and Pie Charts
+
+```{r echo = TRUE}
+CPS1985 %>% ggplot(aes(x = occupation)) +
+    geom_bar()
+```
+
+```{r echo = TRUE}
+jobtype <- table(occupation)
+jobtype
+```
+
+```{r echo = TRUE}
+pie(jobtype)
+```
+
+```{r echo = TRUE}
+set.seed(8675309)
+a <- sample(1:6, 100, replace = TRUE)
+b <- table(a)
+b
+```
+
+```{r echo = TRUE}
+pie(b)
+```
+
+
+```{r echo = TRUE}
+barplot(b)
+```
+
+## Boxplots
+
+```{r echo = TRUE}
+boxplot(wage)
+```
+
+```{r echo = TRUE}
+CPS1985 %>% ggplot(aes(y = wage)) +
+    geom_boxplot() 
+```
+
+```{r echo = TRUE}
+CPS1985 %>% ggplot(aes(y = wage)) +
+    geom_boxplot() +
+    stat_boxplot(geom = "errorbar", width = 0.5)
+```
+
+```{r echo = TRUE}
+boxplot(wage ~ occupation)
+```
+
+```{r echo = TRUE}
+CPS1985 %>% ggplot(aes(x = occupation, y = wage)) +
+    geom_boxplot() +
+    stat_boxplot(geom = "errorbar", width = 0.5)
+    
+```
+
+```{r echo = TRUE}
+CPS1985 %>% ggplot(aes(x = gender, y = wage)) +
+    geom_boxplot() +
+    stat_boxplot(geom = "errorbar", width = 0.5)
+```
+
+
+```{r echo = TRUE}
+CPS1985 %>% ggplot(aes(x = married, y = wage, fill = gender)) +
+    geom_boxplot() 
+```
+
+```{r echo = TRUE}
+CPS1985 %>% ggplot(aes(x = gender, y = wage, fill = married)) +
+    geom_boxplot() 
+```
+
+```{r echo = TRUE}
+CPS1985 %>% ggplot(aes(x = married, y = wage, fill = gender)) +
+    geom_boxplot() +
+    theme_classic() +
+    labs(title = "Does Marriage Influnce the Gender Wage Gap?", 
+         subtitle = "1985 CPS data",
+         x = "Marital Status", 
+         y = "Wages",
+         fill = "",
+         caption = "@mattdobra") +
+    scale_fill_manual(values= c("deepskyblue4", "darksalmon")) +
+    theme(legend.position = "bottom",
+          legend.direction = "horizontal",
+          axis.ticks.x = element_blank()) +
+    scale_x_discrete(labels = c("no" = "Unmarried", "yes" = "Married"))
+```
+
+## Histograms
+
+```{r echo = TRUE}
+hist(age)
+```
+
+```{r, message = FALSE, echo =TRUE}
+CPS1985 %>%  ggplot(aes(x = age)) +
+    geom_histogram()
+```
+
+```{r echo = TRUE}
+CPS1985 %>%  ggplot(aes(x = age)) +
+    geom_histogram(binwidth = 5, color = "black")
+```
+
+```{r echo = TRUE}
+CPS1985 %>%  ggplot(aes(x = age)) +
+    geom_histogram(binwidth = 5, fill = "#CBB676", color = "#B4985A") +
+    theme(panel.background = element_rect(fill = ("#00573C")))
+```
+
+```{r echo = TRUE}
+CPS1985 %>%  ggplot(aes(x = age)) +
+    geom_histogram(binwidth = 5, fill = "#B4985A", color = "#00573C") +
+    theme(
+        panel.background = element_rect(fill = "#00573C"),
+        panel.grid.major = element_line(color = "#CBB676"),
+        panel.grid.minor = element_line(color = "#CBB676"))
+```
+
+## Stacked and grouped bar charts
+
+
+```{r echo=TRUE}
+table1 <- table(gender, occupation)
+table1
+```
+
+```{r echo = TRUE}
+barplot(table1)
+```
+
+```{r echo = TRUE}
+barplot(table1, beside = TRUE)
+```
+
+```{r echo = TRUE}
+CPS1985 %>% ggplot(aes(x = occupation, fill = gender)) +
+    geom_bar()
+```
+
+```{r echo = TRUE}
+CPS1985 %>% ggplot(aes(x = occupation, fill = gender)) +
+    geom_bar() +
+    scale_fill_manual(values= c("deepskyblue4", "lightpink2")) 
+```
+
+```{r echo = TRUE}
+CPS1985 %>% ggplot(aes(x = occupation, fill = gender)) +
+    geom_bar() +
+    scale_fill_viridis_d()
+```
+
+
+```{r echo = TRUE}
+CPS1985 %>% ggplot(aes(x = occupation, fill = gender)) +
+    geom_bar(position = "dodge") +
+    scale_fill_viridis_d()
+```
+
+```{r echo = TRUE}
+CPS1985 %>% ggplot(aes(x = occupation, fill = gender)) +
+    geom_bar(position = "fill") +
+    scale_fill_viridis_d() +
+    labs(y = "")
+```
+
+## Scatter Plots
+
+```{r echo = TRUE}
+head(vote1)
+```
+
+```{r echo = TRUE}
+plot(voteA ~ shareA)
+```
+
+```{r echo = TRUE}
+vote1 %>% ggplot(aes(x = shareA, y = voteA)) +
+    geom_point()
+```
+
+```{r, message=FALSE, echo = TRUE}
+vote1 %>% ggplot(aes(x = shareA, y = voteA)) +
+    geom_point() +
+    geom_smooth(method = lm)
+```
+
+
+```{r, message=FALSE, echo = TRUE}
+vote1 %>% ggplot(aes(x = shareA, y = voteA, color = as.factor(democA))) +
+    geom_point() 
+```
+
+
+```{r, echo = TRUE, message=FALSE}
+vote1 %>% ggplot(aes(x = shareA, y = voteA)) +
+    geom_point(color = "#00573C", fill = "#B4985A", shape = 21, size = 2.5) +
+    facet_wrap(~democA)
+```
+
+## Summarizing Data Numerically: Categorical Variables
+
+```{r echo = TRUE}
+table(occupation)
+```
+
+```{r echo = TRUE}
+table(occupation)/534
+table(occupation)/nrow(CPS1985)
+table(occupation)/length(occupation)
+table(occupation)/dim(CPS1985)[1]
+```
+
+
+```{r echo = TRUE}
+table(occupation, gender)
+```
+
+## Summarizing Data Numerically: Numerical Variables
+
+```{r, echo = TRUE}
+mean(wage)
+```
+
+```{r, echo = TRUE}
+mean(wage, trim = 0.05)
+```
+
+```{r, echo = TRUE}
+median(wage)
+```
+
+
+```{r, echo = TRUE}
+var(wage)
+sd(wage)
+```
+
+```{r, echo = TRUE}
+sd(wage)^2
+sqrt(var(wage))
+```
+
+```{r, echo = TRUE}
+min(wage)
+max(wage)
+```
+
+```{r, echo = TRUE}
+range(wage)
+```
+
+```{r, echo = TRUE}
+quantile(wage, .25)
+```
+
+```{r, echo = TRUE}
+quantile(wage, probs = c(.1, .25, .5, .75, .9))
+```
+
+```{r, echo = TRUE}
+quantile(wage, probs = c(0,1))
+```
+
+
+```{r, echo = TRUE}
+cor(wage, education)
+```
+
+
+```{r, echo = TRUE, message = FALSE}
+CPS1985 %>% ggplot(aes(x = education, y = wage)) +
+    geom_point() +
+    geom_smooth(method = lm)
+```
+
+```{r, echo = TRUE}
+cor(wage, education, method = "spearman")
+```
+
+```{r, echo = TRUE}
+summary(wage)
+```
+
+```{r, echo = TRUE}
+stargazer(CPS1985, type = "text")
+```
+
+```{r, echo = TRUE, results = 'asis'}
+stargazer(CPS1985, type = "html")
+```
+

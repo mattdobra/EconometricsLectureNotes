@@ -1,0 +1,285 @@
+---
+title: "Regression Independent Variables"
+output: html_notebook
+---
+
+This notebook contains code from Chapter 7 of [Prelude to Econometrics Using R](https://bookdown.org/mattdobra/Prelude/).  
+
+The companion site to [Prelude to Econometrics Using R](https://bookdown.org/mattdobra/Prelude/) can be found at [https://mattdobra.github.io/EconometricsLectureNotes/](https://mattdobra.github.io/EconometricsLectureNotes/).
+
+Libraries needed for this notebook:
+
+```{r}
+library(tidyverse)
+library(wooldridge)
+library(AER)
+library(stargazer)
+```
+
+Preload and attach data:
+
+```{r}
+data(CPS1985)
+data(HousePrices)
+data(diamonds)
+data(gpa2)
+data(TeachingRatings)
+data(CPS1988)
+data(GrowthDJ)
+data(CollegeDistance)
+data(happiness)
+data(beauty)
+data(campus)
+data(twoyear)
+
+```
+
+# Chapter 7
+
+## Dummy Variables
+
+```{r echo = TRUE}
+head(CPS1985)
+```
+
+
+```{r echo = TRUE}
+summary(CPS1985$gender)
+```
+
+
+```{r echo = TRUE}
+class(CPS1985$gender)
+```
+
+
+```{r echo = TRUE}
+tempdata <- CPS1985
+tempdata$female <- ifelse(tempdata$gender == "female", 1, 0)
+tempdata$male <- ifelse(tempdata$gender == "male", 1, 0)
+```
+
+```{r echo = TRUE}
+tempdata[168:177, c(7, 12, 13)]
+```
+
+```{r echo = TRUE}
+summary(CPS1985$occupation)
+```
+
+## Anything ANOVA Does, Regression Does Better
+
+```{r echo = TRUE}
+t.test(wage ~ gender, data = CPS1985)
+```
+
+```{r, echo = TRUE}
+summary(aov(wage ~ gender, data = CPS1985))
+```
+
+
+```{r echo = TRUE}
+oneway.test(wage ~ gender, data = CPS1985)
+```
+
+```{r, warning = FALSE, echo = TRUE}
+reg1a <- lm(wage ~ female, data = tempdata)
+stargazer(reg1a, type = "text")
+```
+
+```{r, echo = FALSE}
+summary(aov(wage ~ gender, data = tempdata))
+```
+
+```{r, echo = FALSE}
+anova(reg1a)
+```
+
+```{r, warning = FALSE}
+stargazer(reg1a, type = "text")
+```
+
+```{r echo = TRUE}
+tempdata %>% ggplot(aes(fill = gender, y = wage)) +
+    geom_boxplot() +
+    scale_fill_brewer(palette="Accent")
+```
+
+```{r, warning = FALSE, echo = TRUE}
+reg1b <- lm(wage ~ gender, data = tempdata)
+stargazer(reg1a, reg1b, type = "text")
+```
+
+```{r, warning = FALSE, echo = TRUE}
+reg1c <- lm(wage ~ male, data = tempdata)
+stargazer(reg1a, reg1c, type = "text")
+```
+
+```{r, warning = FALSE, echo = TRUE}
+reg1d <- lm(wage ~ relevel(gender, "female"), data = tempdata)
+stargazer(reg1c, reg1d, type = "text")
+```
+
+```{r, warning = FALSE, echo = TRUE}
+reg1e <- lm(wage ~ male + female, data = tempdata)
+stargazer(reg1e, type = "text")
+```
+
+```{r echo = TRUE}
+tempdata$tempvar <- tempdata$male + tempdata$female
+tempdata[168:177, c(7, 12, 13, 14)]
+```
+
+```{r, warning = FALSE, echo = TRUE}
+reg1f <- lm(wage ~ female + male - 1, data = tempdata)
+stargazer(reg1f, type = "text")
+```
+
+```{r, warning = FALSE, echo = TRUE}
+reg2a <- lm(wage ~ occupation, data = tempdata)
+stargazer(reg2a, type = "text")
+```
+
+```{r, warning = "FALSE", echo = TRUE}
+reg2b <- lm(wage ~ relevel(occupation, "services"), data = tempdata)
+stargazer(reg2b, type = "text")
+```
+
+
+```{r, warning = FALSE, echo = TRUE}
+tempdata$occupation <- relevel(tempdata$occupation, "services")
+reg2c <- lm(wage ~ occupation, data = tempdata)
+stargazer(reg2c, type = "text")
+```
+
+```{r, warning = FALSE, echo = TRUE}
+reg3aa <- lm(wage ~ gender, data = tempdata)
+reg3ab <- lm(wage ~ married, data = tempdata)
+reg3ac <- lm(wage ~ gender + married, data = tempdata)
+reg3ad <- lm(wage ~ gender*married, data = tempdata)
+stargazer(reg3aa, reg3ab, reg3ac, reg3ad, type = "text")
+```
+
+```{r, warning = FALSE, echo = TRUE}
+stargazer(reg3ad, type = "text")
+```
+
+## Combining Numeric and Categorical Independent Variables
+
+```{r, warning = FALSE, echo = TRUE}
+reg4a <- lm(wage ~ education + gender, data = CPS1985)
+stargazer(reg4a, type = "text")
+```
+
+```{r, echo = TRUE}
+CPS1985 %>% ggplot(aes(x = education, y = wage, color = gender)) +
+    geom_point() +
+    scale_color_manual(values = c("cornflowerblue","indianred")) +
+    geom_abline(slope = .751, intercept = .218, color = "darkblue", size = 1.2) +
+    geom_abline(slope = .751, intercept = .218-2.124, color = "firebrick4", size = 1.2) +
+    theme_classic()
+```
+
+
+```{r echo = TRUE}
+head(HousePrices)
+```
+
+```{r echo = TRUE}
+summary(HousePrices)
+```
+
+
+```{r, warning = FALSE, echo = TRUE}
+reg4b <- lm(price ~ lotsize + bedrooms + bathrooms + stories + driveway + recreation + fullbase + gasheat + aircon + garage + prefer, data = HousePrices)
+stargazer(reg4b, type = "text")
+```
+
+```{r echo = TRUE}
+yourhouse <- data.frame(lotsize = 5000, bedrooms = 4, bathrooms = 2, stories = 2, driveway = "yes", recreation = "yes", fullbase = "no", gasheat = "no", aircon = "no", garage = 2, prefer = "yes")
+```
+
+```{r echo = TRUE}
+predict(reg4b, newdata = yourhouse)
+```
+
+
+```{r echo = TRUE}
+yourhouse[2,] <- yourhouse[1,]
+```
+
+```{r echo = TRUE}
+yourhouse[2,]$bedrooms <- 5
+yourhouse[2,]$bathrooms <- 3
+yourhouse[2,]$fullbase <- "yes"
+yourhouse[2,]$gasheat <- "yes"
+yourhouse[2,]$aircon <- "yes"
+```
+
+```{r echo = TRUE}
+predict(reg4b, newdata = yourhouse)
+```
+
+```{r echo = TRUE}
+head(diamonds)
+summary(diamonds)
+```
+
+
+```{r, warning = FALSE, echo = TRUE}
+diamonds2 <- as.data.frame(diamonds)
+diamonds2$cut <- factor(diamonds2$cut, ordered = FALSE)
+diamonds2$color <- factor(diamonds2$color, ordered = FALSE)
+diamonds2$clarity <- factor(diamonds2$clarity, ordered = FALSE)
+diamonds2$color <- relevel(diamonds2$color, c("J")) 
+reg4c <- lm(price ~ carat +I(carat^2) + cut + color + clarity, data = diamonds2)
+stargazer(reg4c, type = "text")
+```
+
+```{r echo = TRUE}
+mydiamond <- data.frame(carat = 32, clarity = "IF", cut = "Ideal", color = "D")
+predict(reg4c, newdata = mydiamond)
+```
+
+```{r echo = TRUE}
+summary(diamonds2$carat)
+```
+
+```{r, warning = FALSE, echo = TRUE}
+reg4d <- lm(colgpa ~ I(sat/100) + athlete + female, data = gpa2)
+stargazer(reg4d, type = "text")
+```
+
+
+```{r, warning = FALSE, echo = TRUE}
+reg4e <- lm(colgpa ~ I(sat/100) + athlete*female, data = gpa2)
+stargazer(reg4d, reg4e, type = "text")
+```
+
+
+```{r, warning = FALSE, echo = TRUE}
+reg4f <- lm(eval~beauty + gender + minority + native + credits, data = TeachingRatings)
+reg4g <- lm(eval~beauty + gender*minority + native + credits, data = TeachingRatings)
+stargazer(reg4f, reg4g, type = "text")
+```
+
+## Interactions with Numeric Variables
+
+```{r, warning = FALSE, echo = TRUE}
+reg5a <- lm(log(wage) ~ experience + I(experience^2) + education*ethnicity, data = CPS1988)
+stargazer(reg5a, type = "text")
+```
+
+```{r, warning = FALSE, echo = TRUE}
+reg5b <- lm(math4 ~ exppp + lunch, data = meap01)
+stargazer(reg5b, type = "text")
+```
+
+
+
+```{r warning = FALSE, echo = TRUE}
+reg5c <- lm(math4 ~ exppp * lunch, data = meap01)
+stargazer(reg5b, reg5c, type = "text")
+```
+
+

@@ -1,0 +1,220 @@
+---
+title: "Inferential Statistics"
+output: html_notebook
+---
+
+This notebook contains code from Chapter 4 of [Prelude to Econometrics Using R](https://bookdown.org/mattdobra/Prelude/).  
+
+The companion site to [Prelude to Econometrics Using R](https://bookdown.org/mattdobra/Prelude/) can be found at [https://mattdobra.github.io/EconometricsLectureNotes/](https://mattdobra.github.io/EconometricsLectureNotes/).
+
+Libraries needed for this notebook:
+
+```{r}
+library(tidyverse)
+library(wooldridge)
+library(AER)
+```
+
+Preload and attach data:
+
+```{r}
+data(trees)
+data(CPS1985)
+attach(CPS1985)
+data(vote1)
+attach(vote1)
+data(k401k)
+attach(k401k)
+data(sleep)
+data(affairs)
+```
+
+# Chapter 4
+
+## One-Sample t-test
+
+```{r, echo = TRUE, eval = FALSE}
+?k401k
+```
+
+
+```{r, echo = TRUE}
+k401k %>% ggplot() +
+    geom_histogram(aes(x = mrate), binwidth = .1)
+```
+
+```{r echo = TRUE}
+summary(mrate)
+```
+
+```{r, echo = TRUE}
+t.test(mrate, alternative = "two.sided", mu = .75, conf.level = 0.95)
+```
+
+```{r, echo = TRUE}
+t.test(prate, alternative = "less", mu = 90, conf.level = .95)
+```
+
+```{r echo = TRUE}
+test1 <- t.test(prate, alternative = "less", mu = 90, conf.level = .95)
+```
+
+
+```{r, echo = TRUE}
+attributes(test1)
+```
+
+
+```{r, echo = TRUE}
+test1$statistic
+test1$estimate
+```
+
+## Two-Sample t-test
+
+```{r echo = TRUE}
+CPS1985 %>% ggplot(aes(y = wage, x = union)) +
+    geom_boxplot()
+```
+
+
+```{r echo = TRUE}
+t.test(wage ~ union, mu = 0, alt = "two.sided", conf.level = .95)
+```
+
+```{r echo = TRUE}
+t.test(wage ~ union)
+```
+
+```{r echo = TRUE}
+t.test(wage[gender == "male" & occupation == "worker"] ~ union[gender == "male" & occupation == "worker"])
+```
+
+```{r echo = TRUE}
+CPS1985 %>% 
+    filter(gender == "male") %>% 
+    filter(occupation == "worker") %>% 
+    t.test(wage ~ union, data = .)
+```
+
+```{r echo = TRUE}
+tempdat <- CPS1985 %>%
+    filter(gender == "male") %>% 
+    filter(occupation == "worker") 
+t.test(wage ~ union, data = tempdat)
+```
+
+## Wilcoxon / Mann-Whitney test
+
+```{r echo = TRUE}
+qqnorm(wage)
+qqline(wage)
+```
+
+
+```{r echo = TRUE}
+qqnorm(trees$Height)
+qqline(trees$Height)
+```
+
+```{r echo = TRUE}
+shapiro.test(wage)
+shapiro.test(trees$Height)
+```
+
+```{r echo = TRUE}
+wilcox.test(wage ~ union)
+```
+
+## Paired t-Test
+
+```{r echo = TRUE}
+sleep
+```
+
+```{r echo = TRUE}
+t.test(extra ~ group, data = sleep, paired =TRUE)
+```
+
+## ANOVA
+
+
+```{r echo = TRUE}
+CPS1985 %>% ggplot(aes(x = occupation, y = wage)) +
+    geom_boxplot(color = "blue4", fill = "cornflowerblue") +
+    stat_boxplot(geom = "errorbar", width = 0.5)
+```
+
+```{r echo = TRUE}
+aov(wage ~ occupation)
+```
+
+```{r echo = TRUE}
+anova1 <- aov(wage ~ occupation)
+summary(anova1)
+```
+
+```{r echo = TRUE}
+TukeyHSD(anova1)
+```
+
+```{r echo = TRUE}
+plot(TukeyHSD(anova1))
+```
+
+```{r echo = TRUE}
+par(mar = c(3,10,3,3))
+plot(TukeyHSD(anova1), las = 1, cex.axis = .75)
+```
+
+```{r echo = TRUE}
+CPS1985 %>% ggplot(aes(x = married, y = wage, fill = gender)) +
+    geom_boxplot() +
+    theme_classic() +
+    labs(title = "Does Marriage Influnce the Gender Wage Gap?", 
+         subtitle = "1985 CPS data",
+         x = "Marital Status", 
+         y = "Wages",
+         fill = "",
+         caption = "@mattdobra") +
+    scale_fill_manual(values= c("deepskyblue4", "darksalmon")) +
+    theme(legend.position = "bottom",
+          legend.direction = "horizontal",
+          axis.ticks.x = element_blank()) +
+    scale_x_discrete(labels = c("no" = "Unmarried", "yes" = "Married"))
+```
+
+```{r echo = TRUE}
+anova2<-aov(wage ~ gender*married)
+summary(anova2)
+```
+
+
+```{r echo = TRUE}
+TukeyHSD(anova2)
+```
+
+## Chi-Square
+
+```{r echo = TRUE}
+affair2 <- affairs %>% select(c(affair, kids))
+table(affair2)
+```
+
+```{r echo = TRUE}
+affairs %>% 
+    ggplot(aes(x = as.factor(kids), fill = as.factor(affair))) +
+    geom_bar(position = "fill") +
+    scale_fill_viridis_d() +
+    labs(y = "")
+```
+
+```{r echo = TRUE}
+chisq.test(affairs$kids, affairs$affair)
+```
+
+```{r, echo = FALSE, warning=FALSE, message = FALSE}
+detach(CPS1985)
+detach(vote1)
+detach(k401k)
+```
