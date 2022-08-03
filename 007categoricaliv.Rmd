@@ -16,7 +16,7 @@ library(AER)
 library(stargazer)
 ```
 
-Preload data:
+Preload our data:
 
 ```{r}
 data(CPS1985)
@@ -42,16 +42,13 @@ data(twoyear)
 head(CPS1985)
 ```
 
-
 ```{r echo = TRUE}
 summary(CPS1985$gender)
 ```
 
-
 ```{r echo = TRUE}
 class(CPS1985$gender)
 ```
-
 
 ```{r echo = TRUE}
 tempdata <- CPS1985
@@ -76,7 +73,6 @@ t.test(wage ~ gender, data = CPS1985)
 ```{r, echo = TRUE}
 summary(aov(wage ~ gender, data = CPS1985))
 ```
-
 
 ```{r echo = TRUE}
 oneway.test(wage ~ gender, data = CPS1985)
@@ -180,7 +176,6 @@ CPS1985 %>% ggplot(aes(x = education, y = wage, color = gender)) +
     theme_classic()
 ```
 
-
 ```{r echo = TRUE}
 head(HousePrices)
 ```
@@ -188,7 +183,6 @@ head(HousePrices)
 ```{r echo = TRUE}
 summary(HousePrices)
 ```
-
 
 ```{r, warning = FALSE, echo = TRUE}
 reg4b <- lm(price ~ lotsize + bedrooms + bathrooms + stories + driveway + recreation + fullbase + gasheat + aircon + garage + prefer, data = HousePrices)
@@ -202,7 +196,6 @@ yourhouse <- data.frame(lotsize = 5000, bedrooms = 4, bathrooms = 2, stories = 2
 ```{r echo = TRUE}
 predict(reg4b, newdata = yourhouse)
 ```
-
 
 ```{r echo = TRUE}
 yourhouse[2,] <- yourhouse[1,]
@@ -224,7 +217,6 @@ predict(reg4b, newdata = yourhouse)
 head(diamonds)
 summary(diamonds)
 ```
-
 
 ```{r, warning = FALSE, echo = TRUE}
 diamonds2 <- as.data.frame(diamonds)
@@ -250,12 +242,10 @@ reg4d <- lm(colgpa ~ I(sat/100) + athlete + female, data = gpa2)
 stargazer(reg4d, type = "text")
 ```
 
-
 ```{r, warning = FALSE, echo = TRUE}
 reg4e <- lm(colgpa ~ I(sat/100) + athlete*female, data = gpa2)
 stargazer(reg4d, reg4e, type = "text")
 ```
-
 
 ```{r, warning = FALSE, echo = TRUE}
 reg4f <- lm(eval~beauty + gender + minority + native + credits, data = TeachingRatings)
@@ -275,11 +265,7 @@ reg5b <- lm(math4 ~ exppp + lunch, data = meap01)
 stargazer(reg5b, type = "text")
 ```
 
-
-
 ```{r warning = FALSE, echo = TRUE}
 reg5c <- lm(math4 ~ exppp * lunch, data = meap01)
 stargazer(reg5b, reg5c, type = "text")
 ```
-
-
