@@ -43,7 +43,6 @@ ceosal1 %>% ggplot(aes(y = salary, x = sales)) +
     geom_smooth(method=lm)
 ```
 
-
 ```{r, echo=TRUE, warning = FALSE}
 reg1a <- lm(salary ~ sales, data = ceosal1)
 stargazer(reg1a, type = "text")
