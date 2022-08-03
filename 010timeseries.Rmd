@@ -1,0 +1,466 @@
+---
+title: "Time Series"
+output: html_notebook
+---
+
+This notebook contains code from Chapter 10 of [Prelude to Econometrics Using R](https://bookdown.org/mattdobra/Prelude/).  
+
+The companion site to [Prelude to Econometrics Using R](https://bookdown.org/mattdobra/Prelude/) can be found at [https://mattdobra.github.io/EconometricsLectureNotes/](https://mattdobra.github.io/EconometricsLectureNotes/).
+
+A warning: this notebook is a bit different from the others, as most of Chapter 10 involved developing intuition about time series by creating fate data rather than by analyzing real data. I actually debated not including any of the code from creating the fake data as it doesn't really fit with the vibe of the rest of these notebooks. In the end, however, I have included most of this code pertaining to the fake data for anybody who wants to play with the data generation parameters and deepen their intuition regarding how AR, MA, and differenced series work.
+
+Libraries needed for this notebook:
+
+```{r, message = FALSE, warning = FALSE}
+library(tidyverse)
+library(wooldridge)
+library(AER)
+library(stargazer)
+library(tseries)
+library(dynlm)
+library(forecast)
+library(Hmisc)
+library(collapse)
+```
+
+Preload data:
+
+```{r, warning=FALSE, echo = TRUE, message = FALSE}
+data(ArgentinaCPI)
+data(okun)
+data(beveridge)
+data(BondYield)
+data(FrozenJuice)
+data(NYSESW)
+data(consump)
+```
+
+# Chapter 10
+
+## Preparing Time Series Data
+
+```{r, echo = TRUE}
+tempCPI <- as.numeric(ArgentinaCPI)
+```
+
+```{r, echo = TRUE}
+ArgentinaCPI
+```
+
+```{r, echo = TRUE}
+tempCPI
+```
+
+```{r, echo = TRUE}
+tempCPI2 <- ts(tempCPI, start = c(1970, 1), frequency=4)
+tempCPI2
+```
+
+
+```{r}
+plot(ArgentinaCPI)
+```
+
+
+```{r, echo = TRUE}
+okun2 <- ts(okun, start = 1959, frequency = 1)
+
+```
+
+```{r, echo = TRUE}
+head(okun)
+head(okun2)
+```
+
+
+```{r, echo = TRUE}
+plot(okun2)
+```
+
+## Autocorrelation
+
+```{r, warning = FALSE, echo = TRUE}
+set.seed(8675309)
+rngesus <- rnorm(69, mean = 1.54, sd = 6)
+bsweather1 <- runif(183, 54, 92)
+bsweather1 <- sort(bsweather1, decreasing = FALSE)
+bsweather1 <- bsweather1 + rngesus 
+bsweather2 <- runif(183, 54, 92)
+bsweather2 <- sort(bsweather2, decreasing = TRUE)
+bsweather2 <- bsweather2 + rngesus 
+bsweather <- c(bsweather1, bsweather2)
+localweather <- ts(bsweather, start = c(2021,1), freq = 365)
+summary(localweather)
+
+
+```
+
+```{r}
+plot(localweather)
+```
+
+```{r}
+plot(localweather)
+abline(a = 75, b = 0)
+```
+
+```{r, echo = TRUE}
+acf(localweather)
+```
+
+
+```{r, echo = TRUE}
+localweather1 <- Hmisc::Lag(localweather,1)
+tempdat = data.frame(localweather, localweather1)
+```
+
+```{r, echo = TRUE}
+head(tempdat)
+```
+
+```{r, echo = TRUE}
+localweather2 <- Hmisc::Lag(localweather, 2)
+localweather3 <- Hmisc::Lag(localweather, 3)
+tempdat <- data.frame(tempdat, localweather2, localweather3)
+head(tempdat)
+```
+
+```{r, echo = TRUE}
+cor(tempdat, use="complete.obs")
+```
+
+```{r}
+acf(localweather)
+```
+
+
+```{r, echo = TRUE}
+pacf(localweather)
+
+```
+
+## Autoregression, Moving Averages, and Trends (oh my!)
+
+
+### Deterministic Series
+
+```{r}
+set.seed(8675309)
+count <- 1:100
+rando <- rnorm(100)
+tempvar <- 4 + count * .7 + rando
+tempvar <- ts(tempvar, start = 1, frequency = 1)
+autoplot(tempvar)
+
+```
+
+### Autoregression
+
+```{r, echo = TRUE}
+set.seed(8675309)
+ardata00 <- arima.sim(list(order = c(0,0,0)), n = 200)
+ardata50 <- 10 + arima.sim(list(order = c(1,0,0), ar = .5), n = 200)
+ardata75 <- 20 + arima.sim(list(order = c(1,0,0), ar = .75), n = 200)
+ardata90 <- 30 + arima.sim(list(order = c(1,0,0), ar = .90), n = 200)
+ardata99 <- 40 + arima.sim(list(order = c(1,0,0), ar = .99), n = 200)
+
+# Note that the addition of 10, 20, 30, and 40 are simply for spacing and allow
+# the next bit of code to put them together clearly on the same graph.
+
+autoplot(ardata00) +
+  autolayer(ardata50) +
+  autolayer(ardata75) +
+  autolayer(ardata90) +
+  autolayer(ardata99) +
+  theme(axis.text.y=element_blank()) + 
+  scale_y_discrete(breaks=NULL) +
+  geom_hline(yintercept = 0, linetype = 2, alpha = .5) +
+  geom_hline(yintercept = 10, linetype = 2, alpha = .5) +
+  geom_hline(yintercept = 20, linetype = 2, alpha = .5) +
+  geom_hline(yintercept = 30, linetype = 2, alpha = .5) +
+  geom_hline(yintercept = 40, linetype = 2, alpha = .5) +
+  ylab("") +
+  theme_minimal()
+
+```
+
+
+```{r, echo = TRUE}
+set.seed(12345)
+ardatan00 <- ardata00[1:50]
+ardatan00 <- ts(ardatan00)
+ardatan50 <- 10 + arima.sim(list(order = c(1,0,0), ar = -.5), n = 50)
+ardatan75 <- 20 + arima.sim(list(order = c(1,0,0), ar = -.75), n = 50)
+ardatan90 <- 30 + arima.sim(list(order = c(1,0,0), ar = -.90), n = 50)
+ardatan99 <- 40 + arima.sim(list(order = c(1,0,0), ar = -.99), n = 50)
+
+autoplot(ardatan00) +
+  autolayer(ardatan50) +
+  autolayer(ardatan75) +
+  autolayer(ardatan90) +
+  autolayer(ardatan99) +
+  theme(axis.text.y=element_blank()) + 
+  scale_y_discrete(breaks=NULL) +
+  geom_hline(yintercept = 0, linetype = 2, alpha = .5) +
+  geom_hline(yintercept = 10, linetype = 2, alpha = .5) +
+  geom_hline(yintercept = 20, linetype = 2, alpha = .5) +
+  geom_hline(yintercept = 30, linetype = 2, alpha = .5) +
+  geom_hline(yintercept = 40, linetype = 2, alpha = .5) +
+  ylab("") +
+  theme_minimal()
+
+```
+
+
+```{r, echo = TRUE}
+set.seed(8675309)
+ardata00 <- arima.sim(list(order = c(0,0,0)), n = 200)
+rwalk1 <- 20 + cumsum(rnorm(200,0,1))
+rwalk1 <- ts(rwalk1)
+rwalk2 <- 40 + cumsum(rnorm(200,0,1))
+rwalk2 <- ts(rwalk2)
+rwalk3 <- 60 + cumsum(rnorm(200,0,1))
+rwalk3 <- ts(rwalk3)
+rwalk4 <- 80 + cumsum(rnorm(200,0,1))
+rwalk4 <- ts(rwalk4)
+
+autoplot(ardata00) +
+  autolayer(rwalk1) +
+  autolayer(rwalk2) +
+  autolayer(rwalk3) +
+  autolayer(rwalk4) +
+  theme(axis.text.y=element_blank()) + 
+  scale_y_discrete(breaks=NULL) +
+  geom_hline(yintercept = 0, linetype = 2, alpha = .5) +
+  geom_hline(yintercept = 20, linetype = 2, alpha = .5) +
+  geom_hline(yintercept = 40, linetype = 2, alpha = .5) +
+  geom_hline(yintercept = 60, linetype = 2, alpha = .5) +
+  geom_hline(yintercept = 80, linetype = 2, alpha = .5) +
+  ylab("") +
+  theme_minimal()
+
+```
+
+### Moving Average Series
+
+
+```{r, echo = TRUE}
+set.seed(8675309)
+madata00 <- arima.sim(list(order = c(0,0,0)), n = 200)
+madata50 <- 10 + arima.sim(list(order = c(0,0,1), ma = .5), n = 200)
+madata75 <- 20 + arima.sim(list(order = c(0,0,1), ma = .75), n = 200)
+madata90 <- 30 + arima.sim(list(order = c(0,0,1), ma = .90), n = 200)
+madata99 <- 40 + arima.sim(list(order = c(0,0,1), ma = .99), n = 200)
+
+# Note that the addition of 10, 20, 30, and 40 are simply for spacing and allow
+# the next bit of code to put them together clearly on the same graph.
+
+autoplot(madata00) +
+  autolayer(madata50) +
+  autolayer(madata75) +
+  autolayer(madata90) +
+  autolayer(madata99) +
+  theme(axis.text.y=element_blank()) + 
+  scale_y_discrete(breaks=NULL) +
+  geom_hline(yintercept = 0, linetype = 2, alpha = .5) +
+  geom_hline(yintercept = 10, linetype = 2, alpha = .5) +
+  geom_hline(yintercept = 20, linetype = 2, alpha = .5) +
+  geom_hline(yintercept = 30, linetype = 2, alpha = .5) +
+  geom_hline(yintercept = 40, linetype = 2, alpha = .5) +
+  ylab("") +
+  theme_minimal()
+
+```
+
+
+```{r, echo = TRUE}
+set.seed(8675309)
+madata00 <- arima.sim(list(order = c(0,0,0)), n = 200)
+madata1 <- 10 + arima.sim(list(ma = .9), n = 200)
+madata3 <- 20 + arima.sim(list(ma = c(.9,.9,.9)), n = 200)
+madata6 <- 30 + arima.sim(list(ma = c(.9,.9,.9,.9,.9,.9)), n = 200)
+madata9 <- 40 + arima.sim(list(ma = c(.9,.9,.9,.9,.9,.9,.9,.9,.9)), n = 200)
+
+# Note that the addition of 10, 20, 30, and 40 are simply for spacing and allow
+# the next bit of code to put them together clearly on the same graph.
+
+autoplot(madata00) +
+  autolayer(madata1) +
+  autolayer(madata3) +
+  autolayer(madata6) +
+  autolayer(madata9) +
+  theme(axis.text.y=element_blank()) + 
+  scale_y_discrete(breaks=NULL) +
+  geom_hline(yintercept = 0, linetype = 2, alpha = .5) +
+  geom_hline(yintercept = 10, linetype = 2, alpha = .5) +
+  geom_hline(yintercept = 20, linetype = 2, alpha = .5) +
+  geom_hline(yintercept = 30, linetype = 2, alpha = .5) +
+  geom_hline(yintercept = 40, linetype = 2, alpha = .5) +
+  ylab("") +
+  theme_minimal()
+
+```
+
+### ARMA Processes
+
+```{r, echo = TRUE}
+set.seed(8675309)
+ardata00 <- arima.sim(list(order = c(0,0,0)), n = 200)
+armadata1 <- 10 + arima.sim(list(order = c(1,0,1), ar = .8, ma = .8), n = 200)
+armadata2 <- 20 + arima.sim(list(order = c(1,0,1), ar = -.8, ma = -.8), n = 200)
+armadata3 <- 30 + arima.sim(list(order = c(1,0,1), ar = -.8, ma = .8), n = 200)
+armadata4 <- 40 + arima.sim(list(order = c(1,0,1), ar = .8, ma = -.8), n = 200)
+
+# Note that the addition of 10, 20, 30, and 40 are simply for spacing and allow
+# the next bit of code to put them together clearly on the same graph.
+
+autoplot(ardata00) +
+  autolayer(armadata1) +
+  autolayer(armadata2) +
+  autolayer(armadata3) +
+  autolayer(armadata4) +
+  theme(axis.text.y=element_blank()) + 
+  scale_y_discrete(breaks=NULL) +
+  geom_hline(yintercept = 0, linetype = 2, alpha = .5) +
+  geom_hline(yintercept = 10, linetype = 2, alpha = .5) +
+  geom_hline(yintercept = 20, linetype = 2, alpha = .5) +
+  geom_hline(yintercept = 30, linetype = 2, alpha = .5) +
+  geom_hline(yintercept = 40, linetype = 2, alpha = .5) +
+  ylab("") +
+  theme_minimal()
+
+```
+
+### Trends
+
+```{r, echo = TRUE}
+set.seed(8675309)
+arimadata1 <- arima.sim(list(order = c(1,0,0), ar = c(.9)), n = 200)
+trend <- 1:200
+arimadata1 <- arimadata1 + .08 * trend
+
+
+autoplot(arimadata1) +
+  theme(axis.text.y=element_blank()) + 
+  geom_smooth(method = lm, linetype = "dashed", color = "black", se = FALSE) +
+  scale_y_discrete(breaks=NULL) +
+  ylab("") +
+  theme_minimal()
+
+```
+
+
+```{r, echo = TRUE}
+arimadata2 <- data.frame(arimadata1) # Convert time series to data frame
+arimadata2 <- arimadata2 %>%  
+  mutate(time = row_number()) # Use tidyverse to create time trend variable
+detrendreg <- lm(arimadata1 ~ time, data = arimadata2) # Estimate regression
+arimadata2$resids <- detrendreg$residuals # grab residuals
+```
+
+```{r, echo = TRUE, message = FALSE, warning = FALSE}
+graph1 <- ggplot(arimadata2, aes(x = time, y = arimadata1)) +
+  geom_line() +
+  geom_smooth(method = lm, se = FALSE)
+
+graph2 <- ggplot(arimadata2, aes(x = time, y = resids)) +
+  geom_line() +
+  geom_smooth(method = lm, se = FALSE)
+
+cowplot::plot_grid(graph1, graph2, ncol = 1, align = "v")
+```
+
+
+```{r, echo = TRUE}
+arimadata2$diff <- collapse::D(arimadata2$arimadata1)
+head(arimadata2)
+```
+
+
+```{r, echo = TRUE, message = FALSE, warning = FALSE}
+graph1 <- ggplot(arimadata2, aes(x = time, y = arimadata1)) +
+  geom_line() +
+  geom_smooth(method = lm, se = FALSE)
+
+graph2 <- ggplot(arimadata2, aes(x = time, y = resids)) +
+  geom_line() +
+  geom_smooth(method = lm, se = FALSE)
+
+graph3 <- ggplot(arimadata2, aes(x = time, y = diff)) +
+  geom_line() +
+  geom_smooth(method = lm, se = FALSE)
+
+
+cowplot::plot_grid(graph1, graph2, graph3, ncol = 1, align = "v")
+```
+
+## The Dickey-Fuller Test
+
+
+```{r, echo = TRUE}
+autoplot(okun2[,"unem"])
+```
+```{r, echo = TRUE}
+autoplot(okun2[,"pcrgdp"])
+```
+
+```{r, echo = TRUE}
+autoplot(BondYield)
+```
+
+```{r, echo = TRUE}
+autoplot(NYSESW)
+```
+
+```{r echo = TRUE}
+adf.test(okun2[,"unem"])
+adf.test(okun2[,"pcrgdp"])
+adf.test(BondYield)
+adf.test(NYSESW)
+```
+
+
+## Modeling ARIMA
+
+```{r, echo = TRUE}
+auto.arima(okun2[,"pcrgdp"])
+```
+
+```{r, echo = TRUE}
+auto.arima(okun2[,"unem"])
+auto.arima(NYSESW)
+```
+
+## Forecasting
+
+```{r, echo = TRUE}
+okun2[,"unem"] %>% 
+  auto.arima() %>% 
+  forecast(h = 5) %>% 
+  autoplot()
+```
+
+```{r, echo = TRUE}
+NYSESW %>% 
+  auto.arima() %>% 
+  forecast(h = 250) %>% 
+  autoplot()
+```
+
+
+```{r, echo = TRUE}
+consump2 <- ts(consump, start = 1959, frequency = 1)
+
+consump2[ ,"pop"] %>% 
+  auto.arima() %>% 
+  forecast(h = 37) %>% 
+  autoplot()
+```
+
+
+```{r, echo = TRUE}
+consump2[ ,"pop"] %>% 
+  auto.arima() %>% 
+  forecast(h = 37) 
+```
+

@@ -1,0 +1,235 @@
+---
+title: "Categorical Dependent Variables"
+output: html_notebook
+---
+
+This notebook contains code from Chapter 8 of [Prelude to Econometrics Using R](https://bookdown.org/mattdobra/Prelude/).  
+
+The companion site to [Prelude to Econometrics Using R](https://bookdown.org/mattdobra/Prelude/) can be found at [https://mattdobra.github.io/EconometricsLectureNotes/](https://mattdobra.github.io/EconometricsLectureNotes/).
+
+Libraries needed for this notebook:
+
+```{r, message = FALSE, warning = FALSE}
+library(tidyverse)
+library(wooldridge)
+library(AER)
+library(stargazer)
+library(jtools)
+library(margins)
+library(MASS)
+library(mlogit)
+```
+
+Preload data:
+
+```{r, warning=FALSE, message = FALSE, echo = TRUE}
+data(k401ksubs)
+data(SmokeBan)
+data(affairs)
+data(recid)
+data(housing)
+```
+
+# Chapter 8
+
+```{r, echo = TRUE}
+retdata <- k401ksubs %>% 
+    dplyr::select(inc, p401k) # Advisable to use dplyr::select because MASS has a select function that might override the one in dplyr.
+summary(retdata)
+```
+
+```{r, message = FALSE, echo = TRUE}
+k401ksubs %>% group_by(p401k) %>% 
+    summarize(mean = mean(inc))
+```
+
+```{r, warning = FALSE, echo = TRUE}
+reg1a <- lm(p401k ~ inc, data = k401ksubs)
+stargazer(reg1a, type = "text")
+```
+
+
+```{r, message = FALSE, echo = TRUE}
+k401ksubs %>% ggplot(aes(x = inc, y = p401k)) +
+    geom_point() +
+    geom_smooth(method = lm, se = FALSE) +
+    theme_classic()
+```
+
+```{r echo = TRUE }
+qqnorm(reg1a$residuals)
+qqline(reg1a$residuals)
+```
+
+## Probit and Logit
+
+```{r echo = TRUE}
+reg1b <- glm(p401k ~ inc, family = binomial(link = "logit"), data = k401ksubs)
+reg1c <- glm(p401k ~ inc, family = binomial(link = "probit"), data = k401ksubs)
+```
+
+```{r, warning = FALSE, echo = TRUE}
+stargazer(reg1a, reg1b, reg1c, type = "text")
+```
+
+
+```{r, message = FALSE, echo = TRUE}
+k401ksubs %>% ggplot(aes(x = inc, y = p401k)) +
+    geom_point() +
+    geom_smooth(method = lm, color = "cornflowerblue", se = FALSE) +
+    stat_smooth(method = "glm", 
+                method.args = list(family = binomial(link = "probit")),
+                color = "mediumorchid",
+                se = FALSE) +
+    stat_smooth(method = "glm", 
+                method.args = list(family = binomial(link = "logit")),
+                color = "limegreen",
+                se = FALSE) +
+    theme_classic()
+```
+
+```{r, warning = FALSE, echo = TRUE}
+reg1bmargins <- margins(reg1b)
+reg1cmargins <- margins(reg1c)
+export_summs(reg1a, reg1bmargins, reg1cmargins)
+```
+
+```{r, warning = FALSE, echo = TRUE}
+export_summs(reg1a, reg1bmargins, reg1cmargins, 
+             number_format = "%.4f",
+             stars = c(`***` = 0.01, `**` = 0.05, `*` = 0.1),
+             statistics = c(N = NULL, "AIC"),
+             model.names = c("OLS", "Logit", "Probit"))
+```
+```{r echo = TRUE}
+AIC(reg1a)
+AIC(reg1b)
+AIC(reg1c)
+```
+
+
+## More Examples Using Probit and Logit
+
+```{r, message = FALSE, warning = FALSE, echo = TRUE}
+reg1d <- glm(p401k ~ inc + I(inc^2) + pira, data = k401ksubs, family = binomial(link = "probit"))
+reg1dmargins <- margins(reg1d)
+export_summs(reg1cmargins, reg1dmargins, 
+             number_format = "%.4f",
+             statistics = c(N = NULL, "AIC", "BIC"),
+             stars = c(`***` = 0.01, `**` = 0.05, `*` = 0.1))
+```
+
+
+```{r, warning = FALSE, echo = TRUE}
+export_summs(reg1d, 
+             number_format = "%.4f",
+             stars = c(`***` = 0.01, `**` = 0.05, `*` = 0.1))
+```
+
+```{r, message = FALSE, warning = FALSE, echo = TRUE}
+reg2a <- glm(smoker ~ ban + age + education + afam + hispanic + gender, data = SmokeBan, family = binomial(link = "probit"))
+reg2amargins <- margins(reg2a)
+export_summs(reg2amargins,  
+             number_format = "%.4f",
+             stars = c(`***` = 0.01, `**` = 0.05, `*` = 0.1))
+```
+
+
+```{r echo = TRUE}
+SmokeBan %>% ggplot(aes(fill = smoker, x = education)) +
+    geom_bar(position = "fill") +
+    theme_classic()
+```
+
+
+```{r, echo = TRUE, message = FALSE, warning = FALSE}
+smokepred <- SmokeBan
+smokepred$fitted <- reg2a$fitted.values
+smokepred %>% ggplot(aes(y = fitted, x = education)) +
+    geom_bar(stat = "summary", fun.fill = "mean", fill = "orangered3") +
+    theme_classic()
+```
+
+
+```{r echo = TRUE}
+smokepred %>% 
+  group_by(education) %>% 
+  summarize(raw = mean(as.numeric(smoker)-1), conditional = mean(fitted))
+```
+
+```{r echo = TRUE}
+reg3a <- glm(affair ~ male + yrsmarr + kids + relig + educ + ratemarr, data = affairs, family = binomial(link = "probit"))
+reg3amargins <- margins(reg3a)
+export_summs(reg3amargins, 
+             number_format = "%.4f",
+             stars = c(`***` = 0.01, `**` = 0.05, `*` = 0.1))
+```
+
+
+```{r, warning = FALSE, echo = TRUE}
+reg3b <- glm(affair ~ male + yrsmarr + kids + as.factor(relig) + educ + as.factor(ratemarr), data = affairs, family = binomial(link = "probit"))
+reg3bmargins <- margins(reg3b)
+export_summs(reg3amargins, reg3bmargins,
+             number_format = "%.4f",
+             stars = c(`***` = 0.01, `**` = 0.05, `*` = 0.1),
+             model.names = c("Measured", "Factors"))
+```
+
+
+```{r echo = TRUE}
+reg4a <- glm(cens ~ educ*workprg + age +I(age^2) + drugs + alcohol + black + tserved,
+             data = recid,
+             family = binomial(link = "probit"))
+export_summs(reg4a)
+```
+
+
+
+```{r, warning = FALSE, echo = TRUE, out.width="50%"}
+reg4amargins <- margins(reg4a)
+export_summs(reg4amargins,
+             number_format = "%.4f",
+             stars = c(`***` = 0.01, `**` = 0.05, `*` = 0.1))
+```
+
+```{r, warning = FALSE, echo = TRUE}
+reg4amargins0 <- margins(reg4a, at = list(educ = 8))
+reg4amargins1 <- margins(reg4a, at = list(educ = 12))
+reg4amargins2 <- margins(reg4a, at = list(educ = 16))
+export_summs(reg4amargins, reg4amargins0, reg4amargins1, reg4amargins2, 
+             number_format = "%.3f",
+             stars = c(`***` = 0.01, `**` = 0.05, `*` = 0.1),
+             model.names = c("AME", "Education = 8", "Education = 12", "Education = 16"))
+```
+
+
+```{r, warning = FALSE, echo = TRUE}
+reg4amarginsnowork <- margins(reg4a, at = list(workprg = 0))
+reg4amarginswork <- margins(reg4a, at = list(workprg = 1))
+export_summs(reg4amargins, reg4amarginsnowork, reg4amarginswork, 
+             number_format = "%.4f",
+             stars = c(`***` = 0.01, `**` = 0.05, `*` = 0.1),
+             model.names = c("AME", "No Work Program", "Work Program"))
+```
+
+## Ordered and Multinomial Probit
+
+```{r, echo = TRUE}
+head(housing)
+```
+
+```{r, warning = FALSE, message = FALSE, echo = TRUE}
+reg5a <- polr(Sat ~ Infl + Type + Cont, weights = Freq, data = housing, method = "probit")
+summary(reg5a)
+```
+
+
+```{r, echo = TRUE}
+temphousing <- predict(reg5a, housing, type = "probs")
+temphousing <- as.data.frame(temphousing)
+temphousing <- temphousing %>% 
+    bind_cols(housing) %>% 
+    filter(Sat == "Low") %>% 
+    select(- c(Sat,Freq))
+tibble(temphousing)
+```

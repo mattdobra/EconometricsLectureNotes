@@ -1,0 +1,229 @@
+---
+title: "Panel Data"
+output: html_notebook
+---
+
+This notebook contains code from Chapter 11 of [Prelude to Econometrics Using R](https://bookdown.org/mattdobra/Prelude/).  
+
+The companion site to [Prelude to Econometrics Using R](https://bookdown.org/mattdobra/Prelude/) can be found at [https://mattdobra.github.io/EconometricsLectureNotes/](https://mattdobra.github.io/EconometricsLectureNotes/).
+
+Libraries needed for this notebook:
+
+```{r, message = FALSE, warning = FALSE}
+library(tidyverse)
+library(wooldridge)
+library(AER)
+library(stargazer)
+library(plm)
+```
+
+Preload data:
+
+```{r, warning=FALSE, message = FALSE, echo = TRUE}
+data(airfare)
+data(USSeatBelts)
+data(CigarettesSW)
+
+```
+
+# Chapter 11
+
+## Panel Data
+
+```{r, echo = TRUE}
+airfare %>% 
+    dplyr::select(year, id, fare, dist, passen, concen) %>% 
+    slice(1:10)
+```
+
+```{r, echo = TRUE}
+summary(airfare)
+```
+
+```{r, echo = TRUE}
+airfarepanel <- pdata.frame(airfare, index = c("id","year"))
+```
+
+```{r, echo = TRUE}
+airfare %>% dplyr::select(id, year) %>% 
+    summary(.)
+airfarepanel %>% dplyr::select(id, year) %>% 
+    summary(.)
+```
+
+```{r, warning = FALSE, echo = TRUE}
+reg1a <- lm(fare ~ dist + concen + passen, data = airfare)
+stargazer(reg1a, type = "text")
+```
+
+## Pooled OLS
+
+```{r, warning = FALSE}
+reg1b <- plm(fare ~ dist + concen + passen , data = airfarepanel, model = "pooling")
+stargazer(reg1a, reg1b, column.labels = c("OLS", "Pooled"), type = "text")
+```
+
+## Between estimator
+
+
+```{r, echo = TRUE}
+airfare %>% 
+  filter(id == 1)
+```
+
+```{r, echo = TRUE}
+airfare %>% 
+  filter(id == 1) %>% 
+  summarize_all(mean)
+```
+
+```{r, warning = FALSE, echo = TRUE}
+reg1c <- plm(fare ~ dist + concen + passen , data = airfarepanel, model = "between") 
+stargazer(reg1b, reg1c, column.labels = c("Pooled", "Between"), type = "text")
+```
+
+```{r, echo = TRUE}
+reg1ca <- airfare %>% 
+  group_by(id) %>% 
+  summarize_all(mean) %>% 
+  lm(fare ~ dist + concen + passen, data = .)
+
+stargazer(reg1c, reg1ca, column.labels = c("Between (plm)", "Between (manual)"), type = "text")
+```
+
+## Fixed effects
+
+```{r, warning = FALSE, echo = TRUE}
+reg1d <- plm(fare ~ dist + concen + passen , data = airfare, index = c("id","year"), model = "within") 
+stargazer(reg1b, reg1d, column.labels = c("Pooled", "Fixed"), type = "text")
+```
+
+```{r, warning = FALSE, echo = TRUE}
+reg1e <- lm(fare ~ dist + concen + passen +  factor(id), data = airfare)
+reg1e$coefficients[1:4]
+```
+
+## Random effects
+
+```{r, warning = FALSE, echo = TRUE}
+reg1f <- plm(fare ~ dist + concen + passen, data = airfarepanel, model = c("random"))
+stargazer(reg1b, reg1d, reg1f, column.labels = c("Pooled", "Fixed", "Random"), type = "text")
+```
+
+## Model testing
+
+```{r, echo = TRUE}
+plmtest(reg1b)
+```
+
+```{r, echo = TRUE}
+phtest(reg1d, reg1f)
+```
+
+## First difference modeling
+
+```{r, warning = FALSE, echo = TRUE}
+reg1g <- plm(fare ~ dist + concen + passen, data = airfarepanel, model = "fd")
+stargazer(reg1b, reg1d, reg1f, reg1g, column.labels = c("Pooled", "Fixed", "Random", "First Diff."), type = "text")
+```
+
+## Further Examples
+
+```{r, echo = TRUE}
+seatbeltpanel <- pdata.frame(USSeatBelts, index = c("state","year"))
+```
+
+```{r, warning = FALSE}
+reg2a <- plm(fatalities ~ seatbelt + speed65 + speed70 + drinkage + alcohol + income + age + enforce, data = seatbeltpanel, model = "pooling")
+reg2b <- plm(fatalities ~ seatbelt + speed65 + speed70 + drinkage + alcohol + income + age + enforce, data = seatbeltpanel, model = "random")
+reg2c <- plm(fatalities ~ seatbelt + speed65 + speed70 + drinkage + alcohol + income + age + enforce, data = seatbeltpanel, model = "within")
+stargazer(reg2a, reg2b, reg2c, type = "text", column.labels = c("Pooled","Random Eff.", "Fixed Eff"))
+```
+
+```{r}
+plmtest(reg2a)
+```
+
+```{r}
+phtest(reg2b, reg2c)
+```
+
+```{r, echo = TRUE}
+cigspanel <- pdata.frame(CigarettesSW, index = c("state","year"))
+cigspanel$income <-cigspanel$income/cigspanel$population
+cigspanel$income <- cigspanel$income/cigspanel$cpi
+cigspanel$tax <- cigspanel$tax/cigspanel$cpi
+cigspanel$price <- cigspanel$price/cigspanel$cpi
+```
+
+```{r, echo = TRUE}
+regcig1 <-cigspanel %>% 
+  filter(year == 1985) %>% 
+  lm(packs ~ income + price + tax, data = .)
+regcig2 <-cigspanel %>% 
+  filter(year == 1995) %>% 
+  lm(packs ~ income + price + tax, data = .)
+stargazer(regcig1, regcig2, type = "text", column.labels = c("1985","1995"))
+```
+
+```{r, echo = TRUE}
+regcig3 <- plm(packs ~ income + price + tax, data =cigspanel, model = "fd")
+regcig4 <- plm(packs ~ income + price + tax, data =cigspanel, model = "between")
+regcig5 <- plm(packs ~ income + price + tax, data =cigspanel, model = "pooling")
+stargazer(regcig3, regcig4, regcig5, 
+          type = "text", 
+          column.labels = c("First-Diff","Between","Pooled"))
+
+
+```
+
+
+```{r, echo = TRUE}
+CigarettesSW %>% 
+  select(year, state, packs) %>% 
+  filter(year == 1985) %>% 
+  slice_max(packs,n=5) 
+```
+```{r, echo = TRUE}
+CigarettesSW %>% 
+  select(year, state, packs) %>% 
+  filter(year == 1995) %>% 
+  slice_max(packs,n=5) 
+
+```
+
+```{r, echo = TRUE}
+CigarettesSW %>% 
+  select(year, state, packs) %>% 
+  filter(year == 1985) %>% 
+  slice_min(packs,n=5) 
+```
+```{r, echo = TRUE}
+CigarettesSW %>% 
+  select(year, state, packs) %>% 
+  filter(year == 1995) %>% 
+  slice_min(packs,n=5) 
+
+```
+
+```{r, echo = TRUE}
+regcig6 <- plm(packs ~ income + price + tax, data =cigspanel, model = "within")
+regcig7 <- plm(packs ~ income + price + tax, data =cigspanel, model = "random")
+regcig5 <- plm(packs ~ income + price + tax, data =cigspanel, model = "pooling")
+stargazer(regcig6, regcig7, regcig5, 
+          type = "text", 
+          column.labels = c("Fixed Eff.","Random Eff.","Pooled"))
+
+
+```
+
+
+```{r}
+plmtest(regcig5)
+```
+
+
+```{r}
+phtest(regcig6, regcig7)
+```
+

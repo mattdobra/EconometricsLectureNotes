@@ -32,6 +32,8 @@ install.packages('forecast')
 install.packages('cowplot')
 install.packages('tidyquant')
 install.packages('plm')
+install.packages('broom')
+install.packages('huxtable')
 ```
 
 Remember, only install things once! After that, just load them with the library command!

@@ -1,5 +1,5 @@
 ---
-title: "Regression Independent Variables"
+title: "Categorical Independent Variables"
 output: html_notebook
 ---
 
@@ -16,7 +16,7 @@ library(AER)
 library(stargazer)
 ```
 
-Preload and attach data:
+Preload data:
 
 ```{r}
 data(CPS1985)

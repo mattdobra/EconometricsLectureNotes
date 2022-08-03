@@ -1,0 +1,191 @@
+---
+title: "Censored and Count Data"
+output: html_notebook
+---
+
+This notebook contains code from Chapter 9 of [Prelude to Econometrics Using R](https://bookdown.org/mattdobra/Prelude/).  
+
+The companion site to [Prelude to Econometrics Using R](https://bookdown.org/mattdobra/Prelude/) can be found at [https://mattdobra.github.io/EconometricsLectureNotes/](https://mattdobra.github.io/EconometricsLectureNotes/).
+
+Libraries needed for this notebook:
+
+```{r, message = FALSE, warning = FALSE}
+library(tidyverse)
+library(wooldridge)
+library(AER)
+library(stargazer)
+library(jtools)
+library(margins)
+library(sampleSelection)
+library(censReg)
+library(MASS)
+```
+
+Preload data:
+
+```{r, warning=FALSE, message = FALSE, echo = TRUE}
+data(fringe)
+data(charity)
+data(mroz)
+data(affairs)
+```
+
+# Chapter 9
+
+```{r, echo = TRUE}
+summary(fringe$annbens)
+```
+
+```{r, echo = TRUE}
+fringe %>% ggplot(aes(x = annbens)) +
+    geom_histogram(binwidth = 100, color = "#00573C", fill = "#00573C") +
+    theme_classic() +
+    scale_x_continuous(expand = c(0, 0)) +
+    scale_y_continuous(expand = c(0, 0)) 
+```
+
+```{r, echo = TRUE}
+sort(table(fringe$annbens),decreasing=TRUE)[1:10]
+```
+
+```{r, warning = FALSE, echo = TRUE}
+reg1a <- censReg(annbens ~ tenure + annearn, left = 0, right = Inf, data = fringe)
+stargazer(reg1a, type = "text")
+```
+
+
+```{r}
+charity %>% ggplot(aes(x = gift)) +
+    geom_histogram(binwidth = 5, color = "#00573C", fill = "#00573C") +
+    theme_classic() +
+    scale_x_continuous(expand = c(0, 0)) +
+    scale_y_continuous(expand = c(0, 0)) 
+```
+
+```{r, echo = TRUE}
+sort(table(charity$gift),decreasing=TRUE)[1:10]
+```
+
+
+```{r, warning = FALSE, echo = TRUE}
+reg2a <- censReg(gift ~ mailsyear + avggift, left = 0, right = Inf, data = charity)
+stargazer(reg2a, type = "text")
+```
+
+
+```{r, warning = FALSE}
+reg2b <- lm(gift ~ mailsyear + avggift, data = charity)
+stargazer(reg2a, reg2b, type = "text")
+```
+
+
+```{r}
+AIC(reg2b)
+BIC(reg2b)
+```
+
+### Heckman Selection Model
+
+```{r}
+summary(mroz$repwage)
+```
+
+```{r, echo = TRUE}
+mroz2 <- mroz
+mroz2$repwage[mroz2$repwage == 0] <- NA 
+```
+
+```{r, echo = TRUE}
+reg3a <- selection(!is.na(repwage) ~ kidslt6 + educ + city + exper, repwage ~ educ + city + exper, data = mroz2)
+```
+
+
+```{r, echo = TRUE}
+summary(reg3a)
+```
+
+
+```{r, warning = FALSE, echo = TRUE}
+reg3b <- censReg(repwage ~ kidslt6 + educ + city + exper, left = 0, right = Inf, data = mroz)
+reg3c <- lm(repwage ~ kidslt6 + educ + city + exper, data = mroz)
+stargazer(reg3a, reg3b, reg3c, type = "text")
+```
+
+
+```{r, echo = TRUE}
+AIC(reg3a) # Heckman
+AIC(reg3b) # Tobit
+AIC(reg3c) # OLS
+BIC(reg3a) # Heckman
+BIC(reg3b) # Tobit
+BIC(reg3c) # OLS
+```
+
+## Count Models
+
+```{r}
+summary(affairs$naffairs)
+table(affairs$naffairs)
+affairs %>%  ggplot(aes(x = naffairs)) +
+    geom_histogram(binwidth = 1, fill = "darkblue") +
+    theme_classic() +
+    scale_x_continuous(expand = c(0, 0), breaks = 0:12) +
+    scale_y_continuous(expand = c(0, 0)) 
+    
+```
+
+
+```{r, echo = TRUE, warning = FALSE}
+reg4a <- glm(naffairs ~ male + yrsmarr + kids + relig + educ + ratemarr, data = affairs, family = poisson())
+reg4amargins <- margins(reg4a)
+export_summs(reg4amargins, 
+             number_format = "%.4f",
+             stars = c(`***` = 0.01, `**` = 0.05, `*` = 0.1))
+```
+
+
+
+```{r, warning = FALSE, echo = TRUE}
+reg4b <- lm(naffairs ~ male + yrsmarr + kids + relig + educ + ratemarr, data = affairs)
+export_summs(reg4amargins, reg4b,  
+             model.names = c("Poisson", "OLS"),
+             number_format = "%.4f",
+             stars = c(`***` = 0.01, `**` = 0.05, `*` = 0.1))
+```
+
+
+```{r, echo = TRUE}
+AIC(reg4a) # Poisson
+AIC(reg4b) # OLS
+```
+
+
+```{r, echo = TRUE}
+summary(reg4a)
+```
+
+```{r, echo = TRUE}
+AER::dispersiontest(reg4a)
+```
+
+```{r, warning = FALSE, echo = TRUE}
+reg4c <- glm.nb(naffairs ~ male + yrsmarr + kids + relig + educ + ratemarr, data = affairs)
+reg4cmargins <- margins(reg4c)
+export_summs(reg4cmargins,
+             model.names = c("Negbin"),
+             number_format = "%.4f",
+             stars = c(`***` = 0.01, `**` = 0.05, `*` = 0.1))
+```
+
+
+```{r, warning = FALSE, echo = TRUE}
+export_summs(reg4cmargins, reg4amargins, reg4b, 
+             model.names = c("Negbin", "Poisson", "OLS"),
+             number_format = "%.4f",
+             stars = c(`***` = 0.01, `**` = 0.05, `*` = 0.1))
+```
+
+
+```{r, echo = TRUE}
+AIC(reg4a) # Poisson AIC
+AIC(reg4c) # Nebgin AIC
